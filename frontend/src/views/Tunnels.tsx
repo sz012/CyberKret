@@ -95,7 +95,7 @@ export default function Tunnels() {
       <header className="page-head">
         <div>
           <span className="eyebrow">Funkcja 1 · Tunele</span>
-          <h1>{digging ? 'Kret ryje w kablach pod podłogą…' : run ? run.summary.split('.')[0] + '.' : 'Wpuść kreta pod podłogę kancelarii.'}</h1>
+          <h1>{digging ? 'Kret ryje w kablach pod podłogą…' : run ? run.summary.split('.')[0] + '.' : 'Wpuść kreta pod podłogę firmy.'}</h1>
           <p className="muted">
             Każdy kabel to jedna rzecz, którą kret sprawdza. Czerwona linia to tunel: droga, którą prawdziwy atakujący doszedłby z internetu do czegoś cennego.
           </p>

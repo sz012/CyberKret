@@ -4,14 +4,16 @@ import { api } from '../api/client'
 import type { IncidentRow, KretRun, MailRow } from '../api/types'
 import { Icon } from '../components/icons'
 import Mascot from '../components/Mascot'
-import { useHealth } from '../components/Shell'
-import { ago } from '../util'
+import { useOrg } from '../components/orgContext'
+import { useHealth } from '../components/useHealth'
+import { ago, plural } from '../util'
 
 export default function Dashboard() {
   const [runs, setRuns] = useState<KretRun[] | null>(null)
   const [mail, setMail] = useState<MailRow[] | null>(null)
   const [incidents, setIncidents] = useState<IncidentRow[] | null>(null)
   const health = useHealth()
+  const { org } = useOrg()
   const nav = useNavigate()
 
   useEffect(() => {
@@ -31,14 +33,24 @@ export default function Dashboard() {
       ? 'Kret jeszcze nie sprawdzał Twojej sieci.'
       : last.tunnels.length === 0
         ? 'Kret nie znalazł otwartych tuneli. Dobra robota.'
-        : `Kret znalazł ${last.tunnels.length} ${last.tunnels.length === 1 ? 'tunel' : last.tunnels.length < 5 ? 'tunele' : 'tuneli'}. Pierwszy ruch zajmie ${last.moves[0]?.effort_min ?? 0} minut.`
+        : `Kret znalazł ${last.tunnels.length} ${plural(last.tunnels.length, 'tunel', 'tunele', 'tuneli')}. Pierwszy ruch zajmie ${last.moves[0]?.effort_min ?? 0} minut.`
 
   return (
     <div className="dash">
+      {org?.demo && (
+        <section className="card-strip card demo-strip">
+          <Icon name="briefcase" size={26} className="lamp" />
+          <div>
+            <b>To jest firma demo: {org.name}.</b>
+            <p className="muted">Wszystko działa naprawdę, ale na zmyślonych danych. Ustaw swoją firmę, a kret sprawdzi Ciebie.</p>
+          </div>
+          <Link className="btn btn-lamp btn-sm" to="/app/firma">Ustaw moją firmę</Link>
+        </section>
+      )}
       <section className="dash-hero card">
         <Mascot size={210} pose={last && last.tunnels.length === 0 ? 'happy' : 'report'} />
         <div className="dash-hero-copy">
-          <span className="eyebrow">Dzień dobry, Kancelaria Nowak</span>
+          <span className="eyebrow">Dzień dobry{org?.name ? `, ${org.name}` : ''}</span>
           <h1>{headline}</h1>
           <p className="muted">
             Kret przegląda sieć, komputery, konta, pocztę, kopie i procedury. Mówi, którędy wszedłby atakujący i co zamknąć najpierw.
@@ -56,7 +68,7 @@ export default function Dashboard() {
         <Link to="/app/tunele" className="tile card">
           <div className="tile-icon lamp"><Icon name="router" size={26} /></div>
           <h3>Tunele</h3>
-          <p className="muted">Ścieżki, którymi atakujący dotarłby do akt, pieniędzy albo zatrzymał pracę kancelarii.</p>
+          <p className="muted">Ścieżki, którymi atakujący dotarłby do danych klientów, pieniędzy albo zatrzymał pracę firmy.</p>
           <div className="tile-stat">
             {last ? (
               <>
@@ -72,7 +84,7 @@ export default function Dashboard() {
         <Link to="/app/poczta" className="tile card">
           <div className="tile-icon net"><Icon name="mail" size={26} /></div>
           <h3>Kret pocztowy</h3>
-          <p className="muted">Czyta maile razem z Panią Grażyną. Podejrzane załączniki otwiera u siebie w norze, jako tekst.</p>
+          <p className="muted">Czyta maile, zanim otworzy je człowiek. Podejrzane załączniki otwiera u siebie w norze, jako tekst.</p>
           <div className="tile-stat">
             <b className={flagged ? 'bad' : 'ok'}>{flagged}</b>
             <span>podejrzanych{unscanned ? `, ${unscanned} czeka na kreta` : ''}</span>
@@ -82,7 +94,7 @@ export default function Dashboard() {
         <Link to={open[0] ? `/app/incydent/${open[0].id}` : '/app/incydent?nowy=1'} className={`tile card ${open.length ? 'tile-alert' : ''}`}>
           <div className="tile-icon bad"><Icon name="alert" size={26} /></div>
           <h3>Incydent</h3>
-          <p className="muted">Gdy coś się stało: kilka pytań i plan dopasowany do kancelarii. Działa bez internetu.</p>
+          <p className="muted">Gdy coś się stało: kilka pytań i plan dopasowany do Twojej firmy. Działa bez internetu.</p>
           <div className="tile-stat">
             {open.length ? (
               <>
@@ -102,8 +114,8 @@ export default function Dashboard() {
           <b>Mózg kreta działa na tym komputerze.</b>
           <p className="muted">
             {health?.llm.available
-              ? `Model ${health.llm.model} przez Ollamę. Maile, wyniki skanów i odpowiedzi nie wychodzą z biura.`
-              : 'Model lokalny nie odpowiada. Kret działa dalej na regułach i gotowych szablonach.'}
+              ? `Model ${health.llm.model} przez Ollamę. Maile, wyniki skanów i odpowiedzi nie wychodzą z tego komputera.`
+              : 'Model lokalny nie odpowiada. Kret działa dalej na regułach i gotowych szablonach. Instrukcja uruchomienia modelu jest w README.'}
           </p>
         </div>
         <span className="zero">0 B</span>

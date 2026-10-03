@@ -66,7 +66,8 @@ def find_paths(org: dict) -> list[dict]:
             "steps": [
                 {
                     "technique": t["id"], "name": t["name"], "chamber": t["chamber"],
-                    "from": t["src"], "to": t["dst"], "to_label": POSITIONS[t["dst"]],
+                    "from": t["src"], "to": t["dst"],
+                    "to_label": targets[t["dst"]]["label"] if t["dst"] in targets else POSITIONS[t["dst"]],
                     "state": st, "narration": t["narration"],
                 }
                 for t, st in p["steps"]

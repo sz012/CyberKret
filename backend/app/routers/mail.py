@@ -6,7 +6,9 @@ from fastapi import APIRouter, HTTPException
 from fastapi.concurrency import run_in_threadpool
 
 from .. import db
+from .. import org as org_mod
 from ..mail import analyze as mail_an
+from ..mail import imap_sync
 from ..schemas import AnalyzeText, UploadEml
 from .demo import MAILBOX
 
@@ -25,7 +27,13 @@ def _row_summary(r) -> dict:
 
 @router.get("/mail")
 def inbox():
-    return {"mailbox": MAILBOX, "owner": "Grażyna Kowalska", "messages": [_row_summary(r) for r in db.list_mail(MAILBOX)]}
+    org = db.get_org()
+    owner = org_mod.mailbox_owner(org)
+    return {
+        "mailbox": MAILBOX, "owner": owner["name"] if owner else "", "owner_role": owner["role"] if owner else "",
+        "demo": bool(org.get("demo")), "imap": imap_sync.status(),
+        "messages": [_row_summary(r) for r in db.list_mail(MAILBOX)],
+    }
 
 
 @router.get("/mail/{mail_id}")
@@ -39,11 +47,26 @@ def message(mail_id: str):
             "analysis": json.loads(r["analysis_json"]) if r["analysis_json"] else None}
 
 
-def _scan(mail_id: str) -> dict:
+def _row(mail_id: str):
     r = db.get_mail(mail_id)
     if not r:
         raise HTTPException(404, "Nie ma takiego maila")
-    result = mail_an.analyze(mail_an.parse(r["eml"]), db.get_org(), recipient_name="Pani Grażyna")
+    return r
+
+
+def _scan(mail_id: str) -> dict:
+    r = _row(mail_id)
+    result = mail_an.rules(mail_an.parse(r["eml"]), db.get_org())
+    db.save_mail_analysis(mail_id, result)
+    return result
+
+
+def _explain(mail_id: str) -> dict:
+    r = _row(mail_id)
+    org = db.get_org()
+    msg = mail_an.parse(r["eml"])
+    result = json.loads(r["analysis_json"]) if r["analysis_json"] else mail_an.rules(msg, org)
+    result = mail_an.explain(result, msg, org, org_mod.first_name(org_mod.mailbox_owner(org)))
     db.save_mail_analysis(mail_id, result)
     return result
 
@@ -53,14 +76,29 @@ async def scan(mail_id: str):
     return await run_in_threadpool(_scan, mail_id)
 
 
+@router.post("/mail/{mail_id}/explain")
+async def explain(mail_id: str):
+    return await run_in_threadpool(_explain, mail_id)
+
+
 @router.post("/mail/deliver-next")
 def deliver_next():
+    if not db.get_org().get("demo"):
+        raise HTTPException(409, "Maile demo działają tylko w firmie demo.")
     with db.conn() as c:
         r = c.execute("SELECT id FROM mail WHERE mailbox = ? AND delivered = 0 ORDER BY id LIMIT 1", (MAILBOX,)).fetchone()
     if not r:
         raise HTTPException(409, "Brak kolejnych maili w scenariuszu demo")
     db.deliver_mail(r["id"])
     return {"id": r["id"]}
+
+
+@router.post("/mail/sync")
+async def sync():
+    try:
+        return await run_in_threadpool(imap_sync.sync, MAILBOX)
+    except imap_sync.ImapError as e:
+        raise HTTPException(400, str(e))
 
 
 @router.post("/mail/upload")
@@ -80,7 +118,8 @@ def _analyze_text(text: str) -> dict:
         msg = EmailMessage()
         msg["Subject"] = "Wklejona wiadomość"
         msg.set_content(text)
-    return mail_an.analyze(msg, db.get_org())
+    org = db.get_org()
+    return mail_an.analyze(msg, org, org_mod.first_name(org_mod.mailbox_owner(org)))
 
 
 @router.post("/analyze-message")

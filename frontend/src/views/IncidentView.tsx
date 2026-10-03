@@ -51,7 +51,7 @@ export default function IncidentView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [iid])
 
-  if (missing) return <p className="muted">Nie ma takiego incydentu. Mógł zostać usunięty przy resecie danych demo.</p>
+  if (missing) return <p className="muted">Nie ma takiego incydentu. Mógł zostać usunięty przy zmianie firmy albo powrocie do demo.</p>
   if (!inc || !org) return <p className="muted">Ładowanie incydentu…</p>
   const s = inc.situation
   const closed = inc.status === 'closed'
@@ -206,8 +206,7 @@ export default function IncidentView() {
             <TunnelMap org={org} run={run} impact={closed ? null : s.map} compact />
           </div>
           <div className="card card-pad stack">
-            <b>Poczta i konta: niezaufane.</b>
-            <p className="muted small">Dopóki informatyk nie potwierdzi, że skrzynka jest czysta, nie potwierdzamy niczego mailem.</p>
+            <p>{s.map.note}</p>
             <b>Kanały zastępcze, ustalone wcześniej:</b>
             <div className="chips">
               {s.map.fallbacks.map((f) => <span key={f} className="chip on-ok"><Icon name="check" size={14} /> {f}</span>)}
@@ -231,7 +230,7 @@ export default function IncidentView() {
       </section>
 
       <section className="continuity">
-        <h2 className="h2">Ciągłość: czy kancelaria działa?</h2>
+        <h2 className="h2">Ciągłość: czy firma działa?</h2>
         {s.continuity.maintained ? (
           <div className="banner ok"><Icon name="check" size={22} /> {s.continuity.banner}</div>
         ) : (

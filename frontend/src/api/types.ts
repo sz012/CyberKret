@@ -34,18 +34,68 @@ export interface Safeguard {
   fix: string
   effort_min: number
   cost: string
+  help?: string
+}
+
+export type Duty = 'boss' | 'finance' | 'office' | 'it' | 'other'
+
+export interface Person {
+  id: string
+  name: string
+  role: string
+  duty?: Duty
+}
+
+export interface Contact {
+  name: string
+  domain: string
+  phone: string
+  note: string
+}
+
+export interface ContinuityDef {
+  id: string
+  label: string
+  critical: boolean
+  fallback: string
+  confirmations: [string, string][]
 }
 
 export interface Org {
+  demo: boolean
   name: string
   domain: string
+  phone: string
   description: string
-  people: { id: string; name: string; role: string }[]
+  mailbox_owner: string | null
+  people: Person[]
   chambers: Chamber[]
   targets: Target[]
   safeguards: Safeguard[]
-  contacts: { name: string; domain: string; phone: string; note: string }[]
+  contacts: Contact[]
   fallbacks: { id: string; label: string; note: string }[]
+  continuity: ContinuityDef[]
+}
+
+export interface OrgProfile {
+  name: string
+  domain: string
+  phone: string
+  description: string
+  key_deadline: string
+  people: { id?: string; name: string; role: string; duty: Duty }[]
+  mailbox_owner_index: number | null
+  contacts: Contact[]
+  fallbacks: { label: string; note: string }[]
+}
+
+export interface Inbox {
+  mailbox: string
+  owner: string
+  owner_role: string
+  demo: boolean
+  imap: { configured: boolean; user: string; host: string; days: number }
+  messages: MailRow[]
 }
 
 export interface TunnelStep {
@@ -245,6 +295,7 @@ export interface EmergencyCard {
   fallbacks: { id: string; label: string; note: string }[]
   contacts: { name: string; domain: string; phone: string; note: string }[]
   first_steps: { title: string; detail: string; role: string }[]
+  by_type: { id: string; label: string; steps: { title: string; detail: string; role: string }[] }[]
   rules: string[]
 }
 
@@ -253,12 +304,12 @@ export interface Situation {
   questions: { id: string; text: string; options: { value: string; label: string }[]; answer: string | null }[]
   confirmed: { text: string; source: string }[]
   unverified: { text: string; source: string }[]
-  hypotheses: Record<'spoof' | 'takeover', Hypothesis>
+  hypotheses: Record<string, Hypothesis>
   act_now: Action[]
   plan: Action[]
   continuity: { items: ContinuityItem[]; maintained: boolean; banner: string | null }
   phases: Phase[]
-  map: { untrusted: string[]; at_risk: string[]; fallbacks: string[] }
+  map: { untrusted: string[]; at_risk: string[]; fallbacks: string[]; note: string }
   uodo: { started_at: string; deadline: string } | null
   messages: { id: string; channel: string; text: string }[]
   lessons: Safeguard[]

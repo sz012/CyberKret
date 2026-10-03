@@ -1,16 +1,29 @@
 """The model explains results computed by the engines. It never decides what is a hole or what to do first."""
 from . import ollama
 
-KRET_SYSTEM = """Jesteś cyberKretem. Właśnie sprawdziłeś systemy małej polskiej kancelarii.
+KRET_SYSTEM = """Jesteś cyberKretem. Właśnie sprawdziłeś systemy małej polskiej firmy.
 Dostajesz wynik silnika: tunele (ścieżki ataku) i trzy ruchy, które je zamykają.
-Napisz relację dla szefa kancelarii, który nie zna się na IT. Mów w pierwszej osobie jako kret.
+Napisz relację dla szefa firmy, który nie zna się na IT. Mów w pierwszej osobie jako kret.
 Nie dodawaj nowych dziur ani nowych zaleceń, opisuj tylko to, co dostałeś.
 Zwróć JSON: {"headline": "jedno zdanie, max 15 słów", "story": "3-4 krótkie zdania: którędy wszedłbym i co bym zabrał", "first_step": "jedno zdanie zachęty do pierwszego ruchu"}"""
 
-INCIDENT_SYSTEM = """Jesteś cyberKretem. W kancelarii trwa incydent. Dostajesz obraz sytuacji z silnika poradnika.
-Napisz odprawę dla szefa kancelarii: spokojnie, konkretnie, bez żargonu, po polsku.
+INCIDENT_SYSTEM = """Jesteś cyberKretem. W małej firmie trwa incydent. Dostajesz obraz sytuacji z silnika poradnika.
+Napisz odprawę dla szefa firmy: spokojnie, konkretnie, bez żargonu, po polsku.
 Rozróżniaj to, co potwierdzone, od tego, czego jeszcze nie wiemy. Nie wymyślaj nowych kroków.
 Zwróć JSON: {"brief": "3-4 zdania odprawy", "next": "jedno zdanie: najważniejsza rzecz w tej chwili"}"""
+
+
+STORY_SCHEMA = {
+    "type": "object",
+    "properties": {"headline": {"type": "string"}, "story": {"type": "string"}, "first_step": {"type": "string"}},
+    "required": ["headline", "story", "first_step"],
+}
+
+BRIEF_SCHEMA = {
+    "type": "object",
+    "properties": {"brief": {"type": "string"}, "next": {"type": "string"}},
+    "required": ["brief", "next"],
+}
 
 
 def kret_story(run: dict) -> dict:
@@ -18,7 +31,7 @@ def kret_story(run: dict) -> dict:
         f"- do „{t['target_label']}” ({t['state']}): " + " → ".join(s["name"] for s in t["steps"]) for t in run["tunnels"]
     ) or "- brak tuneli"
     moves = "\n".join(f"- {m['label']} ({m['effort_min']} min), zamyka {len(m['closes'])} tuneli" for m in run["moves"]) or "- brak"
-    data, meta = ollama.chat_json(KRET_SYSTEM, f"Tunele:\n{tunnels}\n\nRuchy:\n{moves}")
+    data, meta = ollama.chat_json(KRET_SYSTEM, f"Tunele:\n{tunnels}\n\nRuchy:\n{moves}", STORY_SCHEMA)
     if data and data.get("headline"):
         return {"headline": str(data["headline"]), "story": str(data.get("story") or ""),
                 "first_step": str(data.get("first_step") or ""), "llm": meta}
@@ -36,7 +49,7 @@ def incident_brief(sit: dict) -> dict:
     unv = "\n".join(f"- {f['text']}" for f in sit["unverified"]) or "- nic"
     hyp = "\n".join(f"- {h['label']}: {h['level']}" for h in sit["hypotheses"].values())
     now = "\n".join(f"- {a['title']} ({a['role_label']})" for a in sit["act_now"])
-    data, meta = ollama.chat_json(INCIDENT_SYSTEM, f"Potwierdzone:\n{conf}\n\nNiezweryfikowane:\n{unv}\n\nHipotezy:\n{hyp}\n\nDziałaj teraz:\n{now}")
+    data, meta = ollama.chat_json(INCIDENT_SYSTEM, f"Potwierdzone:\n{conf}\n\nNiezweryfikowane:\n{unv}\n\nHipotezy:\n{hyp}\n\nDziałaj teraz:\n{now}", BRIEF_SCHEMA)
     if data and data.get("brief"):
         return {"brief": str(data["brief"]), "next": str(data.get("next") or ""), "llm": meta}
     top = max(sit["hypotheses"].values(), key=lambda h: ["unlikely", "possible", "likely"].index(h["level"]))

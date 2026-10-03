@@ -1,42 +1,27 @@
-# CyberKret
+# cyberKret
 
-> Lepiej, żeby pierwszy był Twój kret. (Better that the first mole in your systems is yours.)
+cyberKret is a local security assistant for small firms without an IT department. It maps the firm, finds the paths an attacker would take from the internet to client data, money or a stopped business ("tunnels"), and picks the changes that close the most of them. When something happens, it walks the team through the incident. Everything runs on one computer and the language model is local, so the firm's data never leaves it.
 
-CyberKret is a mole that a small organization lets into its own systems before a real attacker gets there. It shows the paths an attacker would take ("tunnels"), what to close first, and when something does happen, it walks the team through the incident so the most important work keeps going.
+The interface is in Polish.
 
-Built for HackYeah 2026, task **Defence**. Target users: law firms, accounting offices, tax advisors, clinics, NGOs: 3-50 people, sensitive client data, no IT department.
+![Tunnels view: attack paths on the office map and the three moves that close them](docs/tunele.png)
 
-Everything runs on one machine in the office. The language model is local (Qwen via Ollama), so client emails and scan results never leave the building: **0 bytes sent out**.
+## Features
 
-## Three features
+- **Tunnels.** An attack graph of 8 techniques over 12 safeguards. A depth-first search finds every path from the internet to a target, and a greedy pass picks the safeguards that cut the most target weight first, with time and cost. Every finding says where it comes from: checked by the app, from your answers, or unverified.
+- **Real checks.** A passive domain check (MX, SPF, DMARC, DKIM, HTTPS certificate and redirect, security headers), read-only checks of this Mac (firewall, FileVault, Gatekeeper, SIP, automatic updates) and a password strength meter that runs only in the browser (zxcvbn-ts with a Polish dictionary and the firm's own words).
+- **Mail mole.** Reads a mailbox over IMAP (read-only, nothing is marked as read), `.eml` files or pasted text. Rules decide the verdict: lookalike sender domains, Reply-To mismatch, SPF/DKIM/DMARC results, account change requests, link text that hides another domain, double extensions, fake PDFs, password forms inside attachments. The local model explains the verdict in plain Polish. It may raise the alarm but never lower it, and its quotes must exist in the message.
+- **Incident mode.** Five playbooks: fake invoice or account change request, ransomware, lost or stolen laptop, account takeover, internet or mail outage. Each one asks a few questions, keeps confirmed and unverified facts apart, weighs hypotheses and rebuilds the plan after every answer. Steps go to people by duty, critical work needs confirmed fallbacks, messages are ready to send, and a 72-hour clock starts when personal data may have leaked.
+- **Your firm.** People and duties, vendors with phone numbers from the contract, fallback channels and safeguard answers. A fictional demo firm is included.
+- **Emergency card.** A printable page with first steps for every incident type, roles, fallback channels and vendor phone numbers.
 
-| | What it does | What is real |
-|---|---|---|
-| **Tunele** (tunnels) | The mole rides network cables under the office floor to each area it checks (network, computers, accounts, mail and domain, payments, backups, website). Then it chains weaknesses into attack paths from the internet to client files, money, or a stopped business, and picks the 3 moves that close the most. | Attack-graph engine + greedy "fill first", passive domain check (MX, SPF, DMARC, DKIM, HTTPS, headers), read-only local agent (firewall, FileVault, Gatekeeper, SIP, updates on macOS). The organization map is a fictional seed. |
-| **Kret pocztowy** (mail mole) | Reads every new email in Ms. Grażyna's inbox before she does. Opens attachments as text in its own "burrow", never executes them. Explains in plain Polish what to do. | `.eml` parsing: lookalike sender domains, Reply-To mismatch, Authentication-Results, link text vs. target, double extensions, fake PDFs, password forms inside attachments, account-change and urgency phrases. The local model only explains; it may raise the alarm, never lower it, and its quotes must exist in the message. |
-| **Incydent** (incident mode) | Five questions, then a plan: confirmed vs. unverified facts, two hypotheses (spoofing vs. mailbox takeover), "act now" steps that are safe whatever the cause, roles, continuity checks, ready-to-send messages, a 72 h GDPR (UODO) clock, and a log. The plan rebuilds after every new fact. Closing the incident proposes which tunnels to fill; the mole digs again and shows before/after. | Rules-based playbook engine with plan diffing and persistence in SQLite. |
+![Landing page: the kret walks through the office network and shows the attacker's path](docs/film.png)
 
-Rule that ties it together: **the mole always says how it knows** (`sprawdził kret` / `z Twoich odpowiedzi` / `niepotwierdzone`).
+## Run locally
 
-Also included: a password strength check that runs only in the browser (zxcvbn with a Polish dictionary and the company's own words, nothing is sent anywhere), five incident phases (Zatrzymaj, Oceń, Zawiadom, Utrzymaj działanie, Wnioski) with progress from the plan, continuity and lessons, and a printable emergency card for the drawer at `/app/karta` (first steps, roles, fallback channels, verified vendor phone numbers).
+Requirements: Python 3.12+, Node 20+, optionally [Ollama](https://ollama.com).
 
-## Run it
-
-Requirements: Python 3.12+ with [uv](https://docs.astral.sh/uv/), Node 20+, optionally [Ollama](https://ollama.com).
-
-```bash
-# backend (http://127.0.0.1:8000)
-cd backend
-uv sync
-uv run uvicorn app.main:app --port 8000 --reload
-
-# frontend (http://localhost:5173, proxies /api to the backend)
-cd frontend
-npm install
-npm run dev
-```
-
-Without uv, a plain virtual environment works too:
+Backend (http://127.0.0.1:8000):
 
 ```bash
 cd backend
@@ -45,63 +30,29 @@ python3 -m venv .venv
 .venv/bin/uvicorn app.main:app --port 8000 --reload
 ```
 
-Local model (optional, the app works without it in "rules and templates" mode):
+With [uv](https://docs.astral.sh/uv/): `uv sync`, then `uv run uvicorn app.main:app --port 8000 --reload`.
+
+Frontend (http://localhost:5173, proxies `/api` to the backend):
 
 ```bash
-ollama serve
-ollama pull <qwen tag>          # e.g. a Qwen 3.x model that fits in RAM; we use a 48 GB machine
-export OLLAMA_MODEL=<qwen tag>  # if unset or missing, the first local "qwen" model is used
+cd frontend
+npm install
+npm run dev
 ```
 
-Tests: `cd backend && uv run pytest` (engines, mail heuristics, incident flow, LLM guardrails with a faked model).
+Local model (optional, without it the app uses rules and templates). The default fits a Mac with 8 GB of RAM:
 
-Reset demo data: menu `⋯` → *Reset danych demo*, or `POST /api/demo/reset`.
-
-## Demo script (≈3 min)
-
-1. `/`: intro animation: something moves in the office cables at night… it is your mole.
-2. `/app/tunele`: *Wpuść kreta*. Cables light up; 5 tunnels to client files, money and business continuity. First move: close RDP (15 min).
-3. `/app/poczta`: turn Wi‑Fi off. *Przyślij nowy mail (demo)*: fake Biurex invoice. The mole flags the lookalike domain, Reply-To, fake PDF with a bank login form. *Zgłoś incydent*.
-4. Incident: "Did anyone pay?" → *Nie wiem jeszcze*. Then the new fact *Tak, przelew wyszedł*: plan rebuilds (bank recall, police), log shows the diff.
-5. Continuity: tick the court-hearing and payments confirmations; only then *Kancelaria działa*.
-6. Close incident → fill tunnels (callback rule, DMARC, MFA) → the mole digs again: before 5, after fewer.
-
-## Architecture
-
-```
-backend/app
-  kret/techniques.py   attack techniques (src → dst, required missing safeguards)
-  kret/engine.py       DFS over techniques → tunnels, greedy "fill first", chamber status
-  kret/domain_check.py passive DNS + one GET, SSRF guard, consent required
-  kret/local_agent.py  read-only macOS checks with timeouts
-  mail/analyze.py      .eml heuristics → verdict → local model explanation
-  incident/playbook.py questions, actions with when(ctx) rules, continuity, messages
-  incident/engine.py   facts, hypotheses, plan, phases, continuity, UODO clock
-  incident/card.py     printable emergency card built from the org map and the playbook
-  llm/ollama.py        localhost-only client, JSON mode, fallback on any error
-  routers/             REST API (org, kret, mail, incidents, demo)
-frontend/src
-  components/Mascot.tsx     original mole mascot (SVG, poses)
-  components/TunnelMap.tsx  office cross-section, cables, mole animation, attack tunnels
-  components/BrandMark.tsx  logo in the top-left corner
-  components/PasswordCheckCard.tsx  local password strength check (zxcvbn)
-  components/PhaseStrip.tsx five incident phases with progress
-  views/                    Dashboard, Tunnels, Mail, Incidents, IncidentView, EmergencyCard
-  landing/                  marketing page with the plot-twist intro
+```bash
+ollama pull hf.co/second-state/Bielik-4.5B-v3.0-Instruct-GGUF:Q4_K_M
 ```
 
-Stored: map, answers, statuses, confirmations, scans. Computed on every read: tunnels, situation, plan.
+Settings live in `.env.local` in the repository root (copy `.env.example`). To read Gmail, turn on 2-step verification, create an app password at https://myaccount.google.com/apppasswords and set `IMAP_USER` and `IMAP_PASSWORD`. Restart the backend after changes.
 
-## Honest scope
+Tests: `backend/.venv/bin/pytest backend/tests`. The real-model tests run only when Ollama has a model.
 
-Real: path engine, passive domain check, local agent, `.eml` analysis, local model with fallback, incident engine.
-Simulated: the Kancelaria Nowak map (fictional company, survey-style answers), the inbox (sample emails on `.example` domains).
-Deliberately not done: port scans of other machines, login attempts, executing attachments, sending anything outside.
+## Data and credits
 
-## Credits and AI disclosure
-
-- Mascot and all graphics: original, drawn in SVG for this project. Not based on any existing cartoon character.
-- Libraries: FastAPI, Uvicorn, Pydantic, dnspython, HTTPX, pytest, React, React Router, Vite, TypeScript, zxcvbn-ts (MIT), Fontsource (Bricolage Grotesque, IBM Plex Sans/Mono, SIL OFL).
-- Local model: Qwen (Alibaba Cloud, Apache 2.0) served by Ollama.
-- AI tools were used during development (concept, code, copy). The team reviewed and can explain every part.
-- Concept, plan and a first prototype were prepared before the hackathon start (3 Oct, 23:00). The submission notes separate that from the work done during the event.
+- The demo firm, its people, vendors, domains, emails and account numbers are fictional.
+- Language model: Bielik 4.5B v3.0 Instruct by SpeakLeash (Apache 2.0), GGUF quantization by Second State, served by Ollama.
+- Libraries: FastAPI, Uvicorn, Pydantic, dnspython, HTTPX, pytest, React, React Router, Vite, TypeScript, zxcvbn-ts.
+- Fonts: Mona Sans by GitHub and JetBrains Mono, both under the SIL Open Font License.

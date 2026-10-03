@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.concurrency import run_in_threadpool
 
 from .. import db
+from .. import org as org_mod
 from ..incident import engine
 from ..incident import playbook as pb
 from ..llm import explain
@@ -27,13 +28,13 @@ def _full(iid: int) -> dict:
 
 @router.get("/types")
 def types():
-    return [{"id": k, **v} for k, v in pb.TYPES.items()]
+    return pb.types()
 
 
 @router.post("")
 def create(body: NewIncident):
-    if body.type not in pb.TYPES or not pb.TYPES[body.type]["ready"]:
-        raise HTTPException(422, "Ten poradnik jest w przygotowaniu")
+    if body.type not in pb.PLAYBOOKS:
+        raise HTTPException(422, "Nie ma takiego poradnika")
     facts = []
     if body.mail_id:
         r = db.get_mail(body.mail_id)
@@ -43,7 +44,7 @@ def create(body: NewIncident):
     org = db.get_org()
     sit = engine.situation(db.get_incident(iid), org)
     db.update_incident(iid, plan_ids=[a["id"] for a in sit["plan"]])
-    db.add_event(iid, "start", f"Zgłoszono incydent: {pb.TYPES[body.type]['label']}."
+    db.add_event(iid, "start", f"Zgłoszono incydent: {pb.get(body.type).LABEL}."
                  + (f" Kret pocztowy przekazał {len(facts)} faktów." if facts else ""))
     db.add_event(iid, "plan", f"Plan startowy: {len(sit['plan'])} kroków, {len(sit['act_now'])} do zrobienia od razu.")
     return _full(iid)
@@ -53,7 +54,7 @@ def create(body: NewIncident):
 def list_():
     out = []
     for inc in db.list_incidents():
-        out.append({"id": inc["id"], "type": inc["type"], "type_label": pb.TYPES[inc["type"]]["label"],
+        out.append({"id": inc["id"], "type": inc["type"], "type_label": pb.get(inc["type"]).LABEL,
                     "status": inc["status"], "created_at": inc["created_at"], "closed_at": inc["closed_at"],
                     "done": sum(1 for v in inc["action_status"].values() if v == "done")})
     return out
@@ -68,11 +69,12 @@ def get(iid: int):
 def answers(iid: int, body: Answers):
     inc = _load(iid)
     org = db.get_org()
+    book = pb.get(inc["type"])
     new = dict(inc["answers"])
     answered_at = dict(inc["answered_at"])
     changed = []
     for k, v in body.answers.items():
-        q = pb.QUESTIONS_BY_ID.get(k)
+        q = pb.question(org, book, k)
         if not q or v not in {o[0] for o in q["options"]}:
             raise HTTPException(422, f"Niepoprawna odpowiedź: {k}={v}")
         if new.get(k) != v:
@@ -82,7 +84,7 @@ def answers(iid: int, body: Answers):
     if not changed:
         return _full(iid)
 
-    hyp_before = engine.hypotheses(inc["answers"], inc["facts"], org)
+    hyp_before = book.hypotheses(inc["answers"], inc["facts"], org)
     db.update_incident(iid, answers=new, answered_at=answered_at)
     inc = _load(iid)
     sit = engine.situation(inc, org)
@@ -96,7 +98,7 @@ def answers(iid: int, body: Answers):
         if hyp_before[h_id]["level"] != h["level"]:
             db.add_event(iid, "hypothesis", f"{h['label']}: {_lvl(hyp_before[h_id]['level'])} → {_lvl(h['level'])}.")
     if added or removed:
-        title = {a["id"]: a["title"] for a in pb.ACTIONS}
+        title = {a["id"]: a["title"] for a in book.ACTIONS}
         done_removed = [i for i in removed if inc["action_status"].get(i) == "done"]
         msg = f"Plan przebudowany: +{len(added)} {_kroki(len(added))}, −{len(removed)} {_kroki(len(removed))}."
         if added:
@@ -120,30 +122,31 @@ def _kroki(n: int) -> str:
 @router.patch("/{iid}/actions/{aid}")
 def action(iid: int, aid: str, body: ActionStatus):
     inc = _load(iid)
-    if aid not in pb.ACTIONS_BY_ID:
+    a = pb.action(pb.get(inc["type"]), aid)
+    if not a:
         raise HTTPException(404, "Nie ma takiego kroku")
     st = dict(inc["action_status"])
     if st.get(aid, "todo") != body.status:
         st[aid] = body.status
         db.update_incident(iid, action_status=st)
         if body.status == "done":
-            a = pb.ACTIONS_BY_ID[aid]
-            db.add_event(iid, "action", f"Zrobione: {a['title']} ({pb.ROLES[a['role']]}).")
+            db.add_event(iid, "action", f"Zrobione: {a['title']} ({org_mod.role_label(db.get_org(), a['role'])}).")
     return _full(iid)
 
 
 @router.patch("/{iid}/confirmations/{cid}")
 def confirm(iid: int, cid: str, body: Confirmation):
     inc = _load(iid)
-    labels = {c_id: label for c in pb.CONTINUITY for c_id, label in c["confirmations"]}
+    org = db.get_org()
+    labels = {c_id: label for c in org.get("continuity", []) for c_id, label in c["confirmations"]}
     if cid not in labels:
         raise HTTPException(404, "Nie ma takiego potwierdzenia")
-    before = engine.continuity(inc["answers"], inc["confirmations"])["maintained"]
+    before = engine.continuity(inc["answers"], inc["confirmations"], org)["maintained"]
     conf = dict(inc["confirmations"])
     conf[cid] = body.done
     db.update_incident(iid, confirmations=conf)
     db.add_event(iid, "continuity", ("Potwierdzone: " if body.done else "Cofnięte potwierdzenie: ") + labels[cid] + ".")
-    after = engine.continuity(inc["answers"], conf)["maintained"]
+    after = engine.continuity(inc["answers"], conf, org)["maintained"]
     if after and not before:
         db.add_event(iid, "continuity", "Działalność krytyczna utrzymana. Poczta pozostaje niezaufana.")
     return _full(iid)
@@ -154,7 +157,8 @@ def close(iid: int):
     inc = _load(iid)
     if inc["status"] != "closed":
         db.update_incident(iid, status="closed", closed_at=db.now())
-        db.add_event(iid, "close", "Incydent zamknięty. Kret proponuje zasypać tunele, którymi przyszło zagrożenie.")
+        lesson = " Kret proponuje zasypać tunele, którymi przyszło zagrożenie." if pb.get(inc["type"]).LESSONS else ""
+        db.add_event(iid, "close", f"Incydent zamknięty.{lesson}")
     return _full(iid)
 
 

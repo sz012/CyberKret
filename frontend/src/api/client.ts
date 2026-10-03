@@ -1,5 +1,5 @@
 import type {
-  Analysis, DomainResult, EmergencyCard, Health, Incident, IncidentRow, KretRun, KretStory, LocalCheck, MailMessage, MailRow, Org,
+  Analysis, DomainResult, EmergencyCard, Health, Inbox, Incident, IncidentRow, KretRun, KretStory, LocalCheck, MailMessage, Org, OrgProfile,
 } from './types'
 
 async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -22,6 +22,8 @@ async function req<T>(method: string, path: string, body?: unknown): Promise<T> 
 export const api = {
   health: () => req<Health>('GET', '/api/health'),
   org: () => req<Org>('GET', '/api/org'),
+  saveProfile: (profile: OrgProfile) => req<Org>('PUT', '/api/org/profile', profile),
+  newOrg: (name: string) => req<Org>('POST', '/api/org/new', { name }),
   card: () => req<EmergencyCard>('GET', '/api/org/card'),
   patchSafeguard: (id: string, state: string) => req('PATCH', `/api/org/safeguards/${id}`, { state, source: 'answers' }),
 
@@ -32,7 +34,9 @@ export const api = {
   localCheck: () => req<LocalCheck>('POST', '/api/kret/local-check'),
   applySafeguards: (safeguards: string[]) => req<{ applied: string[] }>('POST', '/api/kret/apply', { safeguards }),
 
-  inbox: () => req<{ mailbox: string; owner: string; messages: MailRow[] }>('GET', '/api/mail'),
+  inbox: () => req<Inbox>('GET', '/api/mail'),
+  syncMail: () => req<{ new: number; skipped: number; checked: number }>('POST', '/api/mail/sync'),
+  explainMail: (id: string) => req<Analysis>('POST', `/api/mail/${id}/explain`),
   mail: (id: string) => req<MailMessage>('GET', `/api/mail/${id}`),
   scanMail: (id: string) => req<Analysis>('POST', `/api/mail/${id}/scan`),
   deliverNext: () => req<{ id: string }>('POST', '/api/mail/deliver-next'),
@@ -47,7 +51,7 @@ export const api = {
   confirm: (id: number, cid: string, done: boolean) => req<Incident>('PATCH', `/api/incidents/${id}/confirmations/${cid}`, { done }),
   closeIncident: (id: number) => req<Incident>('POST', `/api/incidents/${id}/close`),
   brief: (id: number) => req<{ brief: string; next: string; llm: { model: string | null; ms: number | null } }>('GET', `/api/incidents/${id}/brief`),
-  incidentTypes: () => req<{ id: string; label: string; ready: boolean }[]>('GET', '/api/incidents/types'),
+  incidentTypes: () => req<{ id: string; label: string; ready: boolean; questions: number }[]>('GET', '/api/incidents/types'),
 
   resetDemo: () => req('POST', '/api/demo/reset'),
 }

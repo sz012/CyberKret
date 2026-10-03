@@ -44,3 +44,38 @@ class ActionStatus(BaseModel):
 
 class Confirmation(BaseModel):
     done: bool
+
+
+class Person(BaseModel):
+    id: str | None = Field(default=None, max_length=40)
+    name: str = Field(min_length=1, max_length=80)
+    role: str = Field(default="", max_length=80)
+    duty: Literal["boss", "finance", "office", "it", "other"] = "other"
+
+
+class Contact(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    domain: str = Field(default="", max_length=253)
+    phone: str = Field(default="", max_length=40)
+    note: str = Field(default="", max_length=200)
+
+
+class Fallback(BaseModel):
+    label: str = Field(min_length=1, max_length=60)
+    note: str = Field(default="", max_length=200)
+
+
+class OrgProfile(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    domain: str = Field(default="", max_length=253)
+    phone: str = Field(default="", max_length=40)
+    description: str = Field(default="", max_length=300)
+    key_deadline: str = Field(default="", max_length=120)
+    people: list[Person] = Field(default_factory=list, max_length=50)
+    mailbox_owner_index: int | None = None
+    contacts: list[Contact] = Field(default_factory=list, max_length=100)
+    fallbacks: list[Fallback] = Field(default_factory=list, max_length=20)
+
+
+class NewOrg(BaseModel):
+    name: str = Field(min_length=1, max_length=80)

@@ -49,16 +49,22 @@ export default function EmergencyCard() {
         </header>
 
         <section>
-          <h2>Pierwsze kroki, zanim wiesz, co się stało</h2>
-          <ol className="ecard-steps">
-            {card.first_steps.map((s) => (
-              <li key={s.title}>
-                <b>{s.title}</b>
-                <span>{s.detail}</span>
-                <em>{s.role}</em>
-              </li>
+          <h2>Pierwsze kroki, zanim wiesz więcej</h2>
+          <div className="ecard-types">
+            {card.by_type.map((t) => (
+              <div key={t.id}>
+                <h3>{t.label}</h3>
+                <ol className="ecard-steps">
+                  {t.steps.map((s) => (
+                    <li key={s.title}>
+                      <b>{s.title}</b>
+                      <em>{s.role}</em>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             ))}
-          </ol>
+          </div>
         </section>
 
         <div className="ecard-grid">

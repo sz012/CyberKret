@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
-import type { Analysis, MailMessage, MailRow } from '../api/types'
+import type { Analysis, Inbox, MailMessage, MailRow } from '../api/types'
 import { Icon } from '../components/icons'
 import Mascot from '../components/Mascot'
+import { useHealth } from '../components/useHealth'
 import { plural, time } from '../util'
 
 const SCAN_STEPS = [
@@ -39,69 +40,93 @@ function highlight(text: string, quotes: string[]) {
 
 export default function Mail() {
   const [rows, setRows] = useState<MailRow[]>([])
+  const [box, setBox] = useState<Omit<Inbox, 'messages'> | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
   const [msg, setMsg] = useState<MailMessage | null>(null)
-  const [scanning, setScanning] = useState<string | null>(null)
-  const [step, setStep] = useState(0)
-  const [toast, setToast] = useState<string | null>(null)
+  const [explaining, setExplaining] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ ok: boolean; text: string } | null>(null)
   const [noMore, setNoMore] = useState(false)
-  const scanQueue = useRef<Promise<unknown>>(Promise.resolve())
+  const [syncing, setSyncing] = useState(false)
+  const health = useHealth()
+  const modelOn = !!health?.llm.available
+  const queue = useRef<Promise<unknown>>(Promise.resolve())
   const nav = useNavigate()
 
-  const refresh = async () => {
-    const r = (await api.inbox()).messages
-    setRows(r)
-    return r
+  const say = (ok: boolean, text: string) => {
+    setToast({ ok, text })
+    setTimeout(() => setToast(null), 6000)
   }
 
-  const scan = (id: string) => {
-    // One scan at a time: the local model works on one message after another.
-    scanQueue.current = scanQueue.current.then(async () => {
-      setScanning(id)
-      setStep(0)
-      const t = setInterval(() => setStep((s) => Math.min(s + 1, SCAN_STEPS.length - 1)), 600)
+  const refresh = async () => {
+    const { messages, ...meta } = await api.inbox()
+    setRows(messages)
+    setBox(meta)
+    return messages
+  }
+
+  const rulesScan = async (id: string) => {
+    const a = await api.scanMail(id)
+    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, scan: { verdict: a.verdict, label: a.label, level: a.level } } : r)))
+    setMsg((m) => (m && m.id === id ? { ...m, analysis: a } : m))
+    return a
+  }
+
+  const explain = (id: string) => {
+    queue.current = queue.current.then(async () => {
+      setExplaining(id)
       try {
-        // Rules answer instantly; keep the walk-through visible long enough to follow.
-        const [a] = await Promise.all([api.scanMail(id), new Promise((r) => setTimeout(r, SCAN_STEPS.length * 600))])
-        setStep(SCAN_STEPS.length)
-        await new Promise((r) => setTimeout(r, 350))
+        const a = await api.explainMail(id)
         setRows((rs) => rs.map((r) => (r.id === id ? { ...r, scan: { verdict: a.verdict, label: a.label, level: a.level } } : r)))
         setMsg((m) => (m && m.id === id ? { ...m, analysis: a } : m))
       } finally {
-        clearInterval(t)
-        setScanning(null)
+        setExplaining(null)
       }
     })
-    return scanQueue.current
+    return queue.current
+  }
+
+  const open = async (id: string) => {
+    setOpenId(id)
+    const m = await api.mail(id)
+    setMsg(m)
+    const a = m.analysis ?? (await rulesScan(id))
+    if (modelOn && !a.llm.model && a.llm.error !== 'brak lokalnego modelu') explain(id)
   }
 
   const booted = useRef(false)
   useEffect(() => {
     if (booted.current) return
     booted.current = true
-    refresh().then((r) => {
+    refresh().then(async (r) => {
+      for (const x of r.filter((x) => !x.scan)) await rulesScan(x.id)
       if (r[0]) open(r[0].id)
-      r.filter((x) => !x.scan).forEach((x) => scan(x.id))
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  const open = async (id: string) => {
-    setOpenId(id)
-    setMsg(await api.mail(id))
-  }
 
   const deliver = async () => {
     try {
       const { id } = await api.deliverNext()
       const r = await refresh()
       const m = r.find((x) => x.id === id)
-      setToast(`Nowy mail: ${m?.from_name ?? ''}, „${m?.subject ?? ''}”. Kret już czyta.`)
-      setTimeout(() => setToast(null), 5000)
+      say(true, `Nowy mail: ${m?.from_name ?? ''}, „${m?.subject ?? ''}”. Kret już czyta.`)
       await open(id)
-      scan(id)
     } catch {
       setNoMore(true)
+    }
+  }
+
+  const sync = async () => {
+    setSyncing(true)
+    try {
+      const res = await api.syncMail()
+      const r = await refresh()
+      for (const x of r.filter((x) => !x.scan)) await rulesScan(x.id)
+      say(true, res.new ? `Pobrano ${res.new} ${plural(res.new, 'nowy mail', 'nowe maile', 'nowych maili')} z ostatnich ${box?.imap.days ?? 14} dni.` : 'Brak nowych maili.')
+    } catch (x) {
+      say(false, (x as Error).message)
+    } finally {
+      setSyncing(false)
     }
   }
 
@@ -109,7 +134,6 @@ export default function Mail() {
     const { id } = await api.uploadEml(await f.text())
     await refresh()
     await open(id)
-    scan(id)
   }
 
   const report = async () => {
@@ -119,33 +143,45 @@ export default function Mail() {
   }
 
   const a = msg?.analysis ?? null
-  const isScanning = scanning !== null && scanning === msg?.id
+  const isExplaining = explaining !== null && explaining === msg?.id
 
   return (
     <div className="mail-page">
       <header className="page-head">
         <div>
           <span className="eyebrow">Funkcja 2 · Kret pocztowy</span>
-          <h1>Kret czyta pocztę razem z Panią Grażyną.</h1>
-          <p className="muted">Każdy nowy mail kret sprawdza sam. Załączniki otwiera u siebie, jako tekst, nigdy na komputerze pracownika. Treść czyta model na tym komputerze.</p>
+          <h1>Kret czyta pocztę, zanim otworzy ją człowiek.</h1>
+          <p className="muted">Reguły dają werdykt od razu. Model na tym komputerze tłumaczy go po ludzku. Załączniki kret otwiera u siebie, jako tekst, nigdy na komputerze pracownika.</p>
         </div>
         <div className="row gap-sm wrap">
           <label className="btn btn-ghost btn-sm">
             <Icon name="upload" size={16} /> Wczytaj .eml
             <input type="file" accept=".eml,message/rfc822" hidden onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
           </label>
-          <button className="btn btn-lamp" onClick={deliver} disabled={noMore}>{noMore ? 'Brak nowych maili' : 'Przyślij nowy mail (demo)'}</button>
+          {box?.imap.configured && (
+            <button className="btn btn-lamp" onClick={sync} disabled={syncing}>{syncing ? 'Pobieram…' : 'Pobierz nowe maile'}</button>
+          )}
+          {box?.demo && !box.imap.configured && (
+            <button className="btn btn-lamp" onClick={deliver} disabled={noMore}>{noMore ? 'Brak nowych maili' : 'Przyślij nowy mail (demo)'}</button>
+          )}
         </div>
       </header>
 
-      {toast && <div className="toast" role="status"><Icon name="mail" size={18} /> {toast}</div>}
+      {box && !box.imap.configured && !box.demo && (
+        <p className="muted small">Skrzynka nie jest podłączona. Wpisz IMAP_USER i IMAP_PASSWORD do pliku .env.local i uruchom backend ponownie. Instrukcja dla Gmaila jest w README.</p>
+      )}
+
+      {toast && <div className={`toast ${toast.ok ? '' : 'toast-bad'}`} role="status"><Icon name={toast.ok ? 'mail' : 'alert'} size={18} /> {toast.text}</div>}
 
       <div className="mailbox card">
         <div className="mb-list">
           <div className="mb-owner">
             <b>Skrzynka odbiorcza</b>
-            <span className="muted small">Grażyna Kowalska · księgowość</span>
+            <span className="muted small">
+              {box?.imap.configured ? `${box.imap.user} · tylko odczyt` : box?.owner ? `${box.owner}${box.owner_role ? ` · ${box.owner_role.toLowerCase()}` : ''}` : 'maile wgrane ręcznie'}
+            </span>
           </div>
+          {rows.length === 0 && <p className="muted small card-pad">Pusto. {box?.imap.configured ? 'Kliknij „Pobierz nowe maile”.' : 'Wczytaj plik .eml albo podłącz skrzynkę.'}</p>}
           <ul>
             {rows.map((r) => (
               <li key={r.id}>
@@ -170,7 +206,7 @@ export default function Mail() {
         </div>
 
         <div className="mb-read">
-          {!msg && <p className="muted card-pad">Wybierz wiadomość.</p>}
+          {!msg && rows.length > 0 && <p className="muted card-pad">Wybierz wiadomość.</p>}
           {msg && (
             <>
               <div className="mb-meta">
@@ -180,18 +216,18 @@ export default function Mail() {
                 <div><span className="muted">Do:</span> {msg.to.join(', ')}</div>
               </div>
 
-              {isScanning && (
+              {isExplaining && (
                 <div className="scan-box">
                   <Mascot size={110} pose="check" />
                   <ol>
                     {SCAN_STEPS.map((s, i) => (
-                      <li key={s} className={i < step ? 'done' : i === step ? 'now' : ''}>{i < step ? '✓' : i === step ? '›' : '·'} {s}</li>
+                      <li key={s} className={i < SCAN_STEPS.length - 1 ? 'done' : 'now'}>{i < SCAN_STEPS.length - 1 ? '✓' : '›'} {s}</li>
                     ))}
                   </ol>
                 </div>
               )}
 
-              {a && !isScanning && <Verdict a={a} onReport={report} />}
+              {a && <Verdict a={a} explaining={isExplaining} onReport={report} />}
 
               <div className="mb-body">
                 {highlight(msg.text, a?.indicators.map((i) => i.quote ?? '') ?? []).map((x, i) => <span key={i}>{x}</span>)}
@@ -219,7 +255,15 @@ export default function Mail() {
   )
 }
 
-function Verdict({ a, onReport }: { a: Analysis; onReport: () => void }) {
+function llmNote(a: Analysis, explaining: boolean): string {
+  if (a.llm.model) return `wyjaśnienie: ${a.llm.model}, lokalnie, ${((a.llm.ms ?? 0) / 1000).toFixed(1)} s`
+  if (explaining) return 'werdykt z reguł · model lokalny pisze wyjaśnienie'
+  if (a.llm.error === 'brak lokalnego modelu') return 'tryb bez modelu: reguły i szablony'
+  if (a.llm.error === 'nie pytano modelu') return 'werdykt z reguł'
+  return 'model nie odpowiedział, wyjaśnienie z szablonu'
+}
+
+function Verdict({ a, explaining, onReport }: { a: Analysis; explaining: boolean; onReport: () => void }) {
   const signals = a.indicators.filter((i) => i.severity !== 'info')
   const info = a.indicators.filter((i) => i.severity === 'info')
   return (
@@ -245,9 +289,7 @@ function Verdict({ a, onReport }: { a: Analysis; onReport: () => void }) {
       )}
       {info.map((s, i) => <p key={i} className="muted small info-note">ⓘ {s.title}: {s.detail}</p>)}
       <div className="verdict-foot">
-        <span className="muted small mono">
-          {a.llm.model ? `wyjaśnienie: ${a.llm.model}, lokalnie, ${((a.llm.ms ?? 0) / 1000).toFixed(1)} s` : 'tryb bez modelu: reguły i szablony'} · nic nie wysłano na zewnątrz
-        </span>
+        <span className="muted small mono">{llmNote(a, explaining)} · nic nie wysłano na zewnątrz</span>
         {a.level !== 'ok' && <button className="btn btn-bad btn-sm" onClick={onReport}><Icon name="alert" size={15} /> Zgłoś incydent</button>}
       </div>
     </div>
@@ -281,9 +323,10 @@ function AskKret() {
               <span className={`pill ${res.level}`}><span className="dot" />{res.label}</span>
               <p>{res.summary}</p>
               {res.what_to_do && <p><b>Co zrobić:</b> {res.what_to_do}</p>}
+              <p className="muted small mono">{llmNote(res, false)}</p>
             </div>
           ) : (
-            <p className="muted small">Kret odpowie w kilka sekund. Tekst zostaje na tym komputerze.</p>
+            <p className="muted small">{busy ? 'Reguły już sprawdziły tekst, model lokalny pisze wyjaśnienie…' : 'Tekst zostaje na tym komputerze. Z modelem lokalnym odpowiedź zajmuje kilka do kilkunastu sekund.'}</p>
           )}
         </div>
       </div>

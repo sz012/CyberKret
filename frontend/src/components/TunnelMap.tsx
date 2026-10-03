@@ -8,7 +8,7 @@ import { IconG } from './icons'
  * The kret rides inside the cables. Attack tunnels are drawn as red lines from the internet to what hurts.
  */
 
-export const HUB = { x: 500, y: 186 }
+const HUB = { x: 500, y: 186 }
 const CLOUD = { x: 86, y: 58 }
 const TARGET_ICON: Record<string, string> = { client_data_read: 'folder', money_stolen: 'money', operations_stopped: 'briefcase' }
 const STATUS_TEXT: Record<string, string> = { ok: 'w porządku', warn: 'do sprawdzenia', bad: 'otwarte', checking: 'kret sprawdza', pending: '…', idle: '' }
@@ -34,7 +34,7 @@ interface Props {
   compact?: boolean
 }
 
-export function cablePath(x: number, y: number) {
+function cablePath(x: number, y: number) {
   const endY = y - 36
   return `M${HUB.x} ${HUB.y + 10} C ${HUB.x} ${HUB.y + 70}, ${x} ${Math.min(endY - 70, HUB.y + 120)}, ${x} ${endY}`
 }
@@ -54,7 +54,7 @@ function smooth(points: { x: number; y: number }[]) {
   return d
 }
 
-export function tunnelPath(org: Org, t: Tunnel) {
+function tunnelPath(org: Org, t: Tunnel) {
   const ch = Object.fromEntries(org.chambers.map((c) => [c.id, c]))
   const tg = org.targets.find((x) => x.id === t.target)!
   const first = ch[t.chambers[0]]
@@ -72,7 +72,6 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
   const [moleVisible, setMoleVisible] = useState(true)
   const moleRef = useRef<SVGGElement>(null)
   const pathRefs = useRef<Record<string, SVGPathElement | null>>({})
-  const runRef = useRef(0)
 
   useEffect(() => {
     placeMole(HUB.x, HUB.y)
@@ -108,8 +107,8 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
   // Dig animation.
   useEffect(() => {
     if (!run || !digToken) return
-    const my = ++runRef.current
-    const alive = () => runRef.current === my
+    let cancelled = false
+    const alive = () => !cancelled
     const speed = fast ? 0.35 : 1
     ;(async () => {
       setShown(0)
@@ -145,7 +144,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
       onEvent?.({ kind: 'done', text: run.summary, level: 'info' })
     })()
     return () => {
-      runRef.current++
+      cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [digToken])
