@@ -1,4 +1,4 @@
-# cyberKret
+![cyberKret: Lepiej, żeby pierwszy był Twój kret.](docs/banner.png)
 
 cyberKret is a local security assistant for small firms without an IT department. It maps the firm, finds the paths an attacker would take from the internet to client data, money or a stopped business ("tunnels"), and picks the changes that close the most of them. When something happens, it walks the team through the incident. Everything runs on one computer and the language model is local, so the firm's data never leaves it.
 
