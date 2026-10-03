@@ -1,0 +1,78 @@
+{
+  "id": "saldo",
+  "name": "Biuro Rachunkowe Saldo",
+  "domain": "saldo.example",
+  "mailbox": "biuro@saldo.example",
+  "description": "Sześć osób, 40 małych firm-klientów. Pełna księgowość, kadry i płace, rozliczenia VAT.",
+  "today_note": "Dziś termin wysyłki JPK dla 12 klientów.",
+  "continuity_ok": "Terminy klientów dotrzymane, a klienci wiedzą, gdzie płacić.",
+  "sample_message": "Od: Biuro Rachunkowe Saldo <biuro@saldo.example>\nOdpowiedz do: saldo.biuro@poczta-szybka.example\nTemat: Pilne: nowy rachunek do płatności VAT\n\nDzień dobry,\nw związku z wdrożeniem KSeF zmienił się rachunek do płatności podatku VAT za wrzesień.\nProsimy o wpłatę 4 870,00 zł do końca dnia na rachunek:\nPL12 3456 7890 1234 5678 9012 3456\nProsimy nie dzwonić, biuro jest dziś zamknięte z powodu szkolenia.\nPozdrawiamy, Biuro Rachunkowe Saldo",
+  "services": [
+    {"id": "domain", "name": "Domena saldo.example", "description": "Adres, którym biuro podpisuje maile i stronę.", "layer": "surface", "icon": "globe"},
+    {"id": "email", "name": "Skrzynka biuro@", "description": "Wspólna skrzynka sekretariatu i właścicielki w Microsoft 365.", "layer": "surface", "icon": "mail"},
+    {"id": "accounting_software", "name": "Program księgowy", "description": "Program w chmurze. Stąd idą JPK i deklaracje klientów.", "layer": "surface", "icon": "calculator"},
+    {"id": "client_drive", "name": "Dysk z dokumentami", "description": "Faktury, wyciągi i listy płac klientów na dysku konta biuro@.", "layer": "surface", "icon": "folder"},
+    {"id": "ksef_sheet", "name": "Dostępy do KSeF", "description": "Arkusz z danymi dostępowymi do KSeF klientów.", "layer": "surface", "icon": "key"},
+    {"id": "payment_notices", "name": "Informacje o płatnościach", "description": "Co miesiąc biuro wysyła klientom kwoty podatków do zapłaty.", "layer": "surface", "icon": "coins"},
+    {"id": "website", "name": "Strona statusowa", "description": "Przygotowana strona na komunikaty dla klientów. Na razie nieopublikowana.", "layer": "fallback", "icon": "broadcast"},
+    {"id": "phone", "name": "Telefon biura", "description": "Telefon stacjonarny i komórka właścicielki.", "layer": "fallback", "icon": "phone"},
+    {"id": "client_phone_list", "name": "Lista telefonów klientów", "description": "Wydruk z programu księgowego, aktualizowany co miesiąc.", "layer": "fallback", "icon": "list"}
+  ],
+  "dependencies": [
+    {"source": "domain", "target": "email", "label": "zaufanie do nadawcy", "kind": "depends"},
+    {"source": "email", "target": "accounting_software", "label": "odzyskiwanie hasła administratora", "kind": "depends"},
+    {"source": "email", "target": "client_drive", "label": "dysk tego samego konta", "kind": "depends"},
+    {"source": "client_drive", "target": "ksef_sheet", "label": "arkusz leży na dysku", "kind": "depends"},
+    {"source": "email", "target": "payment_notices", "label": "wysyłka kwot do zapłaty", "kind": "depends"},
+    {"source": "phone", "target": "payment_notices", "label": "kwoty przekazane telefonicznie", "kind": "fallback"},
+    {"source": "website", "target": "payment_notices", "label": "jeden komunikat dla wszystkich klientów", "kind": "fallback"},
+    {"source": "client_phone_list", "target": "phone", "label": "numery klientów bez dostępu do poczty", "kind": "fallback"}
+  ],
+  "safeguards": [
+    {"id": "email_mfa", "service": "email", "label": "Logowanie do biuro@ wymaga drugiego kroku (MFA)", "fix": "Włącz MFA na skrzynce biuro@", "why": "Bez drugiego kroku jeden udany phishing wystarczy, żeby przejąć skrzynkę.", "state": "missing", "source": "answers", "effort_minutes": 30},
+    {"id": "email_unique_password", "service": "email", "label": "Każda osoba loguje się na własne konto", "fix": "Daj każdej osobie własne konto zamiast wspólnego hasła", "why": "Hasło znają trzy osoby. Nikt nie wie, gdzie jeszcze je wpisały.", "state": "missing", "source": "answers", "effort_minutes": 60},
+    {"id": "email_recovery_current", "service": "email", "label": "Numer do odzyskiwania konta jest aktualny", "fix": "Zaktualizuj numer do odzyskiwania konta", "why": "Stary numer pozwala zresetować hasło komuś spoza biura.", "state": "present", "source": "answers", "effort_minutes": 10},
+    {"id": "domain_spf", "service": "domain", "label": "Domena ma rekord SPF", "fix": "Dodaj rekord SPF", "why": "SPF mówi skrzynkom odbiorców, które serwery mogą wysyłać pocztę biura.", "state": "present", "source": "kret", "effort_minutes": 30},
+    {"id": "domain_dmarc", "service": "domain", "label": "Domena ma DMARC z polityką quarantine lub reject", "fix": "Dodaj rekord DMARC dla domeny biura", "why": "Bez DMARC skrzynki klientów przyjmują maile podpisane adresem biura, nawet gdy wysłał je ktoś obcy.", "state": "missing", "source": "kret", "effort_minutes": 60},
+    {"id": "domain_dkim", "service": "domain", "label": "Poczta biura jest podpisana DKIM", "fix": "Włącz podpis DKIM u dostawcy poczty", "why": "DKIM pozwala sprawdzić, że mail naprawdę wyszedł z serwerów biura.", "state": "unknown", "source": "kret", "effort_minutes": 30},
+    {"id": "software_admin_mfa", "service": "accounting_software", "label": "Administrator programu księgowego ma MFA i nie odzyskuje hasła przez biuro@", "fix": "Włącz MFA dla administratora programu księgowego", "why": "Kto ma skrzynkę biuro@, może zresetować hasło do programu w dniu terminu.", "state": "unknown", "source": "answers", "effort_minutes": 20},
+    {"id": "client_folder_private", "service": "client_drive", "label": "Folder klientów nie jest udostępniony linkiem", "fix": "Wyłącz udostępnianie folderu „Klienci 2026” linkiem", "why": "Każdy, kto zna link, widzi faktury i listy płac 40 firm.", "state": "missing", "source": "answers", "effort_minutes": 15},
+    {"id": "ksef_credentials_vault", "service": "ksef_sheet", "label": "Dostępy do KSeF są w menedżerze haseł, nie w arkuszu", "fix": "Przenieś dostępy do KSeF z arkusza do menedżera haseł", "why": "Arkusz leży na dysku biuro@. Kto ma skrzynkę, ma też faktury klientów.", "state": "missing", "source": "answers", "effort_minutes": 60},
+    {"id": "payments_fixed_accounts", "service": "payment_notices", "label": "Klienci znają zasadę: numer rachunku nigdy nie zmienia się mailem", "fix": "Ogłoś klientom: numer rachunku nigdy nie zmienia się mailem", "why": "Klient, który zna tę zasadę, nie zapłaci na nowy rachunek z maila. Podatek i tak płaci na swój mikrorachunek.", "state": "missing", "source": "answers", "effort_minutes": 15}
+  ],
+  "people": [
+    {"id": "owner", "name": "Ewa", "role": "Właścicielka"},
+    {"id": "vat", "name": "Joanna", "role": "Księgowa VAT i KSeF"},
+    {"id": "payroll", "name": "Marek", "role": "Kadry i płace"},
+    {"id": "books", "name": "Kasia", "role": "Pełna księgowość"},
+    {"id": "office", "name": "Ola", "role": "Sekretariat"},
+    {"id": "it", "name": "Piotr", "role": "Informatyk zewnętrzny"}
+  ],
+  "channels": [
+    {"id": "phone", "name": "Telefon biura", "description": "Stacjonarny +48 12 000 00 00 i komórka właścicielki.", "service": "phone"},
+    {"id": "status_page", "name": "Strona statusowa", "description": "Gotowa do publikacji w 5 minut.", "service": "website"},
+    {"id": "phone_list", "name": "Wydrukowana lista telefonów", "description": "Leży w szafie sekretariatu, aktualna na 1 października.", "service": "client_phone_list"},
+    {"id": "portal", "name": "Portal programu księgowego", "description": "Klienci mogą tam wgrywać dokumenty bez maila.", "service": null}
+  ],
+  "templates": [
+    {"id": "status_page", "title": "Komunikat na stronę statusową", "text": "Uwaga: nasi klienci dostają fałszywe wiadomości, które wyglądają jak maile z naszego biura i podają nowy numer rachunku. Nie zmieniamy numerów rachunków mailem. Podatki płacisz zawsze na swój mikrorachunek podatkowy, który sprawdzisz w generatorze na podatki.gov.pl. W razie wątpliwości zadzwoń: +48 12 000 00 00."},
+    {"id": "phone_script", "title": "Rozmowa z klientem", "text": "Dzień dobry, dzwonię z Biura Rachunkowego Saldo. Ktoś rozsyła fałszywe maile podpisane naszym adresem, z nowym numerem rachunku. Nic się nie zmieniło: podatek płaci Pan lub Pani jak zawsze na swój mikrorachunek. Czy dostał Pan lub Pani taką wiadomość i czy była już wpłata?"},
+    {"id": "sms", "title": "Krótka wiadomość SMS", "text": "Biuro Rachunkowe Saldo: uwaga na fałszywe maile z nowym numerem rachunku. Nie zmienialiśmy rachunków. Podatek płać na swój mikrorachunek. Pytania: 12 000 00 00."}
+  ],
+  "activities": [
+    {"id": "jpk", "name": "Wysyłka JPK i deklaracji", "note": "Dziś termin dla 12 klientów.", "critical": true, "depends_on": ["accounting_software"], "normally": "Program księgowy", "fallback": null, "confirmations": [
+      {"id": "jpk_software_ok", "label": "Program księgowy działa i nikt obcy się do niego nie logował"},
+      {"id": "jpk_sent", "label": "JPK wysłane dla 12 z 12 klientów"}
+    ]},
+    {"id": "payments_info", "name": "Informacje o płatnościach", "note": "Klienci z dzisiejszym terminem muszą znać kwoty.", "critical": true, "depends_on": ["payment_notices"], "normally": "E-mail z biuro@", "fallback": "Telefon i strona statusowa", "confirmations": [
+      {"id": "payments_phone", "label": "Klienci z dzisiejszym terminem dostali kwoty telefonicznie"},
+      {"id": "payments_notice", "label": "Komunikat o stałym rachunku jest na stronie statusowej"}
+    ]},
+    {"id": "contact", "name": "Kontakt z klientami", "note": "Klienci będą dzwonić z pytaniami o wiadomość.", "critical": true, "depends_on": ["email"], "normally": "E-mail", "fallback": "Telefon biura", "confirmations": [
+      {"id": "contact_duty", "label": "Ustalony dyżur telefoniczny do 18:00"}
+    ]},
+    {"id": "documents", "name": "Przyjmowanie dokumentów", "note": "Może poczekać do jutra.", "critical": false, "depends_on": ["email"], "normally": "E-mail", "fallback": "Portal programu księgowego albo osobiście", "confirmations": [
+      {"id": "documents_channel", "label": "Klienci wiedzą, jak przekazać dokumenty bez maila"}
+    ]}
+  ]
+}

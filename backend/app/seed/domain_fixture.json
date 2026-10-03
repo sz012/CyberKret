@@ -1,0 +1,16 @@
+{
+  "domain": "saldo.example",
+  "checked_at": "",
+  "demo": true,
+  "mail_provider": "Microsoft 365",
+  "findings": [
+    {"id": "mx", "label": "Serwer poczty", "status": "info", "detail": "Pocztę obsługuje Microsoft 365."},
+    {"id": "spf", "label": "SPF", "status": "ok", "detail": "Rekord SPF wskazuje serwery Microsoft 365 i kończy się na -all."},
+    {"id": "dmarc", "label": "DMARC", "status": "bad", "detail": "Brak rekordu DMARC. Każdy może wysłać maila podpisanego adresem z tej domeny, a skrzynki odbiorców nie mają podstaw, żeby go odrzucić."},
+    {"id": "dkim", "label": "DKIM", "status": "unknown", "detail": "Nie znalazłem podpisu DKIM w typowych miejscach. To nie znaczy, że go nie ma."},
+    {"id": "https", "label": "HTTPS", "status": "ok", "detail": "Strona przekierowuje na HTTPS."},
+    {"id": "hsts", "label": "HSTS", "status": "warn", "detail": "Strona nie wymusza HTTPS nagłówkiem HSTS."},
+    {"id": "tls", "label": "Certyfikat", "status": "ok", "detail": "Certyfikat ważny jeszcze 64 dni."},
+    {"id": "generator", "label": "Wersja oprogramowania", "status": "warn", "detail": "Strona pokazuje wersję oprogramowania: WordPress 6.4. Ułatwia to dobranie znanego błędu."}
+  ]
+}
