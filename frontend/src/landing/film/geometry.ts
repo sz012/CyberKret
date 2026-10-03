@@ -131,19 +131,31 @@ export function mixBox(a: Box, b: Box, k: number): Box {
   return [mix(a[0], b[0], k), mix(a[1], b[1], k), mix(a[2], b[2], k), mix(a[3], b[3], k)]
 }
 
-export const RIG_FEET = P(108, 188)
-export const RIG_BODY = P(118, 128)
-export const RIG_LAMP = P(158, 55)
-export const RIG_NECK = P(128, 118)
-
-export function rotateAround(p: Pt, c: Pt, degrees: number): Pt {
-  const r = (degrees * Math.PI) / 180
-  const dx = p.x - c.x
-  const dy = p.y - c.y
-  return { x: c.x + dx * Math.cos(r) - dy * Math.sin(r), y: c.y + dx * Math.sin(r) + dy * Math.cos(r) }
-}
-
 export const toward = (p: Pt, degrees: number, length: number): Pt => ({
   x: p.x + Math.cos((degrees * Math.PI) / 180) * length,
   y: p.y + Math.sin((degrees * Math.PI) / 180) * length,
 })
+
+function channels(hex: string): number[] {
+  const v = parseInt(hex.slice(1), 16)
+  return [(v >> 16) & 255, (v >> 8) & 255, v & 255]
+}
+
+export function mixHex(a: string, b: string, k: number): string {
+  const x = channels(a)
+  const y = channels(b)
+  const c = x.map((v, i) => Math.round(mix(v, y[i], clamp(k))))
+  return `#${c.map((v) => v.toString(16).padStart(2, '0')).join('')}`
+}
+
+export function invert(fn: (t: number) => number, target: number, from: number, to: number): number {
+  let lo = from
+  let hi = to
+  const rising = fn(to) > fn(from)
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2
+    if (fn(mid) < target === rising) lo = mid
+    else hi = mid
+  }
+  return (lo + hi) / 2
+}

@@ -117,7 +117,7 @@ def check(domain: str) -> dict:
         else:
             add("cert", "ok" if days > 14 else "warn", "Certyfikat HTTPS", f"Ważny jeszcze {days} dni.")
         try:
-            with httpx.Client(timeout=TIMEOUT, follow_redirects=False, headers={"User-Agent": "CyberKret/0.1 (passive check)"}) as cli:
+            with httpx.Client(timeout=TIMEOUT, follow_redirects=False, headers={"User-Agent": "cyberKret/0.1 (passive check)"}) as cli:
                 r = cli.get(f"http://{d}/")
                 loc = r.headers.get("location", "")
                 add("https_redirect", "ok" if loc.startswith("https://") else "warn", "Przekierowanie na HTTPS",

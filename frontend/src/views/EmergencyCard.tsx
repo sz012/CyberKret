@@ -39,9 +39,9 @@ export default function EmergencyCard() {
       <article className="ecard">
         <header className="ecard-head">
           <div className="row gap-sm">
-            <BrandMark size={44} />
+            <BrandMark size={44} paper />
             <div>
-              <b>Karta awaryjna CyberKreta</b>
+              <b>Karta awaryjna cyberKreta</b>
               <small>{card.org}</small>
             </div>
           </div>

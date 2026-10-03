@@ -194,7 +194,7 @@ export default function IncidentView() {
             <div className="meter"><i style={{ width: h.level === 'likely' ? '85%' : h.level === 'possible' ? '50%' : '12%' }} /></div>
             <p className="muted small">{h.explain}</p>
             {h.because.length > 0 && <p className="small">Bo: {h.because.join('; ')}.</p>}
-            {h.kret_warned && <p className="warned"><Mascot size={34} pose="report" badge={false} cable={false} /> {h.kret_warned}</p>}
+            {h.kret_warned && <p className="warned"><Mascot size={34} pose="report" /> {h.kret_warned}</p>}
           </div>
         ))}
       </section>

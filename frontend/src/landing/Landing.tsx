@@ -1,20 +1,20 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { BrandMark } from '../components/BrandMark'
+import { BrandMark, Wordmark } from '../components/BrandMark'
 import KretFilm from './film/KretFilm'
 import './landing.css'
 
 export default function Landing() {
   useEffect(() => {
-    document.title = 'CyberKret · Lepiej, żeby pierwszy był Twój kret'
+    document.title = 'cyberKret · Lepiej, żeby pierwszy był Twój kret'
   }, [])
 
   return (
     <div className="landing">
-      <nav className="lnav" aria-label="CyberKret">
-        <Link to="/" className="brand">
-          <BrandMark size={40} />
-          <b>CyberKret</b>
+      <nav className="lnav" aria-label="cyberKret">
+        <Link to="/" className="brand" aria-label="cyberKret, strona główna">
+          <BrandMark size={34} />
+          <Wordmark />
         </Link>
         <Link className="lnav-app" to="/app">Otwórz aplikację</Link>
       </nav>

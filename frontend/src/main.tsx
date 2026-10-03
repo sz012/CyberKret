@@ -1,6 +1,5 @@
-import '@fontsource-variable/source-serif-4/opsz.css'
-import '@fontsource-variable/source-serif-4/opsz-italic.css'
-import '@fontsource-variable/public-sans'
+import '@fontsource-variable/mona-sans/wdth.css'
+import '@fontsource-variable/mona-sans/wdth-italic.css'
 import '@fontsource-variable/jetbrains-mono'
 import './styles/tokens.css'
 import './styles/app.css'

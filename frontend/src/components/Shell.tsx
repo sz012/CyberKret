@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Health } from '../api/types'
-import { BrandMark } from './BrandMark'
+import { BrandMark, Wordmark } from './BrandMark'
 import { Icon } from './icons'
 
 export function useHealth() {
@@ -47,10 +47,10 @@ export default function Shell() {
   return (
     <div className="shell">
       <header className="topbar">
-        <Link to="/app" className="brand" aria-label="CyberKret, pulpit">
+        <Link to="/app" className="brand" aria-label="cyberKret, pulpit">
           <BrandMark />
           <span>
-            <b>CyberKret</b>
+            <Wordmark />
             <small>Kancelaria Nowak</small>
           </span>
         </Link>

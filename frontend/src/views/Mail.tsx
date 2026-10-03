@@ -182,7 +182,7 @@ export default function Mail() {
 
               {isScanning && (
                 <div className="scan-box">
-                  <Mascot size={110} pose="check" beam badge={false} />
+                  <Mascot size={110} pose="check" />
                   <ol>
                     {SCAN_STEPS.map((s, i) => (
                       <li key={s} className={i < step ? 'done' : i === step ? 'now' : ''}>{i < step ? '✓' : i === step ? '›' : '·'} {s}</li>
@@ -225,7 +225,7 @@ function Verdict({ a, onReport }: { a: Analysis; onReport: () => void }) {
   return (
     <div className={`verdict v-${a.level}`}>
       <div className="verdict-top">
-        <Mascot size={92} pose={a.level === 'ok' ? 'happy' : 'alarm'} badge={false} cable={false} />
+        <Mascot size={92} pose={a.level === 'ok' ? 'happy' : 'alarm'} />
         <div>
           <span className={`pill ${a.level}`}><span className="dot" />{a.label}</span>
           <h3>{a.level === 'bad' ? `Stop. Kret znalazł ${signals.length} ${plural(signals.length, 'sygnał', 'sygnały', 'sygnałów')} oszustwa.` : a.level === 'warn' ? 'Uwaga, coś tu nie gra.' : 'Wygląda w porządku.'}</h3>

@@ -110,7 +110,7 @@ export default function Tunnels() {
 
       {prev && run && !digging && prev.tunnels.length !== run.tunnels.length && (
         <div className={`compare card ${run.tunnels.length < prev.tunnels.length ? 'better' : 'worse'}`}>
-          <Mascot size={70} pose={run.tunnels.length < prev.tunnels.length ? 'happy' : 'alarm'} badge={false} cable={false} />
+          <Mascot size={70} pose={run.tunnels.length < prev.tunnels.length ? 'happy' : 'alarm'} />
           <div>
             <b>Przed: {prev.tunnels.length} {plural(prev.tunnels.length, 'tunel', 'tunele', 'tuneli')} → teraz: {run.tunnels.length}.</b>
             <p className="muted">
@@ -223,7 +223,7 @@ export default function Tunnels() {
           </div>
           {sel && (
             <div className="narration card card-pad">
-              <Mascot size={90} pose="check" beam badge={false} />
+              <Mascot size={90} pose="check" />
               <div>
                 <span className="eyebrow">Tak wszedłby atakujący · tunel {sel.n}</span>
                 {sel.steps.map((s, i) => (

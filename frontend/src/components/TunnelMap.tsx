@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { KretRun, Level, Org, Tunnel } from '../api/types'
 import { IconG } from './icons'
-import { MoleGlyph } from './Mascot'
 
 /*
  * Cross-section of the office. Above the raised floor: desks, a rack and the internet uplink.
@@ -86,24 +85,20 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
     setShown(run.tunnels.length)
   }, [run, digToken])
 
-  const placeMole = (x: number, y: number, dir?: number) => {
-    const s = 0.27
-    const flip = dir !== undefined && dir < 0 ? -1 : 1
-    moleRef.current?.setAttribute('transform', `translate(${x} ${y}) scale(${s * flip} ${s}) translate(-118 -122)`)
+  const placeMole = (x: number, y: number) => {
+    moleRef.current?.setAttribute('transform', `translate(${x} ${y})`)
   }
 
   const travel = (path: SVGPathElement, ms: number, reverse = false) =>
     new Promise<void>((resolve) => {
       const L = path.getTotalLength()
       let t0: number | null = null
-      let prev: DOMPoint | null = null
       const step = (now: number) => {
         if (t0 === null) t0 = now
         const k = Math.min(1, (now - t0) / ms)
         const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2
         const p = path.getPointAtLength((reverse ? 1 - e : e) * L)
-        placeMole(p.x, p.y, prev ? p.x - prev.x : undefined)
-        prev = p
+        placeMole(p.x, p.y)
         if (k < 1) requestAnimationFrame(step)
         else resolve()
       }
@@ -305,18 +300,18 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
             <text y="54" textAnchor="middle" className="chamber-name">{c.label}</text>
             <text y="71" textAnchor="middle" className="chamber-st">{untrusted ? 'niezaufane' : STATUS_TEXT[st]}</text>
             {fixedChambers.has(c.id) && st !== 'pending' && st !== 'checking' && (
-              <g transform="translate(0 -44)">
-                <rect x="-34" y="-10" width="68" height="20" rx="10" fill="var(--ok)" />
-                <text y="3.5" textAnchor="middle" className="tm-zip">zasypane</text>
-              </g>
+              <text y="-44" textAnchor="middle" className="tm-zip">zasypane</text>
             )}
           </g>
         )
       })}
 
       {/* mole */}
-      <g ref={moleRef} className="tm-mole" style={{ opacity: moleVisible ? 1 : 0 }}>
-        <MoleGlyph pose={digging ? 'dig' : 'check'} beam badge={false} cable={false} />
+      <g ref={moleRef} className={`tm-kret ${digging ? 'digging' : ''}`} style={{ opacity: moleVisible ? 1 : 0 }}>
+        <circle r="24" className="tm-kret-glow" />
+        <circle r="11" className="tm-kret-ring" />
+        <circle r="6" className="tm-kret-core" />
+        <circle cx="-1.6" cy="-1.6" r="2.2" fill="#fff8e6" />
       </g>
     </svg>
   )

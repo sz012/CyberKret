@@ -44,7 +44,7 @@ p { margin: 0; }
 .ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); } .lamp { color: var(--lamp); } .net { color: var(--net); }
 .pill.solid-bad { color: var(--bad); font-weight: 700; }
 
-.src { font: italic 400 13px/1.3 var(--display); color: var(--muted); white-space: nowrap; }
+.src { font: 500 12px/1.3 var(--mono); color: var(--muted); white-space: nowrap; }
 .src.kret { color: var(--lamp); }
 .src.model { color: var(--net); }
 .src.unverified { color: var(--warn); }
@@ -60,20 +60,29 @@ p { margin: 0; }
 .card-head h3 { font: 600 17px/1.2 var(--display); color: var(--fg); }
 .eyebrow { font: 500 14px/1.3 var(--body); color: var(--muted); }
 
-/* ---------- mascot animation ---------- */
-.mascot .mole-body, .mascot .mole-paw-near, .mascot .mole-wave { transform-box: fill-box; }
-.mole-idle .mole-body, .mole-check .mole-body, .mole-report .mole-body { animation: mole-bob 2.6s ease-in-out infinite; }
-.mole-dig .mole-paw-near { transform-origin: 140px 130px; animation: mole-dig .28s ease-in-out infinite alternate; }
-.mole-dig .mole-paw-far { transform-origin: 140px 150px; animation: mole-dig .28s ease-in-out infinite alternate-reverse; }
-.mole-dig .mole-body { animation: mole-shake .28s ease-in-out infinite alternate; }
-.mole-happy .mole-wave { transform-origin: 150px 130px; animation: mole-wave .9s ease-in-out infinite alternate; }
-.mole-alarm .mole-body { animation: mole-shake .12s linear infinite alternate; }
-.mole-beam { animation: beam-flicker 3.4s infinite; }
-@keyframes mole-bob { 50% { transform: translateY(-3px); } }
-@keyframes mole-dig { from { transform: rotate(-14deg); } to { transform: rotate(16deg); } }
-@keyframes mole-shake { from { transform: translateX(-1.5px); } to { transform: translateX(1.5px); } }
-@keyframes mole-wave { from { transform: rotate(-8deg); } to { transform: rotate(10deg); } }
-@keyframes beam-flicker { 0%, 100% { opacity: .7; } 48% { opacity: .78; } 50% { opacity: .45; } 52% { opacity: .8; } }
+/* ---------- kret ---------- */
+.kret { flex: none; overflow: visible; color: var(--lamp); }
+.kret-happy { color: var(--ok); }
+.kret-alarm { color: var(--bad); }
+.kret-k path { fill: none; stroke: var(--fg-2); stroke-width: 8; stroke-linecap: round; transition: stroke .4s; }
+.kret-lamp { fill: currentColor; }
+.kret-spark { fill: #fff8e6; opacity: .85; }
+.kret-halo { opacity: .7; transform-box: fill-box; transform-origin: center; }
+.kret-idle .kret-halo, .kret-report .kret-halo, .kret-happy .kret-halo { animation: kret-breathe 3.2s ease-in-out infinite; }
+.kret-alarm .kret-halo { animation: kret-breathe 1.1s ease-in-out infinite; }
+.kret-dig .kret-k path { stroke: var(--line-2); }
+.kret-flow { fill: none; stroke: var(--lamp); stroke-width: 3.2; stroke-linecap: round; stroke-dasharray: 2.5 6.5; animation: kret-flow .6s linear infinite; }
+.kret-dig .kret-halo { animation: kret-breathe .9s ease-in-out infinite; }
+.kret-ripples circle {
+  fill: none; stroke: currentColor; stroke-width: 1.6; opacity: 0; vector-effect: non-scaling-stroke;
+  transform-box: fill-box; transform-origin: center; animation: kret-ripple 2.2s ease-out infinite;
+}
+.kret-ripples circle:nth-child(2) { animation-delay: 1.1s; }
+.kret-alarm .kret-ripples circle { animation-duration: 1.4s; }
+.kret-alarm .kret-ripples circle:nth-child(2) { animation-delay: .7s; }
+@keyframes kret-breathe { 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes kret-flow { to { stroke-dashoffset: -9; } }
+@keyframes kret-ripple { from { opacity: .75; transform: scale(.75); } to { opacity: 0; transform: scale(2.7); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -120,7 +129,7 @@ p { margin: 0; }
 .chamber.untrusted .chamber-box { stroke: var(--bad); stroke-dasharray: 6 5; }
 .chamber.untrusted .chamber-st { fill: var(--bad); }
 @keyframes chamber-pulse { to { stroke-width: 6; } }
-.tm-zip { font: 700 10.5px/1 var(--body); fill: #05230f; }
+.tm-zip { font: 600 12.5px/1 var(--body); fill: var(--ok); }
 
 .tm-target rect { fill: var(--panel); stroke: var(--line-2); stroke-width: 1.5; transition: all .4s; }
 .tm-target.hit rect { stroke: var(--bad); fill: #2a1514; }
@@ -139,7 +148,11 @@ p { margin: 0; }
 .tunnel.sel .tunnel-glow { opacity: .7; stroke-width: 16; }
 .tunnel { transition: opacity .3s; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
-.tm-mole { transition: opacity .3s; pointer-events: none; }
+.tm-kret { transition: opacity .3s; pointer-events: none; }
+.tm-kret-glow { fill: var(--lamp); opacity: .16; transform-box: fill-box; transform-origin: center; }
+.tm-kret-ring { fill: none; stroke: var(--lamp); stroke-width: 1.5; opacity: .65; }
+.tm-kret-core { fill: var(--lamp); }
+.tm-kret.digging .tm-kret-glow { animation: kret-breathe .6s ease-in-out infinite; }
 
 /* ---------- helpers ---------- */
 .row { display: flex; align-items: center; }
@@ -169,10 +182,11 @@ p { margin: 0; }
   background: rgba(17, 19, 23, .88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
 }
 .brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-.brand b { display: block; font: 600 19px/1 var(--display); }
+.wordmark { display: block; font: 640 20px/1 var(--display); letter-spacing: -0.02em; white-space: nowrap; }
+.wordmark span { font-weight: 360; color: var(--fg-2); }
 .brand small { display: block; font: 500 11.5px/1.3 var(--mono); color: var(--muted); }
 .mainnav { display: flex; gap: 4px; }
-.mainnav a { padding: 8px 14px; border-radius: var(--r-sm); text-decoration: none; color: var(--fg-2); font-weight: 500; font-size: 15px; }
+.mainnav a { white-space: nowrap; padding: 8px 14px; border-radius: var(--r-sm); text-decoration: none; color: var(--fg-2); font-weight: 500; font-size: 15px; }
 .mainnav a:hover { background: var(--panel-2); }
 .mainnav a.active { background: var(--panel-3); color: var(--fg); box-shadow: inset 0 -2px 0 var(--lamp); }
 .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
