@@ -1,0 +1,31 @@
+From: ExpresPak <powiadomienia@expres-pak-dostawy.example>
+To: g.kowalska@kancelaria-nowak.example
+Subject: Twoja paczka czeka - wymagana =?utf-8?q?dop=C5=82ata_1=2C99_z=C5=82?=
+Date: Sat, 03 Oct 2026 12:00:00 +0200
+Message-ID: <p0c2@expres-pak-dostawy.example>
+Authentication-Results: mx.kancelaria-nowak.example; spf=softfail
+ smtp.mailfrom=expres-pak-dostawy.example; dkim=none; dmarc=none
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+ boundary="===============2047710142284852612=="
+
+--===============2047710142284852612==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Paczka nie mog=C5=82a zosta=C4=87 dor=C4=99czona. Dop=C5=82a=C4=87 1,99 z=C5=
+=82 w ci=C4=85gu 24 godzin: https://expres-pak.example/sledzenie
+
+--===============2047710142284852612==
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+<html><body><p>Paczka nie mog=C5=82a zosta=C4=87 dor=C4=99czona z powodu brak=
+uj=C4=85cej op=C5=82aty.</p>
+<p>Dop=C5=82a=C4=87 <b>1,99 z=C5=82 w ci=C4=85gu 24 godzin</b>, inaczej paczk=
+a wr=C3=B3ci do nadawcy:</p>
+<p><a href=3D"http://expres-pak-oplata.example/pay?id=3D8812">https://expres-=
+pak.example/sledzenie</a></p></body></html>
+
+--===============2047710142284852612==--

@@ -1,0 +1,41 @@
+/* CyberKret tokens. Graphite raised floor, one warm accent: the mole's headlamp. */
+:root {
+  color-scheme: dark;
+  --bg: #111317;
+  --bg-2: #15181d;
+  --panel: #1a1d23;
+  --panel-2: #20242c;
+  --panel-3: #282d37;
+  --line: #2f3542;
+  --line-2: #3c4352;
+  --fg: #eef0f3;
+  --fg-2: #c9ced8;
+  --muted: #8e97a8;
+
+  --lamp: #ffd479;
+  --lamp-2: #ffe7ad;
+  --lamp-ink: #2a1d05;
+
+  --cable: #3a414f;
+  --cable-sheath: #232831;
+  --copper: #d89a5b;
+  --net: #6ea8ff;
+
+  --ok: #5fd08a;
+  --warn: #f2c14e;
+  --bad: #ff6159;
+
+  --mole: #4a4340;
+  --mole-2: #5e5552;
+  --mole-belly: #6f6561;
+  --snout: #f4a0ad;
+
+  --display: 'Bricolage Grotesque', 'Avenir Next', system-ui, sans-serif;
+  --body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --r-sm: 8px;
+  --r: 12px;
+  --r-lg: 18px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
