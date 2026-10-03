@@ -4,7 +4,7 @@
 
 CyberKret is a mole that a small organization lets into its own systems before a real attacker gets there. It shows the paths an attacker would take ("tunnels"), what to close first, and when something does happen, it walks the team through the incident so the most important work keeps going.
 
-Built for HackYeah 2026, task **Defence**. Target users: law firms, accounting offices, tax advisors, clinics, NGOs: 3–50 people, sensitive client data, no IT department.
+Built for HackYeah 2026, task **Defence**. Target users: law firms, accounting offices, tax advisors, clinics, NGOs: 3-50 people, sensitive client data, no IT department.
 
 Everything runs on one machine in the office. The language model is local (Qwen via Ollama), so client emails and scan results never leave the building: **0 bytes sent out**.
 
@@ -17,6 +17,8 @@ Everything runs on one machine in the office. The language model is local (Qwen 
 | **Incydent** (incident mode) | Five questions, then a plan: confirmed vs. unverified facts, two hypotheses (spoofing vs. mailbox takeover), "act now" steps that are safe whatever the cause, roles, continuity checks, ready-to-send messages, a 72 h GDPR (UODO) clock, and a log. The plan rebuilds after every new fact. Closing the incident proposes which tunnels to fill; the mole digs again and shows before/after. | Rules-based playbook engine with plan diffing and persistence in SQLite. |
 
 Rule that ties it together: **the mole always says how it knows** (`sprawdził kret` / `z Twoich odpowiedzi` / `niepotwierdzone`).
+
+Also included: a password strength check that runs only in the browser (zxcvbn with a Polish dictionary and the company's own words, nothing is sent anywhere), five incident phases (Zatrzymaj, Oceń, Zawiadom, Utrzymaj działanie, Wnioski) with progress from the plan, continuity and lessons, and a printable emergency card for the drawer at `/app/karta` (first steps, roles, fallback channels, verified vendor phone numbers).
 
 ## Run it
 
@@ -34,6 +36,15 @@ npm install
 npm run dev
 ```
 
+Without uv, a plain virtual environment works too:
+
+```bash
+cd backend
+python3 -m venv .venv
+.venv/bin/pip install fastapi "uvicorn[standard]" dnspython httpx pydantic pytest
+.venv/bin/uvicorn app.main:app --port 8000 --reload
+```
+
 Local model (optional, the app works without it in "rules and templates" mode):
 
 ```bash
@@ -48,11 +59,11 @@ Reset demo data: menu `⋯` → *Reset danych demo*, or `POST /api/demo/reset`.
 
 ## Demo script (≈3 min)
 
-1. `/` – intro animation: something moves in the office cables at night… it is your mole.
-2. `/app/tunele` – *Wpuść kreta*. Cables light up; 5 tunnels to client files, money and business continuity. First move: close RDP (15 min).
-3. `/app/poczta` – turn Wi‑Fi off. *Przyślij nowy mail (demo)*: fake Biurex invoice. The mole flags the lookalike domain, Reply-To, fake PDF with a bank login form. *Zgłoś incydent*.
-4. Incident – "Did anyone pay?" → *Nie wiem jeszcze*. Then the new fact *Tak, przelew wyszedł*: plan rebuilds (bank recall, police), log shows the diff.
-5. Continuity – tick the court-hearing and payments confirmations; only then *Kancelaria działa*.
+1. `/`: intro animation: something moves in the office cables at night… it is your mole.
+2. `/app/tunele`: *Wpuść kreta*. Cables light up; 5 tunnels to client files, money and business continuity. First move: close RDP (15 min).
+3. `/app/poczta`: turn Wi‑Fi off. *Przyślij nowy mail (demo)*: fake Biurex invoice. The mole flags the lookalike domain, Reply-To, fake PDF with a bank login form. *Zgłoś incydent*.
+4. Incident: "Did anyone pay?" → *Nie wiem jeszcze*. Then the new fact *Tak, przelew wyszedł*: plan rebuilds (bank recall, police), log shows the diff.
+5. Continuity: tick the court-hearing and payments confirmations; only then *Kancelaria działa*.
 6. Close incident → fill tunnels (callback rule, DMARC, MFA) → the mole digs again: before 5, after fewer.
 
 ## Architecture
@@ -65,13 +76,17 @@ backend/app
   kret/local_agent.py  read-only macOS checks with timeouts
   mail/analyze.py      .eml heuristics → verdict → local model explanation
   incident/playbook.py questions, actions with when(ctx) rules, continuity, messages
-  incident/engine.py   facts, hypotheses, plan, continuity, UODO clock
+  incident/engine.py   facts, hypotheses, plan, phases, continuity, UODO clock
+  incident/card.py     printable emergency card built from the org map and the playbook
   llm/ollama.py        localhost-only client, JSON mode, fallback on any error
   routers/             REST API (org, kret, mail, incidents, demo)
 frontend/src
   components/Mascot.tsx     original mole mascot (SVG, poses)
   components/TunnelMap.tsx  office cross-section, cables, mole animation, attack tunnels
-  views/                    Dashboard, Tunnels, Mail, Incidents, IncidentView
+  components/BrandMark.tsx  logo in the top-left corner
+  components/PasswordCheckCard.tsx  local password strength check (zxcvbn)
+  components/PhaseStrip.tsx five incident phases with progress
+  views/                    Dashboard, Tunnels, Mail, Incidents, IncidentView, EmergencyCard
   landing/                  marketing page with the plot-twist intro
 ```
 
@@ -86,7 +101,7 @@ Deliberately not done: port scans of other machines, login attempts, executing a
 ## Credits and AI disclosure
 
 - Mascot and all graphics: original, drawn in SVG for this project. Not based on any existing cartoon character.
-- Libraries: FastAPI, Uvicorn, Pydantic, dnspython, HTTPX, pytest, React, React Router, Vite, TypeScript, Fontsource (Bricolage Grotesque, IBM Plex Sans/Mono, SIL OFL).
+- Libraries: FastAPI, Uvicorn, Pydantic, dnspython, HTTPX, pytest, React, React Router, Vite, TypeScript, zxcvbn-ts (MIT), Fontsource (Bricolage Grotesque, IBM Plex Sans/Mono, SIL OFL).
 - Local model: Qwen (Alibaba Cloud, Apache 2.0) served by Ollama.
 - AI tools were used during development (concept, code, copy). The team reviewed and can explain every part.
 - Concept, plan and a first prototype were prepared before the hackathon start (3 Oct, 23:00). The submission notes separate that from the work done during the event.
