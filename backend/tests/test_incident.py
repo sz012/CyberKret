@@ -84,3 +84,27 @@ def test_demo_domain_uses_fixture(client):
 def test_domain_check_requires_consent_and_valid_name(client):
     assert client.post("/api/kret/domain-check", json={"domain": "x.example", "consent": False}).status_code == 400
     assert client.post("/api/kret/domain-check", json={"domain": "127.0.0.1", "consent": True}).status_code == 422
+
+
+def test_phases_follow_plan_continuity_and_lessons(client):
+    inc = new_incident(client)
+    iid = inc["id"]
+    phases = {p["id"]: p for p in inc["situation"]["phases"]}
+    assert [p["label"] for p in inc["situation"]["phases"]] == ["Zatrzymaj", "Oceń", "Zawiadom", "Utrzymaj działanie", "Wnioski"]
+    assert phases["stop"]["done"] == 0 and phases["stop"]["total"] >= 1
+    client.patch(f"/api/incidents/{iid}/actions/hold_payments", json={"status": "done"})
+    inc = client.patch(f"/api/incidents/{iid}/confirmations/court_doc", json={"done": True}).json()
+    phases = {p["id"]: p for p in inc["situation"]["phases"]}
+    assert phases["stop"]["done"] == 1
+    assert phases["continue"]["done"] == 1
+    assert phases["learn"] == {"id": "learn", "label": "Wnioski", "done": 0, "total": 3}
+
+
+def test_emergency_card_lists_safe_first_steps_and_channels(client):
+    card = client.get("/api/org/card").json()
+    assert card["org"] == "Kancelaria Nowak"
+    assert card["first_steps"][0]["title"] == "Wstrzymaj przelewy na nowe numery kont"
+    assert all(step["role"] for step in card["first_steps"])
+    assert {f["label"] for f in card["fallbacks"]} >= {"Telefon kancelarii", "Kopia akt offline"}
+    assert all(c["phone"] for c in card["contacts"])
+    assert any("UODO" in rule for rule in card["rules"])

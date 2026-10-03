@@ -30,6 +30,9 @@ QUESTIONS_BY_ID = {q["id"]: q for q in QUESTIONS}
 
 PRIORITY = {"now": "Teraz", "15min": "W 15 minut", "1h": "W ciągu godziny", "verify": "Do ustalenia"}
 
+PHASES = [("stop", "Zatrzymaj"), ("assess", "Oceń"), ("notify", "Zawiadom"), ("continue", "Utrzymaj działanie"),
+          ("learn", "Wnioski")]
+
 ROLES = {"grazyna": "Grażyna (księgowość)", "piotr": "Piotr (informatyk)", "anna": "Anna (sekretariat)",
          "nowak": "Jan Nowak (szef)", "all": "Wszyscy"}
 
@@ -40,61 +43,61 @@ def lvl(ctx, h):
 
 ACTIONS = [
     # Safe whatever the cause: they go to "Działaj teraz" even while facts are missing.
-    {"id": "hold_payments", "title": "Wstrzymaj przelewy na nowe numery kont",
+    {"id": "hold_payments", "phase": "stop", "title": "Wstrzymaj przelewy na nowe numery kont",
      "detail": "Żaden przelew na numer podany mailem nie wychodzi, dopóki ktoś nie potwierdzi go telefonicznie.",
      "role": "grazyna", "priority": "now", "safe_any_cause": True, "when": lambda c: True},
-    {"id": "call_vendor", "title": "Zadzwoń do kontrahenta na numer z umowy",
+    {"id": "call_vendor", "phase": "assess", "title": "Zadzwoń do kontrahenta na numer z umowy",
      "detail": "Nie na numer z maila. Zapytaj, czy naprawdę zmienili konto.",
      "role": "grazyna", "priority": "now", "safe_any_cause": True, "when": lambda c: True},
-    {"id": "keep_evidence", "title": "Nie kasuj maila, to dowód",
+    {"id": "keep_evidence", "phase": "assess", "title": "Nie kasuj maila, to dowód",
      "detail": "Kret zapisał kopię z nagłówkami. Przyda się bankowi, policji i CERT Polska.",
      "role": "all", "priority": "now", "safe_any_cause": True, "when": lambda c: True},
-    {"id": "untrusted_mail", "title": "Ważne sprawy tylko telefonicznie",
+    {"id": "untrusted_mail", "phase": "continue", "title": "Ważne sprawy tylko telefonicznie",
      "detail": "Do odwołania poczta jest niezaufana: potwierdzenia, terminy i płatności załatwiamy telefonem.",
      "role": "anna", "priority": "15min", "safe_any_cause": True, "when": lambda c: True},
 
     # Money already left.
-    {"id": "bank_recall", "title": "Dzwoń do banku: zatrzymanie przelewu",
+    {"id": "bank_recall", "phase": "stop", "title": "Dzwoń do banku: zatrzymanie przelewu",
      "detail": "Poproś o wstrzymanie lub zwrot przelewu (recall). Liczą się godziny. Podaj numer konta oszusta.",
      "role": "grazyna", "priority": "now", "safe_any_cause": False, "when": lambda c: c["a"].get("paid") == YES},
-    {"id": "police", "title": "Zgłoś oszustwo na policję",
+    {"id": "police", "phase": "notify", "title": "Zgłoś oszustwo na policję",
      "detail": "Weź wydruk maila z nagłówkami i potwierdzenie przelewu. Bank może o to poprosić.",
      "role": "nowak", "priority": "1h", "safe_any_cause": False, "when": lambda c: c["a"].get("paid") == YES},
-    {"id": "check_payments", "title": "Sprawdź w banku przelewy z ostatnich 7 dni",
+    {"id": "check_payments", "phase": "assess", "title": "Sprawdź w banku przelewy z ostatnich 7 dni",
      "detail": "Szukaj przelewów na numery, które pojawiły się pierwszy raz.",
      "role": "grazyna", "priority": "now", "safe_any_cause": True, "when": lambda c: c["a"].get("paid", UNKNOWN) == UNKNOWN},
 
     # Mailbox takeover.
-    {"id": "reset_password", "title": "Zmień hasło do poczty z innego urządzenia",
+    {"id": "reset_password", "phase": "stop", "title": "Zmień hasło do poczty z innego urządzenia",
      "detail": "Nie z komputera, na którym otwarto maila.",
      "role": "piotr", "priority": "now", "safe_any_cause": False, "when": lambda c: lvl(c, "takeover") != "unlikely"},
-    {"id": "signout", "title": "Wyloguj wszystkie sesje w Microsoft 365",
+    {"id": "signout", "phase": "stop", "title": "Wyloguj wszystkie sesje w Microsoft 365",
      "detail": "Panel administracyjny → Użytkownicy → Wyloguj ze wszystkich sesji.",
      "role": "piotr", "priority": "now", "safe_any_cause": False, "when": lambda c: lvl(c, "takeover") != "unlikely"},
-    {"id": "inbox_rules", "title": "Sprawdź reguły przekierowania w skrzynce",
+    {"id": "inbox_rules", "phase": "stop", "title": "Sprawdź reguły przekierowania w skrzynce",
      "detail": "Oszuści dodają regułę, która chowa odpowiedzi kontrahentów. Usuń nieznane reguły.",
      "role": "piotr", "priority": "15min", "safe_any_cause": False, "when": lambda c: lvl(c, "takeover") != "unlikely"},
-    {"id": "enable_mfa", "title": "Włącz MFA na koncie księgowości",
+    {"id": "enable_mfa", "phase": "stop", "title": "Włącz MFA na koncie księgowości",
      "detail": "Kret ostrzegał: to konto loguje się samym hasłem.",
      "role": "piotr", "priority": "15min", "safe_any_cause": False, "when": lambda c: lvl(c, "takeover") != "unlikely"},
 
     # Spoofing from outside.
-    {"id": "report_cert", "title": "Zgłoś fałszywą domenę do CERT Polska",
+    {"id": "report_cert", "phase": "notify", "title": "Zgłoś fałszywą domenę do CERT Polska",
      "detail": "incydent.cert.pl. CERT może zablokować domenę oszusta, zanim trafi do innych firm.",
      "role": "anna", "priority": "1h", "safe_any_cause": False, "when": lambda c: lvl(c, "spoof") != "unlikely"},
-    {"id": "add_dmarc", "title": "Dodaj rekord DMARC dla domeny kancelarii",
+    {"id": "add_dmarc", "phase": "stop", "title": "Dodaj rekord DMARC dla domeny kancelarii",
      "detail": "Kret ostrzegał o braku DMARC. Dzięki niemu nikt nie wyśle maila „jako kancelaria”.",
      "role": "piotr", "priority": "1h", "safe_any_cause": False, "when": lambda c: lvl(c, "spoof") != "unlikely"},
 
     # Clients.
-    {"id": "warn_clients", "title": "Ostrzeż klientów innym kanałem",
+    {"id": "warn_clients", "phase": "notify", "title": "Ostrzeż klientów innym kanałem",
      "detail": "SMS lub telefon: kancelaria nigdy nie zmienia numeru konta mailem. Gotowy tekst poniżej.",
      "role": "anna", "priority": "1h", "safe_any_cause": False,
      "when": lambda c: c["a"].get("sent", UNKNOWN) in (YES, UNKNOWN) or c["a"].get("clients", UNKNOWN) in (YES, UNKNOWN)},
-    {"id": "verify_access", "title": "Ustal, czy ktoś obcy widział dane klientów",
+    {"id": "verify_access", "phase": "assess", "title": "Ustal, czy ktoś obcy widział dane klientów",
      "detail": "Piotr sprawdza logi logowań w Microsoft 365 z ostatnich 30 dni.",
      "role": "nowak", "priority": "verify", "safe_any_cause": False, "when": lambda c: c["a"].get("clients", UNKNOWN) == UNKNOWN},
-    {"id": "uodo", "title": "Zgłoś naruszenie do UODO w ciągu 72 godzin",
+    {"id": "uodo", "phase": "notify", "title": "Zgłoś naruszenie do UODO w ciągu 72 godzin",
      "detail": "Termin liczy się od chwili stwierdzenia naruszenia. Zgłoszenie przez biznes.gov.pl.",
      "role": "nowak", "priority": "1h", "safe_any_cause": False, "when": lambda c: c["a"].get("clients") == YES},
 ]

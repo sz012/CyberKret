@@ -98,6 +98,20 @@ def continuity(answers: dict, confirmations: dict) -> dict:
             "banner": "Kancelaria działa. Poczta pozostaje niezaufana." if maintained else None}
 
 
+def phases(steps: list[dict], cont: dict, lessons: list[dict]) -> list[dict]:
+    out = []
+    for pid, label in pb.PHASES:
+        own = [s for s in steps if s["phase"] == pid]
+        done, total = sum(s["status"] == "done" for s in own), len(own)
+        if pid == "continue":
+            confs = [c for i in cont["items"] if i["critical"] for c in i["confirmations"]]
+            done, total = done + sum(c["done"] for c in confs), total + len(confs)
+        elif pid == "learn":
+            done, total = sum(s["state"] == "present" for s in lessons), len(lessons)
+        out.append({"id": pid, "label": label, "done": done, "total": total})
+    return out
+
+
 def map_impact(org: dict) -> dict:
     return {
         "untrusted": ["poczta", "konta"],
@@ -132,6 +146,8 @@ def situation(inc: dict, org: dict) -> dict:
         src = "z Twoich odpowiedzi" if q["id"] in answers else "brak odpowiedzi"
         (confirmed if kind == "confirmed" else unverified).append({"text": text, "source": src, "question": q["id"]})
 
+    cont = continuity(answers, inc["confirmations"])
+    lessons = [s for s in org["safeguards"] if s["id"] in pb.LESSONS]
     return {
         "type_label": pb.TYPES[inc["type"]]["label"],
         "questions": [{"id": q["id"], "text": q["text"], "options": [{"value": v, "label": l} for v, l in q["options"]],
@@ -141,9 +157,10 @@ def situation(inc: dict, org: dict) -> dict:
         "hypotheses": hyp,
         "act_now": [s for s in steps if s["safe_any_cause"] or s["priority"] == "now"],
         "plan": steps,
-        "continuity": continuity(answers, inc["confirmations"]),
+        "continuity": cont,
+        "phases": phases(steps, cont, lessons),
         "map": map_impact(org),
         "uodo": uodo_clock(answers, inc["answered_at"]),
         "messages": pb.MESSAGES,
-        "lessons": [s for s in org["safeguards"] if s["id"] in pb.LESSONS],
+        "lessons": lessons,
     }

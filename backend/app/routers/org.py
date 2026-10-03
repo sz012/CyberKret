@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from .. import db
+from ..incident.card import emergency_card
 from ..schemas import SafeguardPatch
 
 router = APIRouter(prefix="/api/org", tags=["org"])
@@ -9,6 +10,11 @@ router = APIRouter(prefix="/api/org", tags=["org"])
 @router.get("")
 def get_org():
     return db.get_org()
+
+
+@router.get("/card")
+def card():
+    return emergency_card(db.get_org())
 
 
 @router.patch("/safeguards/{sid}")
