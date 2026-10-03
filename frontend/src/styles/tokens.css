@@ -18,17 +18,11 @@
 
   --cable: #3a414f;
   --cable-sheath: #232831;
-  --copper: #d89a5b;
   --net: #6ea8ff;
 
   --ok: #5fd08a;
   --warn: #f2c14e;
   --bad: #ff6159;
-
-  --mole: #4a4340;
-  --mole-2: #5e5552;
-  --mole-belly: #6f6561;
-  --snout: #f4a0ad;
 
   --display: 'Mona Sans Variable', 'Segoe UI', system-ui, sans-serif;
   --body: 'Mona Sans Variable', 'Segoe UI', system-ui, sans-serif;

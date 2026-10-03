@@ -110,13 +110,6 @@ const Underground = () => (
         </g>
       )
     })}
-    <g fill="none" strokeLinecap="round">
-      {AMBIENT.map((cable, i) => (
-        <path key={i} d={cable.d} stroke="#131820" strokeWidth="6" />
-      ))}
-      <path d={INTRUDER.d} stroke="#141c28" strokeWidth="7" />
-      <path d={INTRUDER.d} stroke="#22314a" strokeWidth="1.6" />
-    </g>
   </g>
 )
 
@@ -133,6 +126,18 @@ export const Room = memo(function Room() {
     </g>
   )
 })
+
+export function UnderCables({ t }: { t: number }) {
+  return (
+    <g fill="none" strokeLinecap="round" opacity={1 - 0.75 * span(t, T.net[0], T.net[1])}>
+      {AMBIENT.map((cable, i) => (
+        <path key={i} d={cable.d} stroke="#131820" strokeWidth="6" />
+      ))}
+      <path d={INTRUDER.d} stroke="#141c28" strokeWidth="7" />
+      <path d={INTRUDER.d} stroke="#22314a" strokeWidth="1.6" />
+    </g>
+  )
+}
 
 export function Clock({ t }: { t: number }) {
   const whole = Math.floor(t / 1000)
@@ -198,7 +203,7 @@ export function Monitor({ t }: { t: number }) {
   )
 }
 
-export function Port({ t, alarm }: { t: number; alarm: number }) {
+export function Port({ t, alarm, warm }: { t: number; alarm: number; warm: number }) {
   const open = span(t, T.lid, T.lid + 320, ease.back)
   const close = span(t, T.lidClose[0], T.lidClose[1], ease.out)
   const rattle = t < T.lid ? alarm * 1.4 * Math.sin(t / 19) : 0
@@ -209,7 +214,8 @@ export function Port({ t, alarm }: { t: number; alarm: number }) {
   return (
     <g>
       <rect x={HINGE_X + 2} y={SURFACE} width="92" height="14" fill="#030405" />
-      <rect x={HINGE_X + 2} y={SURFACE} width="92" height="14" fill="url(#kf-port-glow)" opacity={inner} />
+      <rect x={HINGE_X + 2} y={SURFACE} width="92" height="14" fill="url(#kf-port-cold)" opacity={inner * (1 - warm)} />
+      <rect x={HINGE_X + 2} y={SURFACE} width="92" height="14" fill="url(#kf-port-warm)" opacity={inner * warm} />
       {seam > 0 && (
         <g fill="#ff6159">
           <rect x={HINGE_X - 6} y={SURFACE - 6} width="108" height="10" rx="5" opacity={0.18 * seam} />

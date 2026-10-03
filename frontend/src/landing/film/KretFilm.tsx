@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { span, wave } from './geometry'
 import { Network, Scout } from './Network'
 import { Blip, Probe, ScanBeam } from './Probe'
-import { Clock, Monitor, Motes, Port, PortLight, Room, RouterLeds, Tags } from './Room'
+import { Clock, Monitor, Motes, Port, PortLight, Room, RouterLeds, Tags, UnderCables } from './Room'
 import { AMBIENT, END, FLOOR, T, alarmLevel, camera, probeState } from './timeline'
 
 const CAPTIONS: { key: string; from: number; to: number }[] = [
@@ -36,7 +36,11 @@ function Defs() {
         <stop offset="0.55" stopColor="#ffd479" stopOpacity="0.1" />
         <stop offset="1" stopColor="#ffd479" stopOpacity="0" />
       </linearGradient>
-      <linearGradient id="kf-port-glow" x1="0" x2="0" y1="1" y2="0">
+      <linearGradient id="kf-port-cold" x1="0" x2="0" y1="1" y2="0">
+        <stop offset="0" stopColor="#eef3ff" stopOpacity="0.9" />
+        <stop offset="1" stopColor="#eef3ff" stopOpacity="0.1" />
+      </linearGradient>
+      <linearGradient id="kf-port-warm" x1="0" x2="0" y1="1" y2="0">
         <stop offset="0" stopColor="#ffe7ad" stopOpacity="0.9" />
         <stop offset="1" stopColor="#ffe7ad" stopOpacity="0.1" />
       </linearGradient>
@@ -134,6 +138,7 @@ export default function KretFilm() {
       <svg className="kf-svg" viewBox={`${vx + shakeX} ${vy + shakeY} ${vw} ${vh}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <Defs />
         <Room />
+        <UnderCables t={t} />
         <Clock t={t} />
         <RouterLeds t={t} alarm={alarm} />
         <Monitor t={t} />
@@ -159,7 +164,7 @@ export default function KretFilm() {
         <g clipPath="url(#kf-above)">
           {probe.visible && <Probe p={probe.p} warm={probe.warm} bright={probe.bright} spin={probe.spin} ring={probe.ring} speed={probe.speed} alarm={alarm} />}
         </g>
-        <Port t={t} alarm={alarm} />
+        <Port t={t} alarm={alarm} warm={probe.warm} />
         <Motes t={t} />
 
         {alarm > 0 && <rect x={vx - 50} y={vy - 50} width={vw + 100} height={vh + 100} fill="#ff4d42" opacity={alarm * (0.04 + 0.08 * wave(t, 900))} />}

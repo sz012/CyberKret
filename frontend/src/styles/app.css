@@ -208,6 +208,8 @@ p { margin: 0; }
 
 /* ---------- dashboard ---------- */
 .dash { display: grid; gap: 22px; }
+.dash > * { min-width: 0; }
+.dash-hero .row { flex-wrap: wrap; }
 .dash-hero { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; padding: 28px 34px;
   background: radial-gradient(600px 300px at 10% 60%, rgba(255, 212, 121, .10), transparent 70%), var(--panel); }
 .dash-hero-copy { display: grid; gap: 14px; }
@@ -222,6 +224,11 @@ p { margin: 0; }
 .tile-alert { border-color: rgba(255, 97, 89, .55); box-shadow: 0 0 0 4px rgba(255, 97, 89, .08); }
 .local-strip { display: grid; grid-template-columns: auto 1fr auto auto; gap: 18px; align-items: center; padding: 18px 24px; }
 .local-strip .zero { font: 600 34px/1 var(--display); color: var(--lamp); }
+@media (max-width: 600px) {
+  .mainnav a { padding: 8px 10px; font-size: 14.5px; }
+  .dash-hero, .sos-hero { padding: 22px; gap: 14px; }
+  .dash-hero .kret, .sos-hero .kret { width: 104px; height: 104px; }
+}
 @media (max-width: 900px) { .tiles { grid-template-columns: 1fr; } .dash-hero { grid-template-columns: 1fr; justify-items: start; } .local-strip { grid-template-columns: auto 1fr; } }
 
 /* ---------- tunnels ---------- */

@@ -1,4 +1,4 @@
-import { P, bump, ease, frame, invert, mix, mixBox, schedule, span, track, type Box, type Pt } from './geometry'
+import { P, bump, clamp, ease, frame, invert, legProgress, mix, mixBox, schedule, span, track, type Box, type Cubic, type Pt } from './geometry'
 
 export const END = 16800
 export const FLOOR = 470
@@ -20,9 +20,9 @@ export const AMBIENT = [
   track([[P(-700, 652), P(200, 664), P(900, 628), P(1900, 662)]]),
 ]
 
-export const SWITCH = P(600, 650)
+export const SWITCH = P(600, 640)
 export const INTERNET = P(60, 520)
-export const TARGET = P(600, 965)
+export const TARGET = P(590, 930)
 
 export type Status = 'bad' | 'ok' | 'warn'
 
@@ -37,38 +37,30 @@ export interface NetNode {
 }
 
 export const NODES: NetNode[] = [
-  { id: 'siec', label: 'Sieć i router', icon: 'router', p: P(170, 770), status: 'bad', verdict: 'pulpit zdalny otwarty', side: 'left' },
-  { id: 'komputery', label: 'Komputery', icon: 'laptop', p: P(370, 830), status: 'ok', verdict: 'w porządku' },
-  { id: 'konta', label: 'Konta i hasła', icon: 'key', p: P(600, 870), status: 'bad', verdict: 'admin bez MFA', side: 'right' },
-  { id: 'poczta', label: 'Poczta', icon: 'mail', p: P(830, 830), status: 'warn', verdict: 'brak DMARC' },
-  { id: 'kopie', label: 'Kopie zapasowe', icon: 'disk', p: P(1040, 770), status: 'ok', verdict: 'w porządku' },
+  { id: 'siec', label: 'Sieć i router', icon: 'router', p: P(170, 740), status: 'bad', verdict: 'pulpit zdalny otwarty', side: 'left' },
+  { id: 'komputery', label: 'Komputery', icon: 'laptop', p: P(370, 800), status: 'ok', verdict: 'w porządku' },
+  { id: 'konta', label: 'Konta i hasła', icon: 'key', p: P(600, 830), status: 'bad', verdict: 'admin bez MFA', side: 'right' },
+  { id: 'poczta', label: 'Poczta', icon: 'mail', p: P(830, 800), status: 'warn', verdict: 'brak DMARC' },
+  { id: 'kopie', label: 'Kopie zapasowe', icon: 'disk', p: P(1040, 740), status: 'ok', verdict: 'w porządku' },
 ]
 
-export const ROUTE = track([
-  [P(PORT_X, FLOOR + 10), P(PORT_X, 560), P(700, 630), SWITCH],
-  [SWITCH, P(470, 690), P(220, 690), NODES[0].p],
-  [NODES[0].p, P(240, 820), P(300, 830), NODES[1].p],
-  [NODES[1].p, P(450, 830), P(520, 870), NODES[2].p],
-  [NODES[2].p, P(680, 870), P(750, 830), NODES[3].p],
-  [NODES[3].p, P(910, 830), P(980, 800), NODES[4].p],
-])
-
-export const CABLES = [
-  track([[P(INTERNET.x, INTERNET.y + 24), P(60, 640), P(120, 730), NODES[0].p]]),
-  track([[P(PORT_X, FLOOR + 10), P(PORT_X, 560), P(700, 630), SWITCH]]),
-  track([[SWITCH, P(470, 690), P(220, 690), NODES[0].p]]),
-  track([
-    [NODES[0].p, P(240, 820), P(300, 830), NODES[1].p],
-    [NODES[1].p, P(450, 830), P(520, 870), NODES[2].p],
-    [NODES[2].p, P(680, 870), P(750, 830), NODES[3].p],
-    [NODES[3].p, P(910, 830), P(980, 800), NODES[4].p],
-  ]),
+const UPLINK: Cubic = [P(INTERNET.x, INTERNET.y + 24), P(60, 630), P(110, 710), NODES[0].p]
+const FEED: Cubic = [SWITCH, P(470, 680), P(220, 680), NODES[0].p]
+const DROP: Cubic = [P(PORT_X, FLOOR + 10), P(PORT_X, 560), P(700, 620), SWITCH]
+const BUS: Cubic[] = [
+  [NODES[0].p, P(240, 790), P(300, 800), NODES[1].p],
+  [NODES[1].p, P(450, 800), P(520, 830), NODES[2].p],
+  [NODES[2].p, P(680, 830), P(750, 800), NODES[3].p],
+  [NODES[3].p, P(910, 800), P(980, 770), NODES[4].p],
 ]
+
+export const ROUTE = track([DROP, FEED, ...BUS])
+export const CABLES = [track([UPLINK]), track([DROP]), track([FEED]), track(BUS)]
 
 export const TUNNEL = track([
-  [P(INTERNET.x, INTERNET.y + 24), P(60, 640), P(120, 730), NODES[0].p],
-  [NODES[0].p, P(250, 1010), P(470, 1010), NODES[2].p],
-  [NODES[2].p, P(612, 892), P(612, 918), P(TARGET.x, TARGET.y - 26)],
+  UPLINK,
+  [NODES[0].p, P(250, 950), P(470, 950), NODES[2].p],
+  [NODES[2].p, P(612, 852), P(612, 878), P(TARGET.x, TARGET.y - 26)],
 ])
 
 export const LEGS = schedule(11800, [600, 560, 420, 420, 420, 420], [100, 220, 220, 220, 220, 0])
@@ -176,11 +168,26 @@ const SHOTS: { t: number; wide: Box; narrow: Box }[] = [
   { t: 9450, wide: [30, 20, 1180, 600], narrow: [60, 110, 740, 580] },
   { t: 9900, wide: [480, 50, 720, 460], narrow: [580, 150, 520, 450] },
   { t: 10400, wide: [480, 50, 720, 460], narrow: [580, 150, 520, 450] },
-  { t: 11900, wide: [-40, 420, 1260, 830], narrow: [0, 430, 1200, 800] },
+  { t: 11900, wide: [-40, 428, 1280, 900], narrow: [-40, 440, 1280, 760] },
 ]
+
+const PHONE_END: Box = [-90, 791, 880, 620]
+
+function followScout(t: number): Box {
+  const p = ROUTE.at(legProgress(t, LEGS, ROUTE.ends))
+  return [clamp(p.x - 260, -80, 820), p.y - 58, 520, 340]
+}
+
+function phoneNetwork(t: number): Box {
+  const dive = SHOTS[SHOTS.length - 2].narrow
+  if (t < 11900) return mixBox(dive, followScout(t), span(t, 10400, 11900))
+  if (t < 15300) return followScout(t)
+  return mixBox(followScout(t), PHONE_END, span(t, 15300, 16000))
+}
 
 export function camera(t: number, aspect: number): Box {
   const narrow = aspect < 0.95
+  if (narrow && t >= 10400) return frame(phoneNetwork(t), aspect)
   const pick = (s: (typeof SHOTS)[number]) => (narrow ? s.narrow : s.wide)
   let box = pick(SHOTS[0])
   for (let i = 1; i < SHOTS.length; i++) {

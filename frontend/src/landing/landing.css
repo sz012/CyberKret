@@ -55,8 +55,17 @@
 .kf-skip:hover { color: var(--fg); border-color: var(--line-2); }
 @keyframes kf-in { from { opacity: 0; transform: translateY(16px); } }
 
+@media (max-height: 800px) and (min-width: 701px) {
+  .kf-copy.lower { padding-bottom: 26px; }
+  .kf-copy.lower .kf-caption { gap: 12px; }
+  .kf-copy.lower .kf-caption h1 { font-size: clamp(28px, 3vw, 40px); }
+  .kf-copy.lower .kf-sub { font-size: 16px; }
+  .kf-copy.lower .btn-lg { padding: 13px 20px; font-size: 16px; }
+}
 @media (max-width: 700px) {
   .kf-copy { padding-top: 88px; }
+  .kf-label { font-size: 19px; }
+  .kf-verdict { font-size: 12.5px; }
   .lnav { padding: 12px 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
