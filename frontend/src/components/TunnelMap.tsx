@@ -12,7 +12,7 @@ import { MoleGlyph } from './Mascot'
 export const HUB = { x: 500, y: 186 }
 const CLOUD = { x: 86, y: 58 }
 const TARGET_ICON: Record<string, string> = { client_data_read: 'folder', money_stolen: 'money', operations_stopped: 'briefcase' }
-const STATUS_TEXT: Record<string, string> = { ok: 'OK', warn: 'DO SPRAWDZENIA', bad: 'OTWARTE', checking: 'KRET SPRAWDZA', pending: '…', idle: '' }
+const STATUS_TEXT: Record<string, string> = { ok: 'w porządku', warn: 'do sprawdzenia', bad: 'otwarte', checking: 'kret sprawdza', pending: '…', idle: '' }
 
 export type ChamberState = Level | 'checking' | 'pending' | 'idle'
 
@@ -192,7 +192,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
       {/* internet cloud + uplink */}
       <g className="tm-cloud" color="#8e97a8">
         <IconG name="cloud" x={CLOUD.x} y={CLOUD.y} size={58} stroke={1.4} />
-        <text x={CLOUD.x} y={CLOUD.y + 46} textAnchor="middle" className="tm-small">INTERNET</text>
+        <text x={CLOUD.x} y={CLOUD.y + 46} textAnchor="middle" className="tm-small">Internet</text>
       </g>
       {org.chambers.find((c) => c.id === 'siec') && (() => {
         const r = org.chambers.find((c) => c.id === 'siec')!
@@ -207,7 +207,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
 
       {/* office furniture */}
       <g className="tm-office">
-        <text x="500" y="26" textAnchor="middle" className="tm-sign">{org.name.toUpperCase()}</text>
+        <text x="500" y="26" textAnchor="middle" className="tm-sign">{org.name}</text>
         {[250, 760].map((x) => (
           <g key={x} transform={`translate(${x} 0)`}>
             <rect x="-70" y="96" width="140" height="8" rx="2" fill="#2a2f39" />
@@ -237,7 +237,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
       {Array.from({ length: 25 }, (_, i) => (
         <rect key={i} x={i * 40 + 1} y="137" width="38" height="6" rx="1" fill="#323844" />
       ))}
-      <text x="16" y="168" className="tm-small">POD PODŁOGĄ · KABLE SIECIOWE</text>
+      <text x="16" y="168" className="tm-small">Pod podłogą: kable sieciowe</text>
 
       {/* cables to chambers */}
       {org.chambers.map((c) => {
@@ -257,11 +257,11 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
         {Array.from({ length: 12 }, (_, i) => (
           <rect key={i} x={-66 + i * 11.2} y="-6" width="8" height="8" rx="1.5" fill="#0d0f13" stroke="#3a414f" />
         ))}
-        <text x="0" y="30" textAnchor="middle" className="tm-small">PATCH PANEL</text>
+        <text x="0" y="30" textAnchor="middle" className="tm-small">Patch panel</text>
       </g>
 
       {/* targets */}
-      <text x="16" y="548" className="tm-small">TO, CO BOLI</text>
+      <text x="16" y="548" className="tm-small">To, co boli</text>
       {org.targets.map((t) => {
         const hit = hitTargets.has(t.id) || impact?.at_risk.includes(t.id)
         return (
@@ -269,7 +269,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
             <rect x="-92" y="-28" width="184" height="56" rx="12" />
             <g color={hit ? 'var(--bad)' : 'var(--muted)'}><IconG name={TARGET_ICON[t.id] ?? 'shield'} x={-62} y={0} size={24} /></g>
             <text x="-38" y="-2" className="tm-target-name">{t.label}</text>
-            <text x="-38" y="15" className="tm-small">{hit ? 'W ZASIĘGU ATAKU' : run ? 'BEZPIECZNE' : ''}</text>
+            <text x="-38" y="15" className="tm-small">{hit ? 'w zasięgu ataku' : run ? 'bezpieczne' : ''}</text>
           </g>
         )
       })}
@@ -303,11 +303,11 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
             {untrusted && <rect x="-34" y="-34" width="68" height="68" rx="16" fill="url(#tm-hatch)" />}
             <g className="chamber-icon"><IconG name={c.icon} x={0} y={0} size={30} /></g>
             <text y="54" textAnchor="middle" className="chamber-name">{c.label}</text>
-            <text y="71" textAnchor="middle" className="chamber-st">{untrusted ? 'NIEZAUFANE' : STATUS_TEXT[st]}</text>
+            <text y="71" textAnchor="middle" className="chamber-st">{untrusted ? 'niezaufane' : STATUS_TEXT[st]}</text>
             {fixedChambers.has(c.id) && st !== 'pending' && st !== 'checking' && (
               <g transform="translate(0 -44)">
                 <rect x="-34" y="-10" width="68" height="20" rx="10" fill="var(--ok)" />
-                <text y="3.5" textAnchor="middle" className="tm-zip">ZASYPANE</text>
+                <text y="3.5" textAnchor="middle" className="tm-zip">zasypane</text>
               </g>
             )}
           </g>
