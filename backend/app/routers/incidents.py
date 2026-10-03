@@ -48,7 +48,7 @@ def _steps(count: int) -> str:
 
 def _titles(titles: list[str]) -> str:
     shown = "; ".join(titles[:DIFF_PREVIEW])
-    return f"{shown} i {len(titles) - DIFF_PREVIEW} więcej" if len(titles) > DIFF_PREVIEW else shown
+    return f"{shown} (i jeszcze {len(titles) - DIFF_PREVIEW})" if len(titles) > DIFF_PREVIEW else shown
 
 
 def _diff_message(added: list[str], removed: list[str]) -> str:

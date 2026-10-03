@@ -206,10 +206,9 @@ def _outro(total: int, moves: list[KretMove], remaining: int, minutes: int) -> s
     )
     count = len(moves)
     if remaining == 0:
-        text += (
-            f" Po {count} {'ruchu' if count == 1 else 'ruchach'} nie zostaje żadna otwarta droga."
-            f" To około {minutes} {'minuty' if minutes == 1 else 'minut'} pracy."
-        )
+        after = "Po tym ruchu" if count == 1 else f"Po {count} ruchach"
+        unit = "minuty" if minutes == 1 else "minut"
+        text += f" {after} nie zostaje żadna otwarta droga. To około {minutes} {unit} pracy."
     else:
         verb = "zostają" if plural(remaining, "one", "few", "many") == "few" else "zostaje"
         text += f" Po tych ruchach {verb} {remaining} {plural(remaining, 'droga', 'drogi', 'dróg')}."
