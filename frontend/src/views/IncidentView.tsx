@@ -26,6 +26,7 @@ export default function IncidentView() {
   const [now, setNow] = useState(Date.now())
   const [lessons, setLessons] = useState<string[]>([])
   const [allFacts, setAllFacts] = useState(false)
+  const [missing, setMissing] = useState(false)
   const briefSeq = useRef(0)
 
   const loadBrief = () => {
@@ -35,10 +36,13 @@ export default function IncidentView() {
   }
 
   useEffect(() => {
-    api.incident(iid).then((x) => {
-      setInc(x)
-      setLessons(x.situation.lessons.filter((l) => l.state !== 'present').map((l) => l.id))
-    })
+    api.incident(iid).then(
+      (x) => {
+        setInc(x)
+        setLessons(x.situation.lessons.filter((l) => l.state !== 'present').map((l) => l.id))
+      },
+      () => setMissing(true),
+    )
     api.org().then(setOrg)
     api.runs().then((r) => setRun(r[0] ?? null))
     loadBrief()
@@ -47,6 +51,7 @@ export default function IncidentView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [iid])
 
+  if (missing) return <p className="muted">Nie ma takiego incydentu. Mógł zostać usunięty przy resecie danych demo.</p>
   if (!inc || !org) return <p className="muted">Ładowanie incydentu…</p>
   const s = inc.situation
   const closed = inc.status === 'closed'
