@@ -1,24 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Health } from '../api/types'
 import { BrandMark, Wordmark } from './BrandMark'
 import { Icon } from './icons'
-
-export function useHealth() {
-  const [h, setH] = useState<Health | null>(null)
-  useEffect(() => {
-    let alive = true
-    const load = () => api.health().then((x) => alive && setH(x)).catch(() => alive && setH(null))
-    load()
-    const t = setInterval(load, 15000)
-    return () => {
-      alive = false
-      clearInterval(t)
-    }
-  }, [])
-  return h
-}
+import { useHealth } from './useHealth'
 
 export function LocalBadge({ health }: { health: Health | null }) {
   if (!health) return <span className="pill bad"><span className="dot" />backend niedostępny</span>

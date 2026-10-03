@@ -4,7 +4,7 @@ import { api } from '../api/client'
 import type { IncidentRow, KretRun, MailRow } from '../api/types'
 import { Icon } from '../components/icons'
 import Mascot from '../components/Mascot'
-import { useHealth } from '../components/Shell'
+import { useHealth } from '../components/useHealth'
 import { ago } from '../util'
 
 export default function Dashboard() {
