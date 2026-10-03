@@ -1,0 +1,24 @@
+:root {
+  color-scheme: dark;
+  --soil-0: #1c1511;
+  --soil-1: #251c17;
+  --soil-2: #30251e;
+  --soil-3: #46372c;
+  --soil-4: #6b5546;
+  --tunnel: #120d0a;
+  --sky: #221d20;
+  --fg: #f2e8db;
+  --fg-2: #d8c9b8;
+  --muted: #b09a85;
+  --lamp: #f5dc9f;
+  --lamp-ink: #2a1d10;
+  --ok: #6fc68c;
+  --warn: #e9c24a;
+  --bad: #f05c46;
+  --display: 'Bricolage Grotesque Variable', 'Avenir Next Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --radius: 14px;
+  --sidebar: 268px;
+  --shaft-step: 74px;
+}
