@@ -8,7 +8,7 @@ from .. import config, db
 
 router = APIRouter(prefix="/api/demo", tags=["demo"])
 
-MAILBOX = "grazyna"
+MAILBOX = "inbox"
 PENDING = {"01_biurex_phishing"}  # arrives live during the demo
 
 

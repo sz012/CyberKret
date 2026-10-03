@@ -8,7 +8,7 @@ import { ago } from '../util'
 
 export default function Incidents() {
   const [rows, setRows] = useState<IncidentRow[] | null>(null)
-  const [types, setTypes] = useState<{ id: string; label: string; ready: boolean }[]>([])
+  const [types, setTypes] = useState<{ id: string; label: string; ready: boolean; questions: number }[]>([])
   const [params] = useSearchParams()
   const nav = useNavigate()
   const fresh = params.get('nowy') === '1'
@@ -32,7 +32,7 @@ export default function Incidents() {
         <div className="stack">
           <span className="eyebrow">Funkcja 3 · Tryb incydentu</span>
           <h1>Coś się stało? Spokojnie. Kret poprowadzi.</h1>
-          <p className="muted">Wybierz, co się dzieje. Kret zada kilka pytań i ułoży plan: co zrobić teraz, kto to robi i jak utrzymać pracę kancelarii. Wszystko działa na tym komputerze, także bez internetu.</p>
+          <p className="muted">Wybierz, co się dzieje. Kret zada kilka pytań i ułoży plan: co zrobić teraz, kto to robi i jak utrzymać pracę firmy. Wszystko działa na tym komputerze, także bez internetu.</p>
         </div>
       </section>
 
@@ -51,7 +51,7 @@ export default function Incidents() {
           {types.map((t) => (
             <button key={t.id} className={`type card ${t.ready ? '' : 'soon'}`} disabled={!t.ready} onClick={() => start(t.id)}>
               <b>{t.label}</b>
-              <span className="muted small">{t.ready ? 'Poradnik gotowy · 5 pytań' : 'w przygotowaniu'}</span>
+              <span className="muted small">{t.ready ? `Poradnik gotowy · ${t.questions} pytań` : 'w przygotowaniu'}</span>
             </button>
           ))}
         </div>

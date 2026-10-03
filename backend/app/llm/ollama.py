@@ -9,6 +9,7 @@ from .. import config
 
 log = logging.getLogger("cyberkret.llm")
 _resolved_model: str | None = None
+PREFERRED = ("bielik", "qwen", "gemma")
 
 
 def list_models() -> list[str]:
@@ -21,7 +22,7 @@ def list_models() -> list[str]:
 
 
 def model() -> str | None:
-    """Configured model if it is pulled; otherwise the first local qwen model; otherwise None."""
+    """Configured model if it is pulled; otherwise the first local Bielik, Qwen or Gemma; otherwise any model."""
     global _resolved_model
     if config.LLM_DISABLED:
         return None
@@ -32,25 +33,31 @@ def model() -> str | None:
         return _resolved_model
     want = config.OLLAMA_MODEL
     exact = [m for m in models if m == want or m == f"{want}:latest" or m.startswith(f"{want}:")]
-    qwen = [m for m in models if "qwen" in m.lower()]
-    _resolved_model = (exact or qwen or models)[0]
+    preferred = [m for family in PREFERRED for m in models if family in m.lower()]
+    _resolved_model = (exact or preferred or models)[0]
     return _resolved_model
 
 
-def chat_json(system: str, user: str, timeout: float | None = None) -> tuple[dict | None, dict]:
-    """Ask for a JSON object. Returns (parsed or None, meta) where meta says which model answered and how fast."""
+def options() -> dict:
+    return {"temperature": 0.1, "num_ctx": config.OLLAMA_CTX, "num_predict": 500}
+
+
+def chat_json(system: str, user: str, schema: dict | None = None, timeout: float | None = None) -> tuple[dict | None, dict]:
+    """Ask for a JSON object, constrained by `schema` when given. Returns (parsed or None, meta)."""
     m = model()
     meta = {"model": m, "local": True, "ms": None, "error": None}
     if not m:
         meta["error"] = "brak lokalnego modelu"
         return None, meta
+    if schema:
+        system = f"{system}\n\nSchemat odpowiedzi (JSON Schema):\n{json.dumps(schema, ensure_ascii=False)}"
     body = {
         "model": m,
         "stream": False,
-        "format": "json",
+        "format": schema or "json",
         "think": False,
         "keep_alive": "30m",
-        "options": {"temperature": 0.2},
+        "options": options(),
         "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
     }
     t0 = time.monotonic()
@@ -76,6 +83,7 @@ def warm_up() -> None:
     if not m:
         return
     try:
-        httpx.post(f"{config.OLLAMA_URL}/api/generate", json={"model": m, "prompt": "", "keep_alive": "30m"}, timeout=120)
+        httpx.post(f"{config.OLLAMA_URL}/api/generate",
+                   json={"model": m, "prompt": "", "keep_alive": "30m", "options": options()}, timeout=180)
     except httpx.HTTPError:
         pass

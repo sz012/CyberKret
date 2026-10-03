@@ -53,7 +53,9 @@ def test_model_cannot_lower_verdict_and_bad_quotes_are_dropped(monkeypatch, org)
     quotes = [i["quote"] for i in r["indicators"] if i["source"] == "model"]
     assert quotes == ["Dział Księgowości"]
     assert r["llm"]["model"] == "qwen-test"
-    assert sent["body"]["format"] == "json" and sent["body"]["stream"] is False
+    assert sent["body"]["format"]["required"] == ["verdict", "summary", "what_to_do", "extra_signals"]
+    assert sent["body"]["stream"] is False and sent["body"]["options"]["num_ctx"] == config.OLLAMA_CTX
+    assert "JSON Schema" in sent["body"]["messages"][0]["content"]
 
 
 def test_model_can_raise_alarm(monkeypatch, org):

@@ -211,7 +211,7 @@ def verdict_from(indicators: list[dict]) -> str:
     return "safe"
 
 
-SYSTEM_PROMPT = """Jesteś cyberKretem, asystentem bezpieczeństwa w małej polskiej kancelarii. Działasz lokalnie, offline.
+SYSTEM_PROMPT = """Jesteś cyberKretem, asystentem bezpieczeństwa w małej polskiej firmie. Działasz lokalnie, offline.
 Dostajesz maila i listę faktów, które sprawdziły deterministyczne testy. Twoje zadanie: wytłumaczyć to pracownikowi bez wiedzy technicznej.
 Zasady:
 - Pisz po polsku, krótko, ciepło, bez żargonu. Zwracaj się do adresata po imieniu, jeśli je znasz.
@@ -224,42 +224,72 @@ Zwróć wyłącznie JSON:
  "what_to_do": "jedno konkretne zdanie: co zrobić teraz",
  "extra_signals": [{"title": "...", "quote": "dosłowny fragment", "explanation": "..."}]}"""
 
+MAIL_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "verdict": {"type": "string", "enum": ["danger", "caution", "safe"]},
+        "summary": {"type": "string"},
+        "what_to_do": {"type": "string"},
+        "extra_signals": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+                "type": "object",
+                "properties": {"title": {"type": "string"}, "quote": {"type": "string"}, "explanation": {"type": "string"}},
+                "required": ["title", "quote", "explanation"],
+            },
+        },
+    },
+    "required": ["verdict", "summary", "what_to_do", "extra_signals"],
+}
 
-def analyze(msg: EmailMessage, org: dict, recipient_name: str | None = None, use_llm: bool = True) -> dict:
+ORDER = ["safe", "caution", "danger"]
+
+
+def rules(msg: EmailMessage, org: dict) -> dict:
     s = summarize(msg)
     ind = heuristics(msg, org)
     verdict = verdict_from(ind)
-    llm_meta = {"model": None, "local": True, "ms": None, "error": "wyłączone"}
+    summary, what = _template(verdict, ind, org)
+    return {
+        "verdict": verdict, **VERDICT[verdict], "summary": summary, "what_to_do": what, "indicators": ind,
+        "llm": {"model": None, "local": True, "ms": None, "error": "nie pytano modelu"},
+        "mail": {k: v for k, v in s.items() if k != "html"},
+    }
+
+
+def explain(result: dict, msg: EmailMessage, org: dict, recipient_name: str | None = None) -> dict:
+    s = summarize(msg)
+    ind = [i for i in result["indicators"] if i["source"] != "model"]
+    verdict = verdict_from(ind)
+    facts = "\n".join(f"- {i['title']}: {i['detail']}" for i in ind) or "- brak sygnałów ostrzegawczych"
+    user = (f"Adresat: {recipient_name or 'pracownik'}\nOd: {s['from_name']} <{s['from_addr']}>\n"
+            f"Reply-To: {s['reply_to'] or '-'}\nTemat: {s['subject']}\n"
+            f"Załączniki: {', '.join(a['filename'] for a in s['attachments']) or 'brak'}\n\n"
+            f"Treść:\n{s['text'][:4000]}\n\nFakty sprawdzone przez kreta:\n{facts}\n"
+            f"Werdykt testów: {verdict}")
+    data, meta = ollama.chat_json(SYSTEM_PROMPT, user, MAIL_SCHEMA)
     summary = what = None
-
-    if use_llm:
-        facts = "\n".join(f"- {i['title']}: {i['detail']}" for i in ind) or "- brak sygnałów ostrzegawczych"
-        user = (f"Adresat: {recipient_name or 'pracownik'}\nOd: {s['from_name']} <{s['from_addr']}>\n"
-                f"Reply-To: {s['reply_to'] or '-'}\nTemat: {s['subject']}\n"
-                f"Załączniki: {', '.join(a['filename'] for a in s['attachments']) or 'brak'}\n\n"
-                f"Treść:\n{s['text'][:4000]}\n\nFakty sprawdzone przez kreta:\n{facts}\n"
-                f"Werdykt testów: {verdict}")
-        data, llm_meta = ollama.chat_json(SYSTEM_PROMPT, user)
-        if data:
-            summary = str(data.get("summary") or "").strip() or None
-            what = str(data.get("what_to_do") or "").strip() or None
-            # The model may raise the alarm, never lower it below what the tests found.
-            order = ["safe", "caution", "danger"]
-            mv = data.get("verdict")
-            if mv in order and order.index(mv) > order.index(verdict):
-                verdict = mv
-            for x in data.get("extra_signals") or []:
-                q = str(x.get("quote") or "").strip()
-                if q and q in s["text"] and not any(i.get("quote") == q for i in ind):
-                    ind.append({"type": "llm", "severity": "medium", "title": str(x.get("title") or "Sygnał"),
-                                "detail": str(x.get("explanation") or ""), "quote": q, "source": "model"})
-
+    if data:
+        summary = str(data.get("summary") or "").strip() or None
+        what = str(data.get("what_to_do") or "").strip() or None
+        mv = data.get("verdict")
+        if mv in ORDER and ORDER.index(mv) > ORDER.index(verdict):
+            verdict = mv
+        for x in data.get("extra_signals") or []:
+            q = str(x.get("quote") or "").strip()
+            if q and q in s["text"] and not any(i.get("quote") == q for i in ind):
+                ind.append({"type": "llm", "severity": "medium", "title": str(x.get("title") or "Sygnał"),
+                            "detail": str(x.get("explanation") or ""), "quote": q, "source": "model"})
     if not summary:
         summary, what = _template(verdict, ind, org)
-    return {
-        "verdict": verdict, **VERDICT[verdict], "summary": summary, "what_to_do": what,
-        "indicators": ind, "llm": llm_meta, "mail": {k: v for k, v in s.items() if k != "html"},
-    }
+    return {**result, "verdict": verdict, **VERDICT[verdict], "summary": summary, "what_to_do": what,
+            "indicators": ind, "llm": meta}
+
+
+def analyze(msg: EmailMessage, org: dict, recipient_name: str | None = None, use_llm: bool = True) -> dict:
+    result = rules(msg, org)
+    return explain(result, msg, org, recipient_name) if use_llm else result
 
 
 def _template(verdict: str, ind: list[dict], org: dict) -> tuple[str, str]:

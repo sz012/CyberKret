@@ -1,36 +1,11 @@
 {
-  "demo": true,
-  "name": "Kancelaria Nowak",
-  "domain": "kancelaria-nowak.example",
-  "phone": "12 000 00 00",
-  "description": "Kancelaria radcy prawnego, 8 osób, Microsoft 365, serwer plików NAS, strona na WordPressie.",
-  "mailbox_owner": "grazyna",
-  "people": [
-    {
-      "id": "nowak",
-      "name": "Jan Nowak",
-      "role": "Radca prawny, szef kancelarii",
-      "duty": "boss"
-    },
-    {
-      "id": "grazyna",
-      "name": "Grażyna Kowalska",
-      "role": "Księgowość",
-      "duty": "finance"
-    },
-    {
-      "id": "anna",
-      "name": "Anna Wiśniewska",
-      "role": "Sekretariat",
-      "duty": "office"
-    },
-    {
-      "id": "piotr",
-      "name": "Piotr Zieliński",
-      "role": "Informatyk z zewnątrz, 2 h w tygodniu",
-      "duty": "it"
-    }
-  ],
+  "demo": false,
+  "name": "",
+  "domain": "",
+  "phone": "",
+  "description": "",
+  "mailbox_owner": null,
+  "people": [],
   "chambers": [
     {
       "id": "siec",
@@ -38,7 +13,7 @@
       "icon": "router",
       "x": 120,
       "y": 250,
-      "blurb": "Router od operatora, Wi-Fi, przekierowania portów",
+      "blurb": "Router, Wi-Fi i przekierowania portów",
       "dig": "jadę kablem do routera, patrzę, co widać z internetu"
     },
     {
@@ -47,8 +22,8 @@
       "icon": "laptop",
       "x": 235,
       "y": 375,
-      "blurb": "8 stanowisk z Windows i jeden Mac szefa",
-      "dig": "odwiedzam 8 stanowisk, sprawdzam konta administratora"
+      "blurb": "Komputery i laptopy w firmie",
+      "dig": "odwiedzam komputery, sprawdzam konta administratora"
     },
     {
       "id": "konta",
@@ -56,8 +31,8 @@
       "icon": "key",
       "x": 380,
       "y": 455,
-      "blurb": "Konta Microsoft 365 całego zespołu",
-      "dig": "sprawdzam logowanie do Microsoft 365"
+      "blurb": "Konta pocztowe i chmurowe zespołu",
+      "dig": "sprawdzam logowanie do kont"
     },
     {
       "id": "poczta",
@@ -65,7 +40,7 @@
       "icon": "mail",
       "x": 620,
       "y": 455,
-      "blurb": "Domena kancelaria-nowak.example i jej rekordy DNS",
+      "blurb": "Domena firmy i jej rekordy DNS",
       "dig": "czytam rekordy SPF i DMARC domeny"
     },
     {
@@ -74,8 +49,8 @@
       "icon": "coins",
       "x": 765,
       "y": 375,
-      "blurb": "Jak księgowość przyjmuje zmiany numerów kont",
-      "dig": "pytam księgowość, jak zmienia numery kont"
+      "blurb": "Jak firma przyjmuje zmiany numerów kont",
+      "dig": "sprawdzam, jak zmieniacie numery kont"
     },
     {
       "id": "kopie",
@@ -83,8 +58,8 @@
       "icon": "disk",
       "x": 880,
       "y": 250,
-      "blurb": "NAS w szafie, kopia co noc",
-      "dig": "schodzę do serwera z kopiami"
+      "blurb": "Kopie zapasowe danych",
+      "dig": "schodzę do kopii zapasowych"
     },
     {
       "id": "www",
@@ -92,15 +67,15 @@
       "icon": "globe",
       "x": 500,
       "y": 300,
-      "blurb": "WordPress u zewnętrznego hostingu",
+      "blurb": "Strona internetowa firmy",
       "dig": "sprawdzam stronę i certyfikat"
     }
   ],
   "targets": [
     {
       "id": "client_data_read",
-      "label": "Akta klientów",
-      "harm": "Wyciek tajemnicy zawodowej i danych osobowych klientów",
+      "label": "Dane klientów",
+      "harm": "Wyciek danych osobowych i tajemnic klientów",
       "weight": 3,
       "x": 270,
       "y": 575
@@ -115,8 +90,8 @@
     },
     {
       "id": "operations_stopped",
-      "label": "Praca kancelarii",
-      "harm": "Zaszyfrowane dyski i kopie, kancelaria staje",
+      "label": "Praca firmy",
+      "harm": "Zaszyfrowane komputery i kopie, firma stoi",
       "weight": 3,
       "x": 730,
       "y": 575
@@ -127,11 +102,11 @@
       "id": "router_no_rdp",
       "chamber": "siec",
       "label": "Pulpit zdalny niewidoczny z internetu",
-      "state": "missing",
-      "source": "answers",
-      "problem": "pulpit zdalny (RDP, port 3389) otwarty na cały internet",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "pulpit zdalny (RDP, port 3389) otwarty na internet",
       "ok_text": "z internetu nie widać pulpitu zdalnego",
-      "evidence": "Router przekierowuje port 3389 na komputer szefa. Tak skonfigurował go poprzedni informatyk.",
+      "evidence": "",
       "fix": "Usuń przekierowanie portu 3389 w routerze. Do pracy z domu użyj VPN.",
       "effort_min": 15,
       "cost": "0 zł"
@@ -140,12 +115,12 @@
       "id": "unique_admin_passwords",
       "chamber": "komputery",
       "label": "Każdy komputer ma inne hasło administratora",
-      "state": "missing",
-      "source": "answers",
-      "problem": "konto „admin” z tym samym hasłem na 3 komputerach",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "to samo hasło administratora na kilku komputerach",
       "ok_text": "każdy komputer ma osobne hasło administratora",
-      "evidence": "Hasło administratora jest takie samo na komputerach szefa, sekretariatu i księgowości.",
-      "fix": "Ustaw różne hasła administratora (Windows LAPS robi to automatycznie). Pracownicy pracują na kontach bez uprawnień admina.",
+      "evidence": "",
+      "fix": "Ustaw różne hasła administratora (Windows LAPS robi to automatycznie). Na co dzień pracujcie na kontach bez uprawnień administratora.",
       "effort_min": 60,
       "cost": "0 zł"
     },
@@ -153,12 +128,12 @@
       "id": "pcs_updated",
       "chamber": "komputery",
       "label": "System i programy aktualne",
-      "state": "present",
-      "source": "answers",
+      "state": "unknown",
+      "source": "unverified",
       "problem": "komputery bez aktualizacji",
-      "ok_text": "8 z 8 komputerów zaktualizowanych",
-      "evidence": "Automatyczne aktualizacje Windows włączone na wszystkich stanowiskach.",
-      "fix": "Włącz automatyczne aktualizacje.",
+      "ok_text": "komputery aktualizują się automatycznie",
+      "evidence": "",
+      "fix": "Włącz automatyczne aktualizacje systemu i programów.",
       "effort_min": 20,
       "cost": "0 zł"
     },
@@ -166,25 +141,25 @@
       "id": "disk_encryption",
       "chamber": "komputery",
       "label": "Dyski zaszyfrowane",
-      "state": "present",
-      "source": "answers",
+      "state": "unknown",
+      "source": "unverified",
       "problem": "dyski laptopów nie są zaszyfrowane",
       "ok_text": "dyski zaszyfrowane (BitLocker, FileVault)",
-      "evidence": "BitLocker włączony na laptopach.",
-      "fix": "Włącz BitLocker / FileVault.",
+      "evidence": "",
+      "fix": "Włącz BitLocker na Windows albo FileVault na Macu.",
       "effort_min": 30,
       "cost": "0 zł"
     },
     {
       "id": "m365_mfa",
       "chamber": "konta",
-      "label": "Logowanie dwuetapowe (MFA) w Microsoft 365",
-      "state": "missing",
-      "source": "answers",
-      "problem": "2 z 8 kont bez logowania dwuetapowego, w tym księgowość",
+      "label": "Logowanie dwuetapowe (MFA) na kontach pocztowych",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "konta pocztowe logują się samym hasłem",
       "ok_text": "wszystkie konta mają logowanie dwuetapowe",
-      "evidence": "Konta księgowości i sekretariatu logują się samym hasłem.",
-      "fix": "Włącz MFA (aplikacja Microsoft Authenticator) dla wszystkich kont. Zacznij od księgowości.",
+      "evidence": "",
+      "fix": "Włącz MFA (na przykład aplikację Authenticator) na wszystkich kontach pocztowych. Zacznij od osób, które płacą faktury.",
       "effort_min": 45,
       "cost": "0 zł"
     },
@@ -192,12 +167,12 @@
       "id": "domain_spf",
       "chamber": "poczta",
       "label": "Rekord SPF",
-      "state": "present",
-      "source": "kret",
+      "state": "unknown",
+      "source": "unverified",
       "problem": "brak rekordu SPF",
       "ok_text": "rekord SPF jest",
-      "evidence": "v=spf1 include:spf.protection.outlook.com -all",
-      "fix": "Dodaj rekord SPF.",
+      "evidence": "",
+      "fix": "Dodaj rekord SPF u dostawcy domeny.",
       "effort_min": 20,
       "cost": "0 zł"
     },
@@ -205,11 +180,11 @@
       "id": "domain_dmarc",
       "chamber": "poczta",
       "label": "Rekord DMARC (ochrona przed podszyciem)",
-      "state": "missing",
-      "source": "kret",
-      "problem": "domena bez DMARC, każdy może wysłać maila „od kancelarii”",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "domena bez DMARC, każdy może wysłać maila w imieniu firmy",
       "ok_text": "DMARC z polityką odrzucania",
-      "evidence": "Brak rekordu TXT pod _dmarc.kancelaria-nowak.example.",
+      "evidence": "",
       "fix": "Dodaj rekord TXT _dmarc z polityką p=quarantine, po 2 tygodniach p=reject.",
       "effort_min": 30,
       "cost": "0 zł"
@@ -218,12 +193,12 @@
       "id": "payment_callback_rule",
       "chamber": "procedury",
       "label": "Zmianę numeru konta potwierdzamy telefonicznie",
-      "state": "missing",
-      "source": "answers",
+      "state": "unknown",
+      "source": "unverified",
       "problem": "zmiana numeru konta wystarczy, że przyjdzie mailem",
       "ok_text": "zmiany numerów kont zawsze potwierdzane telefonem",
-      "evidence": "Księgowość aktualizuje numery kont kontrahentów na podstawie maila.",
-      "fix": "Wprowadź zasadę: zmianę numeru konta potwierdzamy telefonem na numer z umowy. Wydrukuj i powieś przy biurku księgowości.",
+      "evidence": "",
+      "fix": "Wprowadź zasadę: zmianę numeru konta potwierdzamy telefonem na numer z umowy. Wydrukuj ją i powieś przy biurku osoby od płatności.",
       "effort_min": 10,
       "cost": "0 zł"
     },
@@ -231,12 +206,12 @@
       "id": "backup_offline",
       "chamber": "kopie",
       "label": "Kopia odłączona od sieci",
-      "state": "missing",
-      "source": "answers",
-      "problem": "dysk z kopiami stale podpięty, zaszyfrowałby się razem z resztą",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "kopie są stale podpięte i zaszyfrowałyby się razem z resztą",
       "ok_text": "jedna kopia leży offline",
-      "evidence": "NAS jest zamapowany jako dysk Z: na wszystkich komputerach.",
-      "fix": "Raz w tygodniu kopia na dysk USB, który po backupie wraca do sejfu. Odmapuj NAS z komputerów.",
+      "evidence": "",
+      "fix": "Raz w tygodniu zrób kopię na dysk USB, który po backupie odłączasz i chowasz.",
       "effort_min": 30,
       "cost": "ok. 300 zł za dysk"
     },
@@ -248,7 +223,7 @@
       "source": "unverified",
       "problem": "nikt nie sprawdził, czy z kopii da się odtworzyć pliki",
       "ok_text": "odtwarzanie przetestowane w tym kwartale",
-      "evidence": "Nie wiadomo, kiedy ostatnio odtwarzano pliki z kopii.",
+      "evidence": "",
       "fix": "Odtwórz jeden folder z kopii i sprawdź, czy pliki się otwierają.",
       "effort_min": 30,
       "cost": "0 zł"
@@ -256,13 +231,13 @@
     {
       "id": "website_updated",
       "chamber": "www",
-      "label": "WordPress i wtyczki aktualne",
-      "state": "present",
-      "source": "answers",
-      "problem": "nieaktualny WordPress",
-      "ok_text": "CMS aktualny",
-      "evidence": "Hosting aktualizuje WordPressa automatycznie.",
-      "fix": "Włącz automatyczne aktualizacje.",
+      "label": "Strona i jej wtyczki aktualne",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "nieaktualny system strony, na przykład WordPress",
+      "ok_text": "system strony aktualny",
+      "evidence": "",
+      "fix": "Włącz automatyczne aktualizacje u hostingu.",
       "effort_min": 15,
       "cost": "0 zł"
     },
@@ -270,81 +245,58 @@
       "id": "website_https",
       "chamber": "www",
       "label": "HTTPS i ważny certyfikat",
-      "state": "present",
-      "source": "kret",
-      "problem": "strona bez HTTPS",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "strona bez HTTPS albo z wygasającym certyfikatem",
       "ok_text": "certyfikat ważny, przekierowanie na HTTPS",
-      "evidence": "Certyfikat ważny jeszcze 61 dni.",
+      "evidence": "",
       "fix": "Włącz HTTPS u hostingu.",
       "effort_min": 15,
       "cost": "0 zł"
     }
   ],
-  "contacts": [
-    {
-      "name": "Biurex Hurtownia",
-      "domain": "biurex.example",
-      "phone": "+48 12 345 67 89",
-      "note": "dostawca materiałów biurowych, faktury co miesiąc"
-    },
-    {
-      "name": "Lis Transport, Marek Lis",
-      "domain": "lis-transport.example",
-      "phone": "+48 600 100 200",
-      "note": "klient kancelarii"
-    },
-    {
-      "name": "ExpresPak",
-      "domain": "expres-pak.example",
-      "phone": "",
-      "note": "firma kurierska"
-    }
-  ],
+  "contacts": [],
   "fallbacks": [
     {
       "id": "phone",
-      "label": "Telefon kancelarii",
-      "note": "u sekretariatu, działa bez poczty"
+      "label": "Telefon firmy",
+      "note": "działa bez poczty i internetu"
     },
     {
       "id": "sms",
       "label": "SMS do klientów",
-      "note": "z telefonu kancelarii"
+      "note": "z telefonu firmy"
     },
     {
       "id": "offline_copy",
-      "label": "Kopia akt offline",
-      "note": "dysk USB w sejfie, klucz ma Jan Nowak"
+      "label": "Kopia danych offline",
+      "note": "dysk odłączony od sieci"
     },
     {
       "id": "spare_laptop",
       "label": "Laptop zapasowy",
-      "note": "bez dostępu do poczty, do pisania pism"
+      "note": "do pracy, gdy główny komputer jest niezaufany"
     },
     {
       "id": "printed_card",
       "label": "Karta kreta w szufladzie",
-      "note": "wydrukowany poradnik i telefony"
+      "note": "wydrukowane pierwsze kroki i telefony"
     }
   ],
   "continuity": [
     {
-      "id": "court",
-      "label": "Termin w sądzie jutro 10:00",
+      "id": "key",
+      "label": "Najważniejsza sprawa w najbliższych 24 godzinach",
       "critical": true,
-      "fallback": "Pismo z kopii offline, wydruk na laptopie zapasowym.",
+      "fallback": "Dokumenty z kopii offline, praca na zapasowym komputerze.",
       "confirmations": [
         [
-          "court_doc",
-          "Pismo wydrukowane z kopii offline"
+          "key_docs",
+          "Potrzebne dokumenty są dostępne bez poczty"
         ],
         [
-          "court_folder",
-          "Teczka z pełnomocnictwem gotowa"
-        ],
-        [
-          "court_sub",
-          "Zastępstwo na wypadek choroby ustalone"
+          "key_person",
+          "Wiadomo, kto przejmie sprawę, jeśli trzeba"
         ]
       ]
     },
@@ -368,11 +320,11 @@
       "id": "clients",
       "label": "Kontakt z klientami",
       "critical": false,
-      "fallback": "Telefon i SMS z numeru kancelarii.",
+      "fallback": "Telefon i SMS z numeru firmy.",
       "confirmations": [
         [
           "cl_sms",
-          "Klienci dostali ostrzeżenie SMS"
+          "Klienci dostali ostrzeżenie"
         ],
         [
           "cl_web",

@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
-import type { Health } from '../api/types'
+import type { Health, Org } from '../api/types'
 import { BrandMark, Wordmark } from './BrandMark'
 import { Icon } from './icons'
 import { useHealth } from './useHealth'
@@ -21,9 +21,18 @@ export default function Shell() {
   const health = useHealth()
   const nav = useNavigate()
   const [menu, setMenu] = useState(false)
+  const [org, setOrg] = useState<Org | null>(null)
+
+  const reloadOrg = useCallback(async () => {
+    setOrg(await api.org())
+  }, [])
+
+  useEffect(() => {
+    api.org().then(setOrg)
+  }, [])
 
   const reset = async () => {
-    if (!confirm('Przywrócić dane demo? Incydenty i przejścia kreta zostaną usunięte.')) return
+    if (!confirm('Wrócić do firmy demo? Twoja firma, incydenty, maile i przejścia kreta zostaną usunięte z tego komputera.')) return
     await api.resetDemo()
     setMenu(false)
     nav('/app')
@@ -37,7 +46,7 @@ export default function Shell() {
           <BrandMark />
           <span>
             <Wordmark />
-            <small>Kancelaria Nowak</small>
+            <small>{org?.name || 'Twoja firma'}</small>
           </span>
         </Link>
         <nav className="mainnav" aria-label="Główna nawigacja">
@@ -55,16 +64,17 @@ export default function Shell() {
             <button className="btn btn-ghost btn-sm" aria-expanded={menu} onClick={() => setMenu((m) => !m)} aria-label="Więcej">⋯</button>
             {menu && (
               <div className="menu-pop" role="menu">
+                <Link to="/app/firma" role="menuitem" onClick={() => setMenu(false)}>Moja firma</Link>
                 <Link to="/" role="menuitem">Strona projektu</Link>
                 <Link to="/app/karta" role="menuitem" onClick={() => setMenu(false)}>Karta kreta do druku</Link>
-                <button role="menuitem" onClick={reset}>Reset danych demo</button>
+                <button role="menuitem" onClick={reset}>Wróć do firmy demo</button>
               </div>
             )}
           </div>
         </div>
       </header>
       <main className="page">
-        <Outlet />
+        <Outlet context={{ org, reloadOrg }} />
       </main>
     </div>
   )
