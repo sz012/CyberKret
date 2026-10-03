@@ -4,6 +4,7 @@ import { api } from '../api/client'
 import type { DomainResult, KretRun, KretStory, LocalCheck, Org, SafeguardState } from '../api/types'
 import { Icon } from '../components/icons'
 import Mascot from '../components/Mascot'
+import PasswordCheckCard from '../components/PasswordCheckCard'
 import TunnelMap, { type DigEvent } from '../components/TunnelMap'
 import { ago, plural } from '../util'
 
@@ -275,6 +276,7 @@ export default function Tunnels() {
       <section className="extra-checks">
         <DomainCheckCard defaultDomain={org.domain} onApplied={async () => setOrg(await api.org())} />
         <LocalCheckCard onApplied={async () => setOrg(await api.org())} />
+        <PasswordCheckCard name={org.name} domain={org.domain} />
       </section>
       {run && <p className="muted small mono">Ostatnie przejście kreta: {ago(run.created_at)}{run.label ? ` · ${run.label}` : ''}</p>}
     </div>

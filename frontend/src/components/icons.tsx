@@ -21,6 +21,7 @@ const P: Record<string, string> = {
   clock: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M12 7v5l3 2',
   paperclip: 'M20 11l-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7',
   upload: 'M12 16V4 M7 9l5-5 5 5 M4 20h16',
+  printer: 'M7 9V3h10v6 M6 18H4v-7h16v7h-2 M7 14h10v7H7z',
 }
 
 export function Icon({ name, size = 20, stroke = 1.8, className }: { name: string; size?: number; stroke?: number; className?: string }) {

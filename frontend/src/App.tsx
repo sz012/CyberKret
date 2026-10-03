@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Shell from './components/Shell'
 import Landing from './landing/Landing'
 import Dashboard from './views/Dashboard'
+import EmergencyCard from './views/EmergencyCard'
 import IncidentView from './views/IncidentView'
 import Incidents from './views/Incidents'
 import Mail from './views/Mail'
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="poczta" element={<Mail />} />
         <Route path="incydent" element={<Incidents />} />
         <Route path="incydent/:id" element={<IncidentView />} />
+        <Route path="karta" element={<EmergencyCard />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

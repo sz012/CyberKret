@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Icon } from '../components/icons'
+import { BrandMark } from '../components/BrandMark'
 import Mascot from '../components/Mascot'
 import './landing.css'
 import PlotTwist from './PlotTwist'
@@ -57,7 +58,7 @@ export default function Landing() {
     <div className="landing">
       <nav className="lnav">
         <a href="#top" className="brand">
-          <Mascot size={44} badge={false} cable={false} title="" />
+          <BrandMark size={40} />
           <b>CyberKret</b>
         </a>
         <div className="lnav-links">
@@ -132,7 +133,7 @@ export default function Landing() {
               <div className="mm-head"><span>Skrzynka · Grażyna Kowalska</span><span className="pill bad"><span className="dot" />nie otwieraj, zgłoś</span></div>
               <div className="mm-meta">
                 <div><span className="muted">Od:</span> Biurex Hurtownia &lt;faktury@<span className="flag">biurex-pl.example</span>&gt;</div>
-                <b>Aktualizacja numeru rachunku – FV/09/2026</b>
+                <b>Aktualizacja numeru rachunku - FV/09/2026</b>
               </div>
               <div className="mm-stop">
                 <div className="row gap-sm"><Mascot size={60} pose="alarm" badge={false} cable={false} /><strong>Stop. Kret znalazł 3 sygnały oszustwa.</strong></div>
@@ -242,7 +243,7 @@ export default function Landing() {
           <span className="depth">dla kogo</span>
           <h2>Dla firm, które mają najwięcej do stracenia, a nie mają działu IT.</h2>
           <div className="who">
-            {['Kancelarie', 'Biura rachunkowe', 'Doradcy podatkowi', 'Notariusze', 'Gabinety medyczne', 'Fundacje', 'Firmy 3–50 osób'].map((w) => <span key={w}>{w}</span>)}
+            {['Kancelarie', 'Biura rachunkowe', 'Doradcy podatkowi', 'Notariusze', 'Gabinety medyczne', 'Fundacje', 'Firmy 3-50 osób'].map((w) => <span key={w}>{w}</span>)}
           </div>
         </div>
       </section>

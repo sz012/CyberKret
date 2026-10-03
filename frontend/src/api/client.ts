@@ -1,5 +1,5 @@
 import type {
-  Analysis, DomainResult, Health, Incident, IncidentRow, KretRun, KretStory, LocalCheck, MailMessage, MailRow, Org,
+  Analysis, DomainResult, EmergencyCard, Health, Incident, IncidentRow, KretRun, KretStory, LocalCheck, MailMessage, MailRow, Org,
 } from './types'
 
 async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -22,6 +22,7 @@ async function req<T>(method: string, path: string, body?: unknown): Promise<T> 
 export const api = {
   health: () => req<Health>('GET', '/api/health'),
   org: () => req<Org>('GET', '/api/org'),
+  card: () => req<EmergencyCard>('GET', '/api/org/card'),
   patchSafeguard: (id: string, state: string) => req('PATCH', `/api/org/safeguards/${id}`, { state, source: 'answers' }),
 
   runKret: (label?: string) => req<KretRun>('POST', `/api/kret/run${label ? `?label=${encodeURIComponent(label)}` : ''}`),

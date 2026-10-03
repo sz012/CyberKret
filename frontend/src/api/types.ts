@@ -232,6 +232,22 @@ export interface ContinuityItem {
   confirmations: { id: string; label: string; done: boolean }[]
 }
 
+export interface Phase {
+  id: 'stop' | 'assess' | 'notify' | 'continue' | 'learn'
+  label: string
+  done: number
+  total: number
+}
+
+export interface EmergencyCard {
+  org: string
+  people: { id: string; name: string; role: string }[]
+  fallbacks: { id: string; label: string; note: string }[]
+  contacts: { name: string; domain: string; phone: string; note: string }[]
+  first_steps: { title: string; detail: string; role: string }[]
+  rules: string[]
+}
+
 export interface Situation {
   type_label: string
   questions: { id: string; text: string; options: { value: string; label: string }[]; answer: string | null }[]
@@ -241,6 +257,7 @@ export interface Situation {
   act_now: Action[]
   plan: Action[]
   continuity: { items: ContinuityItem[]; maintained: boolean; banner: string | null }
+  phases: Phase[]
   map: { untrusted: string[]; at_risk: string[]; fallbacks: string[] }
   uodo: { started_at: string; deadline: string } | null
   messages: { id: string; channel: string; text: string }[]

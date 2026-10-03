@@ -109,6 +109,15 @@ export default function Dashboard() {
         <span className="zero">0 B</span>
         <span className="muted small">wysłanych na zewnątrz</span>
       </section>
+
+      <section className="card-strip card">
+        <Icon name="printer" size={26} className="lamp" />
+        <div>
+          <b>Karta kreta do szuflady.</b>
+          <p className="muted">Wydrukuj ją, zanim coś się stanie. Gdy padnie poczta, internet albo prąd, każdy wie, co robić i do kogo dzwonić.</p>
+        </div>
+        <Link className="btn btn-ghost btn-sm" to="/app/karta">Otwórz kartę</Link>
+      </section>
     </div>
   )
 }

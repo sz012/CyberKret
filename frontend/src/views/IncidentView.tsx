@@ -4,6 +4,7 @@ import { api } from '../api/client'
 import type { Action, Incident, KretRun, Org } from '../api/types'
 import { Icon } from '../components/icons'
 import Mascot from '../components/Mascot'
+import PhaseStrip from '../components/PhaseStrip'
 import TunnelMap from '../components/TunnelMap'
 import { clock, time } from '../util'
 
@@ -102,6 +103,8 @@ export default function IncidentView() {
           {!closed && <button className="btn btn-ghost btn-sm" onClick={close}>Zamknij incydent</button>}
         </div>
       </header>
+
+      <PhaseStrip phases={s.phases} closed={closed} />
 
       <section className="brief card">
         <Mascot size={96} pose="report" />

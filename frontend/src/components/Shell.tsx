@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Health } from '../api/types'
+import { BrandMark } from './BrandMark'
 import { Icon } from './icons'
-import Mascot from './Mascot'
 
 export function useHealth() {
   const [h, setH] = useState<Health | null>(null)
@@ -48,7 +48,7 @@ export default function Shell() {
     <div className="shell">
       <header className="topbar">
         <Link to="/app" className="brand" aria-label="CyberKret, pulpit">
-          <Mascot size={46} pose="idle" badge={false} cable={false} title="" />
+          <BrandMark />
           <span>
             <b>CyberKret</b>
             <small>Kancelaria Nowak</small>
@@ -70,6 +70,7 @@ export default function Shell() {
             {menu && (
               <div className="menu-pop" role="menu">
                 <Link to="/" role="menuitem">Strona projektu</Link>
+                <Link to="/app/karta" role="menuitem" onClick={() => setMenu(false)}>Karta kreta do druku</Link>
                 <button role="menuitem" onClick={reset}>Reset danych demo</button>
               </div>
             )}
