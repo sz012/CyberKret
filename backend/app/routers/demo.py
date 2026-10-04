@@ -5,11 +5,32 @@ from email.utils import parsedate_to_datetime
 from fastapi import APIRouter
 
 from .. import config, db
+from ..incident.engine import situation
+from ..kret.engine import run
+from ..mail.analyze import parse, rules
 
 router = APIRouter(prefix="/api/demo", tags=["demo"])
 
 MAILBOX = "inbox"
 PENDING = {"01_biurex_phishing"}  # arrives live during the demo
+
+
+@router.get("/presentation")
+def presentation():
+    org = json.loads((config.SEED_DIR / "kancelaria_nowak.json").read_text())
+    before = run(org)
+    improved = json.loads(json.dumps(org))
+    first = before["moves"][0]["safeguard"]
+    for safeguard in improved["safeguards"]:
+        if safeguard["id"] == first:
+            safeguard["state"] = "present"
+    after = run(improved)
+    mail = rules(parse((config.SEED_DIR / "emails" / "01_biurex_phishing.eml").read_text()), org)
+    incident = {
+        "type": "fake_invoice", "answers": {"paid": "no", "sent": "no", "clicked": "no", "clients": "unknown"},
+        "facts": mail["indicators"], "action_status": {}, "confirmations": {}, "answered_at": {},
+    }
+    return {"org": org, "before": before, "after": after, "mail": mail, "situation": situation(incident, org)}
 
 
 def reset() -> None:

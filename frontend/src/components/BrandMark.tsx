@@ -1,4 +1,4 @@
-import { MARK_ARM, MARK_LAMP, MARK_LEG, MARK_STEM } from './markPaths'
+import { KRET_LETTERS, MARK_ARM, MARK_LAMP, MARK_LEG, MARK_STEM } from './markPaths'
 
 export function BrandMark({ size = 30, paper = false }: { size?: number; paper?: boolean }) {
   return (
@@ -15,8 +15,11 @@ export function BrandMark({ size = 30, paper = false }: { size?: number; paper?:
 
 export function Wordmark() {
   return (
-    <span className="wordmark">
-      <span>cyber</span>Kret
+    <span className="wordmark" role="img" aria-label="cyberKret">
+      <span aria-hidden="true">cyber</span>
+      <svg className="wordmark-kret" viewBox="10 6.25 137.25 51.5" aria-hidden="true">
+        <path d={KRET_LETTERS} fill="none" stroke="currentColor" strokeWidth="7.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
     </span>
   )
 }

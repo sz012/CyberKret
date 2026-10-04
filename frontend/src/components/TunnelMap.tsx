@@ -24,7 +24,7 @@ export interface DigEvent {
 
 interface Props {
   org: Org
-  run: KretRun | null
+  run: Pick<KretRun, 'tunnels' | 'chambers' | 'summary'> | null
   digToken?: number // change to start a dig animation of `run`
   fast?: boolean
   onEvent?: (e: DigEvent) => void

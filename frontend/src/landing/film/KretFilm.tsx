@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { span, wave } from './geometry'
-import { Network, Scout } from './Network'
+import { Network } from './Network'
 import { Blip, Probe, ScanBeam } from './Probe'
 import { Clock, Monitor, Motes, Port, PortLight, Room, RouterLeds, Tags, UnderCables } from './Room'
 import { AMBIENT, END, FLOOR, T, alarmLevel, camera, probeState } from './timeline'
@@ -83,9 +83,11 @@ function Defs() {
   )
 }
 
-export default function KretFilm() {
+export default function KretFilm({ time, presentation = false }: { time?: number; presentation?: boolean }) {
   const reduce = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
-  const [t, setT] = useState(reduce ? END : 0)
+  const [elapsed, setT] = useState(reduce ? END : 0)
+  const controlled = time !== undefined
+  const t = controlled ? Math.min(END, time) : elapsed
   const [aspect, setAspect] = useState(16 / 9)
   const raf = useRef(0)
   const stage = useRef<HTMLElement>(null)
@@ -102,9 +104,9 @@ export default function KretFilm() {
   }, [])
 
   useEffect(() => {
-    if (!reduce) play()
+    if (!reduce && !controlled) play()
     return () => cancelAnimationFrame(raf.current)
-  }, [play, reduce])
+  }, [play, reduce, controlled])
 
   useEffect(() => {
     const el = stage.current
@@ -153,7 +155,6 @@ export default function KretFilm() {
         <Blip t={t} />
 
         <Network t={t} />
-        <Scout t={t} />
 
         <PortLight t={t} warm={probe.warm} />
         {roomGlow > 0 && <circle className="kf-glow" cx={probe.p.x} cy={probe.p.y} r="520" fill="url(#kf-room)" opacity={roomGlow} />}
@@ -200,20 +201,20 @@ export default function KretFilm() {
         )}
         {caption?.key === 'purpose' && (
           <div className="kf-caption" key="purpose">
-            <h1>Kret sprawdza, którędy wszedłby ten prawdziwy.</h1>
-            {t >= T.sub && <p className="kf-sub">Pokazuje drogę i&nbsp;mówi, co zamknąć najpierw. Zanim zrobi to ktoś inny.</p>}
-            {t >= T.cta && (
+            <h1>Znajdź lukę, zanim znajdzie ją włamywacz.</h1>
+            {t >= T.sub && <p className="kf-sub">Kret pokazuje drogę do Twoich danych i&nbsp;mówi, co zamknąć najpierw.</p>}
+            {t >= T.cta && !presentation && (
               <div className="kf-cta">
                 <Link className="btn btn-lamp btn-lg" to="/app">Otwórz aplikację</Link>
                 <button type="button" className="kf-link" onClick={play}>Obejrzyj jeszcze raz</button>
               </div>
             )}
-            {t >= T.cta && <p className="kf-pillars">symulacja ataku · plan po incydencie · lokalny agent AI</p>}
+            {t >= T.cta && !presentation && <p className="kf-pillars">symulacja ataku · plan po incydencie · lokalny agent AI</p>}
           </div>
         )}
       </div>
 
-      {!ended && (
+      {!ended && !presentation && (
         <button type="button" className="kf-skip" onClick={skip}>
           Pomiń
         </button>

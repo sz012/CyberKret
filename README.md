@@ -1,4 +1,6 @@
-![cyberKret: Lepiej, żeby pierwszy był Twój kret.](docs/banner.png)
+<p align="center">
+  <img src="docs/banner.png" width="760" alt="cyberKret: Lepiej, żeby pierwszy był Twój kret.">
+</p>
 
 cyberKret is a local security assistant for small firms without an IT department. It maps the firm, finds the paths an attacker would take from the internet to client data, money or a stopped business ("tunnels"), and picks the changes that close the most of them. When something happens, it walks the team through the incident. Everything runs on one computer and the language model is local, so the firm's data never leaves it.
 
@@ -12,6 +14,7 @@ The interface is in Polish.
 - **Incident mode.** Five playbooks: fake invoice or account change request, ransomware, lost or stolen laptop, account takeover, internet or mail outage. Each one asks a few questions, keeps confirmed and unverified facts apart, weighs hypotheses and rebuilds the plan after every answer. Steps go to people by duty, critical work needs confirmed fallbacks, messages are ready to send, and a 72-hour clock starts when personal data may have leaked.
 - **Your firm.** People and duties, vendors with phone numbers from the contract, fallback channels and safeguard answers. A fictional demo firm is included.
 - **Emergency card.** A printable page with first steps for every incident type, roles, fallback channels and vendor phone numbers.
+- **Presentation.** `/demo` plays a 96-second story using the opening animation and actual rule-engine results for the fictional firm. It does not modify the saved firm. Local narration clips can extend each scene. Recording instructions and the Polish voiceover script are in [docs/demo.md](docs/demo.md).
 
 ## Run locally
 
@@ -45,6 +48,8 @@ ollama pull hf.co/second-state/Bielik-4.5B-v3.0-Instruct-GGUF:Q4_K_M
 Settings live in `.env.local` in the repository root (copy `.env.example`). To read Gmail, turn on 2-step verification, create an app password at https://myaccount.google.com/apppasswords and set `IMAP_USER` and `IMAP_PASSWORD`. Restart the backend after changes.
 
 Tests: `backend/.venv/bin/pytest backend/tests`. The real-model tests run only when Ollama has a model.
+
+Frontend checks (from `frontend`): `npm test`, `npm run lint`, `npm run build`.
 
 ## Data and credits
 
