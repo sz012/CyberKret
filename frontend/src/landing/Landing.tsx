@@ -16,7 +16,10 @@ export default function Landing() {
           <BrandMark size={34} />
           <Wordmark />
         </Link>
-        <Link className="lnav-app" to="/app">Otwórz aplikację</Link>
+        <div className="lnav-links">
+          <Link className="lnav-app lnav-demo" to="/demo">Zobacz demo</Link>
+          <Link className="lnav-app" to="/app">Otwórz aplikację</Link>
+        </div>
       </nav>
       <KretFilm />
     </div>

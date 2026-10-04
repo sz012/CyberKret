@@ -22,6 +22,22 @@ export function Network({ t }: { t: number }) {
         ))}
       </g>
 
+      {drawn > 0 && (
+        <g fill="none" strokeLinecap="round">
+          <path d={TUNNEL.d} stroke="#ff6159" strokeWidth="12" opacity="0.14" strokeDasharray={TUNNEL.length} strokeDashoffset={TUNNEL.length * (1 - drawn)} />
+          <path d={TUNNEL.d} stroke="#ff6159" strokeWidth="2.6" strokeDasharray={TUNNEL.length} strokeDashoffset={TUNNEL.length * (1 - drawn)} />
+          {hit && <path d={TUNNEL.d} stroke="#ffd2cf" strokeWidth="1.6" strokeDasharray="3 15" strokeDashoffset={-t / 30} />}
+          {!hit && (
+            <g className="kf-glow">
+              <circle cx={head.x} cy={head.y} r="40" fill="url(#kf-glow-red)" />
+              <circle cx={head.x} cy={head.y} r="4" fill="#ffe1de" stroke="none" />
+            </g>
+          )}
+        </g>
+      )}
+
+      <Scout t={t} />
+
       <g transform={`translate(${INTERNET.x} ${INTERNET.y})`}>
         <circle r="24" fill="#0c0f13" stroke="#3a4150" strokeWidth="1.5" />
         <g color="#c9ced8">
@@ -74,24 +90,11 @@ export function Network({ t }: { t: number }) {
         <text x="48" y="16" className="kf-verdict" fill={hit ? '#ff6159' : '#6b7484'}>{hit ? 'w zasięgu włamywacza' : 'bezpieczne?'}</text>
       </g>
 
-      {drawn > 0 && (
-        <g fill="none" strokeLinecap="round">
-          <path d={TUNNEL.d} stroke="#ff6159" strokeWidth="12" opacity="0.14" strokeDasharray={TUNNEL.length} strokeDashoffset={TUNNEL.length * (1 - drawn)} />
-          <path d={TUNNEL.d} stroke="#ff6159" strokeWidth="2.6" strokeDasharray={TUNNEL.length} strokeDashoffset={TUNNEL.length * (1 - drawn)} />
-          {hit && <path d={TUNNEL.d} stroke="#ffd2cf" strokeWidth="1.6" strokeDasharray="3 15" strokeDashoffset={-t / 30} />}
-          {!hit && (
-            <g className="kf-glow">
-              <circle cx={head.x} cy={head.y} r="40" fill="url(#kf-glow-red)" />
-              <circle cx={head.x} cy={head.y} r="4" fill="#ffe1de" stroke="none" />
-            </g>
-          )}
-        </g>
-      )}
     </g>
   )
 }
 
-export function Scout({ t }: { t: number }) {
+function Scout({ t }: { t: number }) {
   if (t < LEGS[0].start - 100) return null
   const u = legProgress(t, LEGS, ROUTE.ends)
   const p = ROUTE.at(u)
