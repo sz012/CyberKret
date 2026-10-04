@@ -4,8 +4,6 @@ cyberKret is a local security assistant for small firms without an IT department
 
 The interface is in Polish.
 
-![Tunnels view: attack paths on the office map and the three moves that close them](docs/tunele.png)
-
 ## Features
 
 - **Tunnels.** An attack graph of 8 techniques over 12 safeguards. A depth-first search finds every path from the internet to a target, and a greedy pass picks the safeguards that cut the most target weight first, with time and cost. Every finding says where it comes from: checked by the app, from your answers, or unverified.
@@ -14,8 +12,6 @@ The interface is in Polish.
 - **Incident mode.** Five playbooks: fake invoice or account change request, ransomware, lost or stolen laptop, account takeover, internet or mail outage. Each one asks a few questions, keeps confirmed and unverified facts apart, weighs hypotheses and rebuilds the plan after every answer. Steps go to people by duty, critical work needs confirmed fallbacks, messages are ready to send, and a 72-hour clock starts when personal data may have leaked.
 - **Your firm.** People and duties, vendors with phone numbers from the contract, fallback channels and safeguard answers. A fictional demo firm is included.
 - **Emergency card.** A printable page with first steps for every incident type, roles, fallback channels and vendor phone numbers.
-
-![Landing page: the kret walks through the office network and shows the attacker's path](docs/film.png)
 
 ## Run locally
 
