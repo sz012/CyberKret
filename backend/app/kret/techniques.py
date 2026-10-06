@@ -1,4 +1,4 @@
-"""Attack techniques the kret simulates on the organization map.
+"""Attack techniques the mole simulates on the organization map.
 
 A technique works when every safeguard in `requires_missing` is absent. An empty list means it always works
 once the attacker stands at `src` (e.g. a mailbox owner can always read files on its drive).
@@ -9,63 +9,63 @@ ENTRY = "internet"
 
 POSITIONS = {
     "internet": "Internet",
-    "rdp_session": "Komputer z otwartym pulpitem zdalnym",
-    "admin_all_pcs": "Administrator na wszystkich komputerach",
-    "m365_account": "Przejęte konto pocztowe",
-    "email_spoof": "Fałszywy mail od firmy lub kontrahenta",
-    "client_data_read": "Dane klientów",
-    "money_stolen": "Pieniądze",
-    "operations_stopped": "Praca firmy",
+    "rdp_session": "Computer with remote desktop open",
+    "admin_all_pcs": "Admin on every computer",
+    "m365_account": "Taken-over email account",
+    "email_spoof": "Fake email from the company or a vendor",
+    "client_data_read": "Client data",
+    "money_stolen": "Money",
+    "operations_stopped": "Business operations",
 }
 
 TECHNIQUES = [
     {
-        "id": "T1", "name": "Otwarty pulpit zdalny",
+        "id": "T1", "name": "Open remote desktop",
         "src": ["internet"], "dst": "rdp_session", "chamber": "siec",
         "requires_missing": ["router_no_rdp"],
-        "narration": "Wchodzę z internetu prosto na pulpit komputera, bo router wystawia port 3389. Boty próbują takich drzwi co kilka minut.",
+        "narration": "I come in from the internet straight onto a computer's desktop, because the router exposes port 3389. Bots try doors like this every few minutes.",
     },
     {
-        "id": "T2", "name": "Wspólne hasło administratora",
+        "id": "T2", "name": "Shared admin password",
         "src": ["rdp_session"], "dst": "admin_all_pcs", "chamber": "komputery",
         "requires_missing": ["unique_admin_passwords"],
-        "narration": "Na tym komputerze wyciągam hasło konta administratora. Pasuje też do pozostałych komputerów, więc mam je wszystkie.",
+        "narration": "On this computer I pull out the admin account password. It also works on the other computers, so now I have all of them.",
     },
     {
-        "id": "T3", "name": "Phishing na konto bez MFA",
+        "id": "T3", "name": "Phishing an account without MFA",
         "src": ["internet"], "dst": "m365_account", "chamber": "konta",
         "requires_missing": ["m365_mfa"],
-        "narration": "Wysyłam osobie od faktur fałszywą stronę logowania do poczty. Wystarczy samo hasło, bo konto nie ma drugiego kroku.",
+        "narration": "I send the person who handles invoices a fake email login page. The password alone is enough, because the account has no second step.",
     },
     {
-        "id": "T4", "name": "Podszycie pod domenę",
+        "id": "T4", "name": "Domain spoofing",
         "src": ["internet"], "dst": "email_spoof", "chamber": "poczta",
         "requires_missing": ["domain_dmarc"],
-        "narration": "Piszę maila jako Twoja firma albo jej kontrahent. Bez DMARC skrzynki odbiorców nie mają podstaw, żeby go odrzucić.",
+        "narration": "I write an email as your company or one of its vendors. Without DMARC the recipients' mailboxes have no grounds to reject it.",
     },
     {
-        "id": "T5", "name": "Pliki na koncie",
+        "id": "T5", "name": "Files in the account",
         "src": ["m365_account"], "dst": "client_data_read", "chamber": "konta",
         "requires_missing": [],
-        "narration": "Z przejętego konta otwieram pliki w chmurze. Dane klientów są w środku.",
+        "narration": "From the taken-over account I open the files in the cloud. The client data is right there.",
     },
     {
-        "id": "T6", "name": "Dyski stanowisk",
+        "id": "T6", "name": "Workstation drives",
         "src": ["admin_all_pcs"], "dst": "client_data_read", "chamber": "komputery",
         "requires_missing": [],
-        "narration": "Jako administrator kopiuję dane klientów z dysków i z udziałów sieciowych.",
+        "narration": "As an admin I copy client data from the drives and the network shares.",
     },
     {
-        "id": "T7", "name": "Szyfrowanie razem z kopiami",
+        "id": "T7", "name": "Encrypting the backups too",
         "src": ["admin_all_pcs"], "dst": "operations_stopped", "chamber": "kopie",
         "requires_missing": ["backup_offline"],
-        "narration": "Uruchamiam ransomware na wszystkich komputerach. Kopia jest stale podpięta do sieci, więc szyfruje się razem z resztą.",
+        "narration": "I run ransomware on every computer. The backup is always connected to the network, so it gets encrypted with everything else.",
     },
     {
-        "id": "T8", "name": "Fałszywy numer konta",
+        "id": "T8", "name": "Fake bank account number",
         "src": ["m365_account", "email_spoof"], "dst": "money_stolen", "chamber": "procedury",
         "requires_missing": ["payment_callback_rule"],
-        "narration": "Proszę osobę od płatności o nowy numer rachunku do faktury. Nikt nie dzwoni, żeby to potwierdzić, więc przelew idzie do mnie.",
+        "narration": "I ask the person who makes payments to use a new account number for an invoice. Nobody calls to confirm it, so the money comes to me.",
     },
 ]
 

@@ -23,14 +23,14 @@ def runs():
 async def story(run_id: int):
     r = db.get_run(run_id)
     if not r:
-        raise HTTPException(404, "Nie ma takiego przejścia kreta")
+        raise HTTPException(404, "No such mole run")
     return await run_in_threadpool(explain.kret_story, r)
 
 
 @router.post("/domain-check")
 async def domain(body: DomainCheck):
     if not body.consent:
-        raise HTTPException(400, "Kret sprawdza tylko domeny, do których masz prawo. Potwierdź zgodę.")
+        raise HTTPException(400, "The mole only checks domains you have the right to check. Confirm your consent.")
     try:
         result = await run_in_threadpool(domain_check.check, body.domain)
     except domain_check.DomainError as e:

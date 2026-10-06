@@ -41,7 +41,7 @@ def patch_safeguard(sid: str, body: SafeguardPatch):
     org = db.get_org()
     s = next((s for s in org["safeguards"] if s["id"] == sid), None)
     if not s:
-        raise HTTPException(404, "Nie ma takiego zabezpieczenia")
+        raise HTTPException(404, "No such safeguard")
     s["state"], s["source"] = body.state, body.source
     db.save_org(org)
     return s

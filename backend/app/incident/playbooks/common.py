@@ -1,6 +1,6 @@
 YES, NO, UNKNOWN = "yes", "no", "unknown"
 
-YES_NO = [(YES, "Tak"), (NO, "Nie"), (UNKNOWN, "Nie wiem")]
+YES_NO = [(YES, "Yes"), (NO, "No"), (UNKNOWN, "Not sure yet")]
 
 
 def lvl(ctx: dict, hypothesis: str) -> str:
@@ -25,7 +25,7 @@ def boss_name(org: dict) -> str | None:
 
 def phone_line(org: dict) -> str:
     phone = org.get("phone", "").strip()
-    return f"prosimy o telefon: {phone}." if phone else "prosimy o kontakt telefoniczny."
+    return f"please call us on {phone}." if phone else "please contact us by phone."
 
 
 def hypothesis(label: str, level: str, explain: str, because: list[str], warned: str | None) -> dict:

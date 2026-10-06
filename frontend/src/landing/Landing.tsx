@@ -6,19 +6,19 @@ import './landing.css'
 
 export default function Landing() {
   useEffect(() => {
-    document.title = 'cyberKret · Lepiej, żeby pierwszy był Twój kret'
+    document.title = 'cyberMole · Better your own mole gets in first'
   }, [])
 
   return (
     <div className="landing">
-      <nav className="lnav" aria-label="cyberKret">
-        <Link to="/" className="brand" aria-label="cyberKret, strona główna">
+      <nav className="lnav" aria-label="cyberMole">
+        <Link to="/" className="brand" aria-label="cyberMole, home">
           <BrandMark size={34} />
           <Wordmark />
         </Link>
         <div className="lnav-links">
-          <Link className="lnav-app lnav-demo" to="/demo">Zobacz demo</Link>
-          <Link className="lnav-app" to="/app">Otwórz aplikację</Link>
+          <Link className="lnav-app lnav-demo" to="/demo">Watch the demo</Link>
+          <Link className="lnav-app" to="/app">Open the app</Link>
         </div>
       </nav>
       <KretFilm />

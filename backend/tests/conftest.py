@@ -15,7 +15,7 @@ from app.main import app  # noqa: E402
 
 @pytest.fixture
 def org():
-    return json.loads((config.SEED_DIR / "kancelaria_nowak.json").read_text())
+    return json.loads((config.SEED_DIR / "nowak_law_office.json").read_text())
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ZxcvbnFactory } from '@zxcvbn-ts/core'
 
-const STRENGTH = ['bardzo słabe', 'słabe', 'średnie', 'dobre', 'bardzo dobre']
+const STRENGTH = ['very weak', 'weak', 'fair', 'good', 'very good']
 const LEVEL = ['bad', 'bad', 'warn', 'ok', 'ok']
 
 interface Strength {
@@ -13,15 +13,16 @@ interface Strength {
 }
 
 async function createChecker(): Promise<ZxcvbnFactory> {
-  const [core, common, polish] = await Promise.all([
+  const [core, common, english, polish] = await Promise.all([
     import('@zxcvbn-ts/core'),
     import('@zxcvbn-ts/language-common'),
+    import('@zxcvbn-ts/language-en'),
     import('@zxcvbn-ts/language-pl'),
   ])
   return new core.ZxcvbnFactory({
-    translations: polish.translations,
+    translations: english.translations,
     graphs: common.adjacencyGraphs,
-    dictionary: { ...common.dictionary, ...polish.dictionary },
+    dictionary: { ...common.dictionary, ...english.dictionary, ...polish.dictionary },
   })
 }
 
@@ -60,16 +61,16 @@ export default function PasswordCheckCard({ name, domain }: { name: string; doma
 
   return (
     <div className="card">
-      <div className="card-head"><h3>Sprawdź siłę hasła</h3><span className="src kret">tylko w przeglądarce</span></div>
+      <div className="card-head"><h3>Check password strength</h3><span className="src kret">in the browser only</span></div>
       <div className="card-pad stack">
-        <p className="muted small">Hasło nie opuszcza tej karty przeglądarki. Nie trafia na serwer, do dziennika ani do modelu.</p>
+        <p className="muted small">The password never leaves this browser tab. It does not reach the server, the log or the model.</p>
         <input
           className="input"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Wpisz hasło"
-          aria-label="Hasło do sprawdzenia"
+          placeholder="Type a password"
+          aria-label="Password to check"
           autoComplete="off"
           spellCheck={false}
         />
@@ -79,8 +80,8 @@ export default function PasswordCheckCard({ name, domain }: { name: string; doma
               {STRENGTH.map((label, i) => <span key={label} className={i <= strength.score ? 'on' : undefined} />)}
             </div>
             <p className="small">
-              <b className={LEVEL[strength.score]}>Hasło {STRENGTH[strength.score]}.</b>{' '}
-              <span className="muted">Złamanie przy wycieku zajęłoby: {strength.crackTime}.</span>
+              <b className={LEVEL[strength.score]}>Password strength: {STRENGTH[strength.score]}.</b>{' '}
+              <span className="muted">Cracking it after a leak would take: {strength.crackTime}.</span>
             </p>
             {strength.warning && <p className="small warn">{strength.warning}</p>}
             {strength.suggestions.length > 0 && (

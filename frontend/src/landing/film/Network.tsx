@@ -74,7 +74,7 @@ export function Network({ t }: { t: number }) {
             </g>
             <text x={labelX} y={labelY} textAnchor={anchor} className="kf-label">{node.label}</text>
             <text x={labelX} y={labelY + 19} textAnchor={anchor} className="kf-verdict" fill={arrived ? color : '#6b7484'}>
-              {arrived ? node.verdict : 'czeka na kreta'}
+              {arrived ? node.verdict : 'waiting for the mole'}
             </text>
           </g>
         )
@@ -86,8 +86,8 @@ export function Network({ t }: { t: number }) {
         <g color={hit ? '#ffb4ae' : '#c9ced8'}>
           <IconG name="folder" x={0} y={0} size={26} stroke={1.6} />
         </g>
-        <text x="48" y="-3" className="kf-label">Akta klientów</text>
-        <text x="48" y="16" className="kf-verdict" fill={hit ? '#ff6159' : '#6b7484'}>{hit ? 'w zasięgu włamywacza' : 'bezpieczne?'}</text>
+        <text x="48" y="-3" className="kf-label">Client files</text>
+        <text x="48" y="16" className="kf-verdict" fill={hit ? '#ff6159' : '#6b7484'}>{hit ? 'exposed to attack' : 'safe?'}</text>
       </g>
 
     </g>

@@ -8,10 +8,10 @@ import PhaseStrip from '../components/PhaseStrip'
 import TunnelMap from '../components/TunnelMap'
 import { clock, time } from '../util'
 
-const LEVEL = { likely: 'prawdopodobne', possible: 'możliwe', unlikely: 'mało prawdopodobne' }
+const LEVEL = { likely: 'likely', possible: 'possible', unlikely: 'unlikely' }
 const NEXT_STATUS: Record<string, Action['status']> = { todo: 'in_progress', in_progress: 'done', done: 'todo' }
-const STATUS_LABEL: Record<string, string> = { todo: 'do zrobienia', in_progress: 'w toku', done: 'zrobione' }
-const CONT_LABEL: Record<string, string> = { ok: 'działa', fallback: 'działa awaryjnie', paused: 'w trakcie', at_risk: 'zagrożone' }
+const STATUS_LABEL: Record<string, string> = { todo: 'to do', in_progress: 'in progress', done: 'done' }
+const CONT_LABEL: Record<string, string> = { ok: 'working', fallback: 'on backup', paused: 'in progress', at_risk: 'at risk' }
 
 export default function IncidentView() {
   const { id } = useParams()
@@ -51,8 +51,8 @@ export default function IncidentView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [iid])
 
-  if (missing) return <p className="muted">Nie ma takiego incydentu. Mógł zostać usunięty przy zmianie firmy albo powrocie do demo.</p>
-  if (!inc || !org) return <p className="muted">Ładowanie incydentu…</p>
+  if (missing) return <p className="muted">There is no such incident. It may have been removed when the company changed or after going back to the demo.</p>
+  if (!inc || !org) return <p className="muted">Loading the incident…</p>
   const s = inc.situation
   const closed = inc.status === 'closed'
 
@@ -72,12 +72,12 @@ export default function IncidentView() {
   const cycle = async (a: Action) => setInc(await api.actionStatus(iid, a.id, NEXT_STATUS[a.status]))
   const confirm = async (cid: string, done: boolean) => setInc(await api.confirm(iid, cid, done))
   const close = async () => {
-    if (!window.confirm('Zamknąć incydent? Kret zaproponuje, co zasypać, żeby to się nie powtórzyło.')) return
+    if (!window.confirm('Close the incident? The mole will suggest what to fill in so it does not happen again.')) return
     setInc(await api.closeIncident(iid))
   }
   const fill = async () => {
     await api.applySafeguards(lessons)
-    nav('/app/tunele?kop=1&label=po%20incydencie')
+    nav('/app/tunnels?dig=1&label=after%20incident')
   }
 
   const started = new Date(inc.created_at).getTime()
@@ -89,23 +89,23 @@ export default function IncidentView() {
     <div className="incident-page">
       <header className={`inc-head card ${closed ? 'closed' : 'live'}`}>
         <div className="stack">
-          <span className="eyebrow">{closed ? 'Incydent zamknięty' : 'Incydent trwa'} · #{inc.id}</span>
+          <span className="eyebrow">{closed ? 'Incident closed' : 'Incident in progress'} · #{inc.id}</span>
           <h1>{s.type_label}</h1>
           <div className="row gap wrap">
-            <span className="pill lamp"><Icon name="clock" size={14} /> {closed ? `zamknięty ${time(inc.closed_at!)}` : `trwa ${clock(now - started)}`}</span>
-            <span className="pill muted">{doneCount} z {s.plan.length} kroków zrobionych</span>
-            <span className="pill ok"><Icon name="wifiOff" size={14} /> działa bez internetu</span>
+            <span className="pill lamp"><Icon name="clock" size={14} /> {closed ? `closed ${time(inc.closed_at!)}` : `running ${clock(now - started)}`}</span>
+            <span className="pill muted">{doneCount} of {s.plan.length} steps done</span>
+            <span className="pill ok"><Icon name="wifiOff" size={14} /> works offline</span>
           </div>
         </div>
         <div className="inc-head-right">
           {uodoLeft !== null && (
             <div className="uodo">
-              <span className="eyebrow bad">Zgłoszenie do UODO</span>
+              <span className="eyebrow bad">Report to the data protection authority</span>
               <b className="mono">{clock(uodoLeft)}</b>
-              <span className="muted small">72 h od stwierdzenia naruszenia</span>
+              <span className="muted small">72 h from discovering the breach (GDPR)</span>
             </div>
           )}
-          {!closed && <button className="btn btn-ghost btn-sm" onClick={close}>Zamknij incydent</button>}
+          {!closed && <button className="btn btn-ghost btn-sm" onClick={close}>Close the incident</button>}
         </div>
       </header>
 
@@ -115,22 +115,22 @@ export default function IncidentView() {
         <Mascot size={96} pose="report" />
         <div>
           <div className="row gap-sm">
-            <h3>Odprawa od kreta</h3>
-            <span className={`src ${brief?.llm.model ? 'model' : ''}`}>{briefBusy ? 'model myśli…' : brief?.llm.model ? `${brief.llm.model} · lokalnie` : 'szablon'}</span>
+            <h3>The mole's briefing</h3>
+            <span className={`src ${brief?.llm.model ? 'model' : ''}`}>{briefBusy ? 'model is thinking…' : brief?.llm.model ? `${brief.llm.model} · local` : 'template'}</span>
           </div>
           {brief ? (
             <>
               <p>{brief.brief}</p>
-              {brief.next && <p className="story-next">Teraz najważniejsze: {brief.next}</p>}
+              {brief.next && <p className="story-next">Most important now: {brief.next}</p>}
             </>
           ) : (
-            <p className="muted thinking">Kret układa odprawę…</p>
+            <p className="muted thinking">The mole is preparing the briefing…</p>
           )}
         </div>
       </section>
 
       <section>
-        <h2 className="h2">Co wiemy? <span className="muted h2-sub">„Nie wiem jeszcze” też jest odpowiedzią. Plan zmieni się po każdym nowym fakcie.</span></h2>
+        <h2 className="h2">What do we know? <span className="muted h2-sub">"Not sure yet" is a valid answer too. The plan changes with every new fact.</span></h2>
         <div className="questions">
           {s.questions.map((q) => (
             <div key={q.id} className={`q card ${q.answer ? '' : 'unanswered'}`}>
@@ -149,35 +149,35 @@ export default function IncidentView() {
         <div className="diff card" role="status">
           <Icon name="alert" size={18} className="lamp" />
           <div>
-            <b>Nowy fakt, plan przebudowany: +{diff.added.length}, −{diff.removed.length}.</b>
-            {diff.added.length > 0 && <p className="ok small">Dochodzi: {diff.added.join('; ')}</p>}
-            {diff.removed.length > 0 && <p className="muted small">Odpada: {diff.removed.join('; ')}</p>}
+            <b>New fact, plan rebuilt: +{diff.added.length}, −{diff.removed.length}.</b>
+            {diff.added.length > 0 && <p className="ok small">Added: {diff.added.join('; ')}</p>}
+            {diff.removed.length > 0 && <p className="muted small">Dropped: {diff.removed.join('; ')}</p>}
           </div>
         </div>
       )}
 
       <section className="three">
         <div className="col card">
-          <div className="card-head"><h3>Potwierdzone</h3><span className="pill ok">{s.confirmed.length}</span></div>
+          <div className="card-head"><h3>Confirmed</h3><span className="pill ok">{s.confirmed.length}</span></div>
           <ul className="facts">
-            {(allFacts ? s.confirmed : [...s.confirmed.filter((f) => f.source !== 'kret pocztowy'), ...s.confirmed.filter((f) => f.source === 'kret pocztowy').slice(0, 3)]).map((f, i) => (
-              <li key={i}><span>{f.text}</span><span className={`src ${f.source === 'kret pocztowy' ? 'kret' : ''}`}>{f.source}</span></li>
+            {(allFacts ? s.confirmed : [...s.confirmed.filter((f) => f.source !== 'mail mole'), ...s.confirmed.filter((f) => f.source === 'mail mole').slice(0, 3)]).map((f, i) => (
+              <li key={i}><span>{f.text}</span><span className={`src ${f.source === 'mail mole' ? 'kret' : ''}`}>{f.source}</span></li>
             ))}
-            {!allFacts && s.confirmed.filter((f) => f.source === 'kret pocztowy').length > 3 && (
-              <li><button className="btn btn-ghost btn-sm" onClick={() => setAllFacts(true)}>Pokaż wszystkie sygnały z maila ({s.confirmed.filter((f) => f.source === 'kret pocztowy').length})</button></li>
+            {!allFacts && s.confirmed.filter((f) => f.source === 'mail mole').length > 3 && (
+              <li><button className="btn btn-ghost btn-sm" onClick={() => setAllFacts(true)}>Show all signals from the email ({s.confirmed.filter((f) => f.source === 'mail mole').length})</button></li>
             )}
-            {!s.confirmed.length && <li className="muted">Jeszcze nic.</li>}
+            {!s.confirmed.length && <li className="muted">Nothing yet.</li>}
           </ul>
         </div>
         <div className="col card">
-          <div className="card-head"><h3>Niezweryfikowane</h3><span className="pill warn">{s.unverified.length}</span></div>
+          <div className="card-head"><h3>Unverified</h3><span className="pill warn">{s.unverified.length}</span></div>
           <ul className="facts">
             {s.unverified.map((f, i) => <li key={i}><span>{f.text}</span><span className="src unverified">{f.source}</span></li>)}
-            {!s.unverified.length && <li className="muted">Wszystko ustalone.</li>}
+            {!s.unverified.length && <li className="muted">Everything is settled.</li>}
           </ul>
         </div>
         <div className="col card act-now">
-          <div className="card-head"><h3>Działaj teraz</h3><span className="muted small">bezpieczne bez względu na przyczynę</span></div>
+          <div className="card-head"><h3>Act now</h3><span className="muted small">safe whatever the cause</span></div>
           <ul className="actions">
             {s.act_now.map((a) => <ActionItem key={a.id} a={a} onClick={() => cycle(a)} disabled={closed} />)}
           </ul>
@@ -193,21 +193,21 @@ export default function IncidentView() {
             </div>
             <div className="meter"><i style={{ width: h.level === 'likely' ? '85%' : h.level === 'possible' ? '50%' : '12%' }} /></div>
             <p className="muted small">{h.explain}</p>
-            {h.because.length > 0 && <p className="small">Bo: {h.because.join('; ')}.</p>}
+            {h.because.length > 0 && <p className="small">Because: {h.because.join('; ')}.</p>}
             {h.kret_warned && <p className="warned"><Mascot size={34} pose="report" /> {h.kret_warned}</p>}
           </div>
         ))}
       </section>
 
       <section className="impact">
-        <h2 className="h2">Co jest zagrożone</h2>
+        <h2 className="h2">What is at risk</h2>
         <div className="impact-grid">
           <div className="card map-wrap">
             <TunnelMap org={org} run={run} impact={closed ? null : s.map} compact />
           </div>
           <div className="card card-pad stack">
             <p>{s.map.note}</p>
-            <b>Kanały zastępcze, ustalone wcześniej:</b>
+            <b>Backup channels agreed in advance:</b>
             <div className="chips">
               {s.map.fallbacks.map((f) => <span key={f} className="chip on-ok"><Icon name="check" size={14} /> {f}</span>)}
             </div>
@@ -216,7 +216,7 @@ export default function IncidentView() {
       </section>
 
       <section>
-        <h2 className="h2">Pełny plan <span className="muted h2-sub">kliknij krok, żeby zmienić status</span></h2>
+        <h2 className="h2">Full plan <span className="muted h2-sub">click a step to change its status</span></h2>
         <div className="plan">
           {groups.map((g) => (
             <div key={g.p} className="plan-group card">
@@ -230,17 +230,17 @@ export default function IncidentView() {
       </section>
 
       <section className="continuity">
-        <h2 className="h2">Ciągłość: czy firma działa?</h2>
+        <h2 className="h2">Continuity: is the business running?</h2>
         {s.continuity.maintained ? (
           <div className="banner ok"><Icon name="check" size={22} /> {s.continuity.banner}</div>
         ) : (
-          <div className="banner warn"><Icon name="alert" size={20} /> Nie mówimy „działamy”, dopóki ktoś nie potwierdzi tego, co krytyczne. Samo odhaczenie kroków nie wystarcza.</div>
+          <div className="banner warn"><Icon name="alert" size={20} /> We do not say "we are up" until someone confirms what is critical. Ticking off steps is not enough.</div>
         )}
         <div className="cont-grid">
           {s.continuity.items.map((c) => (
             <div key={c.id} className={`cont card st-${c.status}`}>
               <div className="card-head">
-                <h3>{c.label} {c.top && <span className="pill lamp">najważniejsze</span>}</h3>
+                <h3>{c.label} {c.top && <span className="pill lamp">top priority</span>}</h3>
                 <span className={`pill ${c.status === 'at_risk' ? 'bad' : c.status === 'paused' ? 'warn' : 'ok'}`}><span className="dot" />{CONT_LABEL[c.status]}</span>
               </div>
               <div className="card-pad stack">
@@ -257,7 +257,7 @@ export default function IncidentView() {
       </section>
 
       <section>
-        <h2 className="h2">Gotowe komunikaty</h2>
+        <h2 className="h2">Ready-made messages</h2>
         <div className="msgs">
           {s.messages.map((m) => <Message key={m.id} channel={m.channel} text={m.text} />)}
         </div>
@@ -267,23 +267,23 @@ export default function IncidentView() {
         <section className="fill card">
           <Mascot size={120} pose="dig" />
           <div className="stack">
-            <span className="eyebrow">Wnioski</span>
-            <h2>Zasypmy tunel, którym to przyszło.</h2>
-            <p className="muted">Kret zaznaczył zabezpieczenia, które zamknęłyby drogę temu atakowi. Odhacz te, które już wprowadziliście, a kret przekopie mapę jeszcze raz.</p>
+            <span className="eyebrow">Lessons</span>
+            <h2>Let us fill in the tunnel this came through.</h2>
+            <p className="muted">The mole marked the safeguards that would have closed the path for this attack. Tick the ones you have put in place and the mole will dig through the map again.</p>
             {s.lessons.map((l) => (
               <label key={l.id} className="check">
                 <input type="checkbox" checked={lessons.includes(l.id)} disabled={l.state === 'present'}
                   onChange={(e) => setLessons((ls) => (e.target.checked ? [...ls, l.id] : ls.filter((x) => x !== l.id)))} />
-                <span><b>{l.label}</b> <span className="muted small">{l.state === 'present' ? '(już jest)' : `${l.effort_min} min · ${l.fix}`}</span></span>
+                <span><b>{l.label}</b> <span className="muted small">{l.state === 'present' ? '(already in place)' : `${l.effort_min} min · ${l.fix}`}</span></span>
               </label>
             ))}
-            <div><button className="btn btn-lamp" disabled={!lessons.length} onClick={fill}>Zasyp i wpuść kreta ▸</button></div>
+            <div><button className="btn btn-lamp" disabled={!lessons.length} onClick={fill}>Fill in and send the mole ▸</button></div>
           </div>
         </section>
       )}
 
       <section>
-        <h2 className="h2">Dziennik</h2>
+        <h2 className="h2">Log</h2>
         <ol className="timeline">
           {inc.events.map((e) => (
             <li key={e.id} className={`ev-${e.kind}`}>
@@ -300,7 +300,7 @@ export default function IncidentView() {
 function ActionItem({ a, onClick, disabled, showSafe }: { a: Action; onClick: () => void; disabled?: boolean; showSafe?: boolean }) {
   return (
     <li className={`action st-${a.status}`}>
-      <button onClick={onClick} disabled={disabled} aria-label={`${a.title}: ${STATUS_LABEL[a.status]}. Zmień status.`}>
+      <button onClick={onClick} disabled={disabled} aria-label={`${a.title}: ${STATUS_LABEL[a.status]}. Change status.`}>
         <span className="box">{a.status === 'done' ? '✓' : a.status === 'in_progress' ? '…' : ''}</span>
         <span className="a-body">
           <b>{a.title}</b>
@@ -308,7 +308,7 @@ function ActionItem({ a, onClick, disabled, showSafe }: { a: Action; onClick: ()
           <span className="row gap-sm wrap">
             <span className="src">{a.role_label}</span>
             {a.status !== 'todo' && <span className={`src ${a.status === 'done' ? 'fixed' : 'kret'}`}>{STATUS_LABEL[a.status]}</span>}
-            {showSafe && a.safe_any_cause && <span className="src fixed">bezpieczne zawsze</span>}
+            {showSafe && a.safe_any_cause && <span className="src fixed">always safe</span>}
           </span>
         </span>
       </button>
@@ -322,7 +322,7 @@ function Message({ channel, text }: { channel: string; text: string }) {
     <div className="msg card card-pad stack">
       <div className="row between"><b>{channel}</b>
         <button className="btn btn-ghost btn-sm" onClick={() => { navigator.clipboard?.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500) }}>
-          <Icon name="copy" size={14} /> {copied ? 'Skopiowane' : 'Kopiuj'}
+          <Icon name="copy" size={14} /> {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
       <p className="muted">{text}</p>

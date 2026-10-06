@@ -7,7 +7,7 @@ import httpx
 
 from .. import config
 
-log = logging.getLogger("cyberkret.llm")
+log = logging.getLogger("cybermole.llm")
 _resolved_model: str | None = None
 PREFERRED = ("bielik", "qwen", "gemma")
 
@@ -39,7 +39,7 @@ def model() -> str | None:
 
 
 def options() -> dict:
-    return {"temperature": 0.1, "num_ctx": config.OLLAMA_CTX, "num_predict": 500}
+    return {"temperature": 0.1, "num_ctx": config.OLLAMA_CTX, "num_predict": 800}
 
 
 def chat_json(system: str, user: str, schema: dict | None = None, timeout: float | None = None) -> tuple[dict | None, dict]:
@@ -47,10 +47,10 @@ def chat_json(system: str, user: str, schema: dict | None = None, timeout: float
     m = model()
     meta = {"model": m, "local": True, "ms": None, "error": None}
     if not m:
-        meta["error"] = "brak lokalnego modelu"
+        meta["error"] = "no local model"
         return None, meta
     if schema:
-        system = f"{system}\n\nSchemat odpowiedzi (JSON Schema):\n{json.dumps(schema, ensure_ascii=False)}"
+        system = f"{system}\n\nAnswer schema (JSON Schema):\n{json.dumps(schema, ensure_ascii=False)}"
     body = {
         "model": m,
         "stream": False,

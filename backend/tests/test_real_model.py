@@ -12,31 +12,32 @@ def real_model(monkeypatch):
     monkeypatch.setattr(config, "LLM_DISABLED", False)
     monkeypatch.setattr(ollama, "_resolved_model", None)
     if not ollama.list_models():
-        pytest.skip("Ollama nie działa albo nie ma pobranego modelu")
+        pytest.skip("Ollama is not running or has no model pulled")
     return ollama.model()
 
 
-def polish(text: str) -> bool:
-    return any(ch in text for ch in "ąćęłńóśźż") and len(text.split()) >= 5
+def english(text: str) -> bool:
+    words = text.lower().split()
+    return len(words) >= 5 and any(w in words for w in ("the", "a", "to", "and", "is", "your", "you")) and not any(ch in text for ch in "ąćęłńśźż")
 
 
-def test_model_explains_phishing_in_polish(real_model, org):
+def test_model_explains_phishing_in_english(real_model, org):
     msg = an.parse((config.SEED_DIR / "emails" / "01_biurex_phishing.eml").read_text())
-    r = an.analyze(msg, org, recipient_name="Grażyna")
-    print(f"\n[{real_model}] {r['llm']['ms']} ms\nwerdykt: {r['verdict']}\n{r['summary']}\nco zrobić: {r['what_to_do']}")
+    r = an.analyze(msg, org, recipient_name="Grace")
+    print(f"\n[{real_model}] {r['llm']['ms']} ms\nverdict: {r['verdict']}\n{r['summary']}\nwhat to do: {r['what_to_do']}")
     assert r["llm"]["error"] is None, r["llm"]
     assert r["verdict"] == "danger"
-    assert polish(r["summary"]) and r["what_to_do"]
+    assert english(r["summary"]) and r["what_to_do"]
 
 
 def test_model_tells_the_kret_story(real_model, org):
     s = explain.kret_story(engine.run(org))
     print(f"\n[{real_model}] {s['llm']['ms']} ms\n{s['headline']}\n{s['story']}\n{s['first_step']}")
-    assert s["llm"]["error"] is None and polish(s["story"])
+    assert s["llm"]["error"] is None and english(s["story"])
 
 
 def test_model_writes_incident_brief(real_model, client):
     inc = client.post("/api/incidents", json={"type": "ransomware"}).json()
     b = explain.incident_brief(inc["situation"])
-    print(f"\n[{real_model}] {b['llm']['ms']} ms\n{b['brief']}\nteraz: {b['next']}")
-    assert b["llm"]["error"] is None and polish(b["brief"])
+    print(f"\n[{real_model}] {b['llm']['ms']} ms\n{b['brief']}\nnow: {b['next']}")
+    assert b["llm"]["error"] is None and english(b["brief"])

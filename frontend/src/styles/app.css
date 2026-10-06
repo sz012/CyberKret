@@ -64,7 +64,7 @@ p { margin: 0; }
 .kret { flex: none; overflow: visible; color: var(--lamp); }
 .kret-happy { color: var(--ok); }
 .kret-alarm { color: var(--bad); }
-.kret-k path { fill: none; stroke: var(--fg-2); stroke-width: 8; stroke-linecap: round; transition: stroke .4s; }
+.kret-k path { fill: none; stroke: var(--fg-2); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; transition: stroke .4s; }
 .kret-lamp { fill: currentColor; }
 .kret-spark { fill: #fff8e6; opacity: .85; }
 .kret-halo { opacity: .7; transform-box: fill-box; transform-origin: center; }
@@ -184,7 +184,7 @@ p { margin: 0; }
 .brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
 .wordmark { display: inline-flex; align-items: baseline; font: 640 20px/1 var(--display); letter-spacing: -0.02em; white-space: nowrap; }
 .wordmark span { font-weight: 360; color: var(--fg-2); }
-.wordmark-kret { width: 1.943em; height: .729em; overflow: visible; flex: none; }
+.wordmark-mole { width: 2.01em; height: .729em; overflow: visible; flex: none; }
 .brand small { display: block; font: 500 11.5px/1.3 var(--mono); color: var(--muted); }
 .mainnav { display: flex; gap: 4px; }
 .mainnav a { white-space: nowrap; padding: 8px 14px; border-radius: var(--r-sm); text-decoration: none; color: var(--fg-2); font-weight: 500; font-size: 15px; }

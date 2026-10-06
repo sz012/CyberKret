@@ -2,11 +2,11 @@ from .. import org as org_mod
 from . import playbook as pb
 
 RULES = [
-    "Nie płać na numer konta podany mailem. Zadzwoń do kontrahenta na numer z umowy.",
-    "Nie kasuj podejrzanych maili ani żądań okupu. To dowód dla banku, policji i CERT Polska.",
-    "Przelew już wyszedł? Dzwoń do banku od razu, liczą się godziny.",
-    "Możliwy wyciek danych klientów: 72 godziny na zgłoszenie do UODO od chwili stwierdzenia.",
-    "Incydent zgłaszasz do CERT Polska przez incydent.cert.pl.",
+    "Never pay to an account number sent by email. Call the vendor on the number from the contract.",
+    "Do not delete suspicious emails or ransom notes. They are evidence for the bank, the police and CERT.",
+    "Has the payment already gone out? Call the bank right away, hours matter.",
+    "Possible leak of client data: 72 hours to notify the data protection authority (UODO in Poland) from the moment you know.",
+    "Report the incident to your national CERT (in Poland: CERT Polska, incydent.cert.pl).",
 ]
 
 

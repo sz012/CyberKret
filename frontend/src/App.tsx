@@ -16,15 +16,15 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/demo" element={<Suspense fallback={<div className="page" role="status">Przygotowuję demo…</div>}><Demo /></Suspense>} />
+      <Route path="/demo" element={<Suspense fallback={<div className="page" role="status">Preparing the demo…</div>}><Demo /></Suspense>} />
       <Route path="/app" element={<Shell />}>
         <Route index element={<Dashboard />} />
-        <Route path="tunele" element={<Tunnels />} />
-        <Route path="poczta" element={<Mail />} />
-        <Route path="incydent" element={<Incidents />} />
-        <Route path="incydent/:id" element={<IncidentView />} />
-        <Route path="karta" element={<EmergencyCard />} />
-        <Route path="firma" element={<Company />} />
+        <Route path="tunnels" element={<Tunnels />} />
+        <Route path="mail" element={<Mail />} />
+        <Route path="incident" element={<Incidents />} />
+        <Route path="incident/:id" element={<IncidentView />} />
+        <Route path="card" element={<EmergencyCard />} />
+        <Route path="company" element={<Company />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

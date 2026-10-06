@@ -1,15 +1,15 @@
 import { useId } from 'react'
-import { MARK_ARM, MARK_LAMP, MARK_LEG, MARK_STEM } from './markPaths'
+import { MARK_ARM, MARK_LAMP, MARK_STROKES } from './markPaths'
 
 export type Pose = 'idle' | 'dig' | 'check' | 'happy' | 'alarm' | 'report'
 
 const STATE: Record<Pose, string> = {
-  idle: 'czeka',
-  dig: 'sprawdza',
-  check: 'analizuje',
-  happy: 'wszystko w porządku',
+  idle: 'waiting',
+  dig: 'checking',
+  check: 'analysing',
+  happy: 'all good',
   alarm: 'alarm',
-  report: 'raport gotowy',
+  report: 'report ready',
 }
 
 interface Props {
@@ -23,7 +23,7 @@ export default function Mascot({ size = 160, pose = 'idle', className = '' }: Pr
   const box = Math.round(size * 0.78)
   const { x, y, r } = MARK_LAMP
   return (
-    <svg className={`kret kret-${pose} ${className}`} viewBox="-6 -18 88 88" width={box} height={box} role="img" aria-label={`Kret: ${STATE[pose]}`}>
+    <svg className={`kret kret-${pose} ${className}`} viewBox="-6 -18 88 88" width={box} height={box} role="img" aria-label={`Mole: ${STATE[pose]}`}>
       <defs>
         <radialGradient id={glow}>
           <stop offset="0.2" stopColor="currentColor" stopOpacity="0.55" />
@@ -38,9 +38,7 @@ export default function Mascot({ size = 160, pose = 'idle', className = '' }: Pr
         </g>
       )}
       <g className="kret-k">
-        <path d={MARK_STEM} />
-        <path d={MARK_ARM} />
-        <path d={MARK_LEG} />
+        {MARK_STROKES.map((d) => <path key={d} d={d} />)}
       </g>
       {pose === 'dig' && <path className="kret-flow" d={MARK_ARM} />}
       <circle className="kret-lamp" cx={x} cy={y} r={r} />

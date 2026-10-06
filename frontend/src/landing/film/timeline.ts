@@ -37,11 +37,11 @@ export interface NetNode {
 }
 
 export const NODES: NetNode[] = [
-  { id: 'siec', label: 'Sieć i router', icon: 'router', p: P(170, 740), status: 'bad', verdict: 'pulpit zdalny otwarty', side: 'left' },
-  { id: 'komputery', label: 'Komputery', icon: 'laptop', p: P(370, 800), status: 'ok', verdict: 'w porządku' },
-  { id: 'konta', label: 'Konta i hasła', icon: 'key', p: P(600, 830), status: 'bad', verdict: 'admin bez MFA', side: 'right' },
-  { id: 'poczta', label: 'Poczta', icon: 'mail', p: P(830, 800), status: 'warn', verdict: 'brak DMARC' },
-  { id: 'kopie', label: 'Kopie zapasowe', icon: 'disk', p: P(1040, 740), status: 'ok', verdict: 'w porządku' },
+  { id: 'siec', label: 'Network & router', icon: 'router', p: P(170, 740), status: 'bad', verdict: 'remote desktop open', side: 'left' },
+  { id: 'komputery', label: 'Computers', icon: 'laptop', p: P(370, 800), status: 'ok', verdict: 'all good' },
+  { id: 'konta', label: 'Accounts', icon: 'key', p: P(600, 830), status: 'bad', verdict: 'admin without MFA', side: 'right' },
+  { id: 'poczta', label: 'Email', icon: 'mail', p: P(830, 800), status: 'warn', verdict: 'no DMARC' },
+  { id: 'kopie', label: 'Backups', icon: 'disk', p: P(1040, 740), status: 'ok', verdict: 'all good' },
 ]
 
 const UPLINK: Cubic = [P(INTERNET.x, INTERNET.y + 24), P(60, 630), P(110, 710), NODES[0].p]
@@ -95,8 +95,8 @@ function angleFromHover(p: Pt): number {
 }
 
 const TAG_SPOTS: { id: string; label: string; at: Pt; to: Pt }[] = [
-  { id: 'monitor', label: 'komputer', at: P(630, 236), to: P(630, 196) },
-  { id: 'akta', label: 'akta klientów', at: P(205, 268), to: P(205, 226) },
+  { id: 'monitor', label: 'computer', at: P(630, 236), to: P(630, 196) },
+  { id: 'akta', label: 'client files', at: P(205, 268), to: P(205, 226) },
   { id: 'router', label: 'router', at: P(434, 388), to: P(434, 316) },
 ]
 

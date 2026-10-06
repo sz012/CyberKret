@@ -6,14 +6,14 @@ import { Icon } from '../components/icons'
 import { useOrg } from '../components/orgContext'
 
 const DUTIES: { value: Duty; label: string }[] = [
-  { value: 'boss', label: 'Szef, podejmuje decyzje' },
-  { value: 'finance', label: 'Płatności i faktury' },
-  { value: 'office', label: 'Biuro i klienci' },
-  { value: 'it', label: 'Informatyk' },
-  { value: 'other', label: 'Inna rola' },
+  { value: 'boss', label: 'Owner, makes decisions' },
+  { value: 'finance', label: 'Payments and invoices' },
+  { value: 'office', label: 'Office and clients' },
+  { value: 'it', label: 'IT' },
+  { value: 'other', label: 'Other role' },
 ]
 
-const STATE_LABEL: Record<SafeguardState, string> = { present: 'jest', missing: 'brak', unknown: 'nie wiem' }
+const STATE_LABEL: Record<SafeguardState, string> = { present: 'yes', missing: 'no', unknown: "don't know" }
 
 function toProfile(org: Org): OrgProfile {
   const owner = org.people.findIndex((p) => p.id === org.mailbox_owner)
@@ -47,7 +47,7 @@ export default function Company() {
     })
   }, [])
 
-  if (!org || !form) return <p className="muted">Ładowanie firmy…</p>
+  if (!org || !form) return <p className="muted">Loading the company…</p>
 
   const update = (patch: Partial<OrgProfile>) => setForm({ ...form, ...patch })
   const setPerson = (i: number, patch: Partial<OrgProfile['people'][number]>) =>
@@ -78,7 +78,7 @@ export default function Company() {
       setOrg(o)
       setForm(toProfile(o))
       await reloadOrg()
-      setStatus({ ok: true, text: 'Zapisano. Kret użyje tych danych przy kolejnym przejściu, w poczcie i w incydencie.' })
+      setStatus({ ok: true, text: 'Saved. The mole will use this data in its next run, in email checks and in incidents.' })
     } catch (x) {
       setStatus({ ok: false, text: (x as Error).message })
     } finally {
@@ -88,13 +88,13 @@ export default function Company() {
 
   const startOwn = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!confirm('Zacząć od własnej firmy? Dane demo (incydenty, maile i przejścia kreta) zostaną usunięte z tego komputera.')) return
+    if (!confirm('Start with your own company? Demo data (incidents, emails and mole runs) will be removed from this computer.')) return
     const o = await api.newOrg(newName.trim())
     setOrg(o)
     setForm(toProfile(o))
     setNewName('')
     await reloadOrg()
-    setStatus({ ok: true, text: 'Firma utworzona. Uzupełnij ludzi i kontrahentów, potem odpowiedz na pytania o zabezpieczenia.' })
+    setStatus({ ok: true, text: 'Company created. Add people and vendors, then answer the questions about safeguards.' })
   }
 
   const setSafeguard = async (id: string, state: SafeguardState) => {
@@ -108,21 +108,21 @@ export default function Company() {
     <div className="company-page">
       <header className="page-head">
         <div>
-          <span className="eyebrow">Ustawienia</span>
-          <h1>Moja firma</h1>
-          <p className="muted">Kret sprawdza to, co tu wpiszesz: ludzi, kontrahentów, domenę i zabezpieczenia. Wszystko zostaje na tym komputerze.</p>
+          <span className="eyebrow">Settings</span>
+          <h1>My company</h1>
+          <p className="muted">The mole checks what you enter here: people, vendors, the domain and safeguards. Everything stays on this computer.</p>
         </div>
       </header>
 
       {org.demo && (
         <section className="card card-pad demo-note">
           <div>
-            <b>Teraz oglądasz firmę demo: {org.name}.</b>
-            <p className="muted">Silniki działają naprawdę, ale na zmyślonych danych. Zacznij od swojej firmy, a kret będzie sprawdzał Ciebie.</p>
+            <b>You are looking at a demo company: {org.name}.</b>
+            <p className="muted">The engines really work, but on made-up data. Start with your own company and the mole will check you.</p>
           </div>
           <form className="row gap-sm wrap" onSubmit={startOwn}>
-            <input className="input" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Nazwa Twojej firmy" aria-label="Nazwa Twojej firmy" maxLength={80} />
-            <button className="btn btn-lamp" disabled={!newName.trim()}>Zacznij od mojej firmy</button>
+            <input className="input" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Your company name" aria-label="Your company name" maxLength={80} />
+            <button className="btn btn-lamp" disabled={!newName.trim()}>Start with my company</button>
           </form>
         </section>
       )}
@@ -131,99 +131,99 @@ export default function Company() {
 
       <form className="company-form" onSubmit={save}>
         <section className="card">
-          <div className="card-head"><h3>Firma</h3><span>podstawowe dane</span></div>
+          <div className="card-head"><h3>Company</h3><span>basic details</span></div>
           <div className="card-pad form-grid">
             <label className="field">
-              <span>Nazwa</span>
+              <span>Name</span>
               <input className="input" required maxLength={80} value={form.name} onChange={(e) => update({ name: e.target.value })} />
             </label>
             <label className="field">
-              <span>Domena firmy</span>
-              <input className="input" maxLength={253} value={form.domain} onChange={(e) => update({ domain: e.target.value })} placeholder="firma.pl" />
+              <span>Company domain</span>
+              <input className="input" maxLength={253} value={form.domain} onChange={(e) => update({ domain: e.target.value })} placeholder="company.com" />
             </label>
             <label className="field">
-              <span>Telefon firmy</span>
-              <input className="input" maxLength={40} value={form.phone} onChange={(e) => update({ phone: e.target.value })} placeholder="trafi do komunikatów dla klientów" />
+              <span>Company phone</span>
+              <input className="input" maxLength={40} value={form.phone} onChange={(e) => update({ phone: e.target.value })} placeholder="goes into messages for clients" />
             </label>
             <label className="field">
-              <span>Czym się zajmujecie</span>
-              <input className="input" maxLength={300} value={form.description} onChange={(e) => update({ description: e.target.value })} placeholder="np. biuro rachunkowe, 6 osób" />
+              <span>What you do</span>
+              <input className="input" maxLength={300} value={form.description} onChange={(e) => update({ description: e.target.value })} placeholder="e.g. accounting office, 6 people" />
             </label>
             <label className="field wide">
-              <span>Co musi się udać w najbliższych 24 godzinach, nawet gdy padnie poczta?</span>
-              <input className="input" maxLength={120} value={form.key_deadline} onChange={(e) => update({ key_deadline: e.target.value })} placeholder="np. termin w sądzie, wypłaty, wysyłka zamówień" />
+              <span>What must get done in the next 24 hours, even if email goes down?</span>
+              <input className="input" maxLength={120} value={form.key_deadline} onChange={(e) => update({ key_deadline: e.target.value })} placeholder="e.g. a court deadline, payroll, shipping orders" />
             </label>
           </div>
         </section>
 
         <section className="card">
-          <div className="card-head"><h3>Ludzie</h3><span>kroki w incydencie trafiają do osób według funkcji</span></div>
+          <div className="card-head"><h3>People</h3><span>incident steps go to people by their role</span></div>
           <div className="card-pad stack">
-            {form.people.length === 0 && <p className="muted small">Dodaj przynajmniej siebie. Kret przypisze Ci kroki w incydencie i pokaże Cię na karcie awaryjnej.</p>}
+            {form.people.length === 0 && <p className="muted small">Add at least yourself. The mole will assign you incident steps and put you on the emergency card.</p>}
             {form.people.map((p, i) => (
               <div key={i} className="edit-row people-row">
-                <input className="input" required maxLength={80} value={p.name} onChange={(e) => setPerson(i, { name: e.target.value })} placeholder="Imię i nazwisko" aria-label="Imię i nazwisko" />
-                <input className="input" maxLength={80} value={p.role} onChange={(e) => setPerson(i, { role: e.target.value })} placeholder="Stanowisko" aria-label="Stanowisko" />
-                <select className="input" value={p.duty} onChange={(e) => setPerson(i, { duty: e.target.value as Duty })} aria-label="Funkcja">
+                <input className="input" required maxLength={80} value={p.name} onChange={(e) => setPerson(i, { name: e.target.value })} placeholder="Full name" aria-label="Full name" />
+                <input className="input" maxLength={80} value={p.role} onChange={(e) => setPerson(i, { role: e.target.value })} placeholder="Job title" aria-label="Job title" />
+                <select className="input" value={p.duty} onChange={(e) => setPerson(i, { duty: e.target.value as Duty })} aria-label="Role">
                   {DUTIES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
                 </select>
                 <label className="check small owner-check">
                   <input type="radio" name="owner" checked={form.mailbox_owner_index === i} onChange={() => update({ mailbox_owner_index: i })} />
-                  skrzynka
+                  mailbox
                 </label>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => removePerson(i)} aria-label={`Usuń ${p.name || 'osobę'}`}>Usuń</button>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => removePerson(i)} aria-label={`Remove ${p.name || 'person'}`}>Remove</button>
               </div>
             ))}
             <div className="row gap-sm wrap">
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => update({ people: [...form.people, { name: '', role: '', duty: form.people.length ? 'other' : 'boss' }], mailbox_owner_index: form.mailbox_owner_index ?? 0 })}>
-                Dodaj osobę
+                Add a person
               </button>
-              <span className="muted small">„Skrzynka” oznacza osobę, której pocztę czyta kret pocztowy.</span>
+              <span className="muted small">"Mailbox" marks the person whose email the mail mole reads.</span>
             </div>
           </div>
         </section>
 
         <section className="card">
-          <div className="card-head"><h3>Kontrahenci</h3><span>kret porównuje z nimi nadawców maili</span></div>
+          <div className="card-head"><h3>Vendors</h3><span>the mole compares email senders with them</span></div>
           <div className="card-pad stack">
-            {form.contacts.length === 0 && <p className="muted small">Wpisz firmy, od których dostajecie faktury. Mail z podobnej, ale innej domeny kret oznaczy jako podróbkę, a telefon trafi na kartę awaryjną.</p>}
+            {form.contacts.length === 0 && <p className="muted small">Add the companies that send you invoices. The mole flags email from a similar but different domain as a fake, and the phone number goes on the emergency card.</p>}
             {form.contacts.map((c, i) => (
               <div key={i} className="edit-row contact-row">
-                <input className="input" required maxLength={80} value={c.name} onChange={(e) => setContact(i, { name: e.target.value })} placeholder="Nazwa" aria-label="Nazwa kontrahenta" />
-                <input className="input" maxLength={253} value={c.domain} onChange={(e) => setContact(i, { domain: e.target.value })} placeholder="domena, np. hurtownia.pl" aria-label="Domena kontrahenta" />
-                <input className="input" maxLength={40} value={c.phone} onChange={(e) => setContact(i, { phone: e.target.value })} placeholder="telefon z umowy" aria-label="Telefon kontrahenta" />
-                <input className="input" maxLength={200} value={c.note} onChange={(e) => setContact(i, { note: e.target.value })} placeholder="notatka" aria-label="Notatka" />
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => update({ contacts: form.contacts.filter((_, k) => k !== i) })} aria-label={`Usuń ${c.name || 'kontrahenta'}`}>Usuń</button>
+                <input className="input" required maxLength={80} value={c.name} onChange={(e) => setContact(i, { name: e.target.value })} placeholder="Name" aria-label="Vendor name" />
+                <input className="input" maxLength={253} value={c.domain} onChange={(e) => setContact(i, { domain: e.target.value })} placeholder="domain, e.g. supplier.com" aria-label="Vendor domain" />
+                <input className="input" maxLength={40} value={c.phone} onChange={(e) => setContact(i, { phone: e.target.value })} placeholder="phone from the contract" aria-label="Vendor phone" />
+                <input className="input" maxLength={200} value={c.note} onChange={(e) => setContact(i, { note: e.target.value })} placeholder="note" aria-label="Note" />
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => update({ contacts: form.contacts.filter((_, k) => k !== i) })} aria-label={`Remove ${c.name || 'vendor'}`}>Remove</button>
               </div>
             ))}
-            <div><button type="button" className="btn btn-ghost btn-sm" onClick={() => update({ contacts: [...form.contacts, { ...EMPTY_CONTACT }] })}>Dodaj kontrahenta</button></div>
+            <div><button type="button" className="btn btn-ghost btn-sm" onClick={() => update({ contacts: [...form.contacts, { ...EMPTY_CONTACT }] })}>Add a vendor</button></div>
           </div>
         </section>
 
         <section className="card">
-          <div className="card-head"><h3>Kanały zastępcze</h3><span>czym się kontaktujecie, gdy padnie poczta</span></div>
+          <div className="card-head"><h3>Backup channels</h3><span>how you reach each other when email is down</span></div>
           <div className="card-pad stack">
             {form.fallbacks.map((f, i) => (
               <div key={i} className="edit-row fallback-row">
-                <input className="input" required maxLength={60} value={f.label} onChange={(e) => setFallback(i, { label: e.target.value })} placeholder="np. telefon firmy" aria-label="Kanał" />
-                <input className="input" maxLength={200} value={f.note} onChange={(e) => setFallback(i, { note: e.target.value })} placeholder="notatka" aria-label="Notatka" />
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => update({ fallbacks: form.fallbacks.filter((_, k) => k !== i) })} aria-label={`Usuń ${f.label || 'kanał'}`}>Usuń</button>
+                <input className="input" required maxLength={60} value={f.label} onChange={(e) => setFallback(i, { label: e.target.value })} placeholder="e.g. company phone" aria-label="Channel" />
+                <input className="input" maxLength={200} value={f.note} onChange={(e) => setFallback(i, { note: e.target.value })} placeholder="note" aria-label="Note" />
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => update({ fallbacks: form.fallbacks.filter((_, k) => k !== i) })} aria-label={`Remove ${f.label || 'channel'}`}>Remove</button>
               </div>
             ))}
-            <div><button type="button" className="btn btn-ghost btn-sm" onClick={() => update({ fallbacks: [...form.fallbacks, { label: '', note: '' }] })}>Dodaj kanał</button></div>
+            <div><button type="button" className="btn btn-ghost btn-sm" onClick={() => update({ fallbacks: [...form.fallbacks, { label: '', note: '' }] })}>Add a channel</button></div>
           </div>
         </section>
 
         <div className="save-bar">
-          <button className="btn btn-lamp" disabled={busy}>{busy ? 'Zapisuję…' : 'Zapisz zmiany'}</button>
-          <span className="muted small">Zabezpieczenia poniżej zapisują się od razu.</span>
+          <button className="btn btn-lamp" disabled={busy}>{busy ? 'Saving…' : 'Save changes'}</button>
+          <span className="muted small">Safeguards below are saved right away.</span>
         </div>
       </form>
 
       <section className="card">
-        <div className="card-head"><h3>Zabezpieczenia</h3><span>{answered} z {org.safeguards.length} z odpowiedzią</span></div>
+        <div className="card-head"><h3>Safeguards</h3><span>{answered} of {org.safeguards.length} answered</span></div>
         <div className="card-pad stack">
-          <p className="muted small">Odpowiedz zgodnie z prawdą. „Nie wiem” też jest odpowiedzią: kret pokaże wtedy tunel jako możliwy. Domenę i ten komputer kret sprawdzi sam w Tunelach.</p>
+          <p className="muted small">Answer honestly. "Don't know" is a valid answer too: the mole then shows the tunnel as possible. The mole checks the domain and this computer by itself in Tunnels.</p>
           <ul className="sg-list">
             {org.safeguards.map((s) => (
               <li key={s.id} className="sg-item">
@@ -231,7 +231,7 @@ export default function Company() {
                   <b>{s.label}</b>
                   {s.help && <p className="muted small">{s.help}</p>}
                 </div>
-                <div className="seg" role="group" aria-label={`Stan: ${s.label}`}>
+                <div className="seg" role="group" aria-label={`Status: ${s.label}`}>
                   {(['present', 'missing', 'unknown'] as SafeguardState[]).map((st) => (
                     <button key={st} type="button" className={s.state === st ? 'on' : ''} onClick={() => setSafeguard(s.id, st)}>{STATE_LABEL[st]}</button>
                   ))}
@@ -239,7 +239,7 @@ export default function Company() {
               </li>
             ))}
           </ul>
-          <div><Link className="btn btn-lamp btn-sm" to="/app/tunele?kop=1"><Icon name="router" size={16} /> Wpuść kreta do mojej firmy</Link></div>
+          <div><Link className="btn btn-lamp btn-sm" to="/app/tunnels?dig=1"><Icon name="router" size={16} /> Send the mole into my company</Link></div>
         </div>
       </section>
     </div>

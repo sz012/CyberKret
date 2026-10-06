@@ -4,14 +4,14 @@ import { IconG } from './icons'
 
 /*
  * Cross-section of the office. Above the raised floor: desks, a rack and the internet uplink.
- * Below it: network cables from the patch panel to every "chamber" (a thing the kret checks).
- * The kret rides inside the cables. Attack tunnels are drawn as red lines from the internet to what hurts.
+ * Below it: network cables from the patch panel to every "chamber" (a thing the mole checks).
+ * The mole rides inside the cables. Attack tunnels are drawn as red lines from the internet to what hurts.
  */
 
 const HUB = { x: 500, y: 186 }
 const CLOUD = { x: 86, y: 58 }
 const TARGET_ICON: Record<string, string> = { client_data_read: 'folder', money_stolen: 'money', operations_stopped: 'briefcase' }
-const STATUS_TEXT: Record<string, string> = { ok: 'w porządku', warn: 'do sprawdzenia', bad: 'otwarte', checking: 'kret sprawdza', pending: '…', idle: '' }
+const STATUS_TEXT: Record<string, string> = { ok: 'fine', warn: 'to check', bad: 'open', checking: 'mole is checking', pending: '…', idle: '' }
 
 export type ChamberState = Level | 'checking' | 'pending' | 'idle'
 
@@ -115,7 +115,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
       setStates(Object.fromEntries(org.chambers.map((c) => [c.id, 'pending' as ChamberState])))
       setMoleVisible(true)
       placeMole(HUB.x, HUB.y)
-      onEvent?.({ kind: 'start', text: `Kret wchodzi pod ${org.name}: ${run.chambers.length} kabli do sprawdzenia.`, level: 'info' })
+      onEvent?.({ kind: 'start', text: `The mole goes under ${org.name}: ${run.chambers.length} cables to check.`, level: 'info' })
       await sleep(400 * speed)
       for (const c of run.chambers) {
         if (!alive()) return
@@ -138,7 +138,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
         await sleep(650 * speed)
         const t = run.tunnels[i]
         setShown(i + 1)
-        onEvent?.({ kind: 'tunnel', level: t.state === 'open' ? 'bad' : 'warn', text: `Tunel ${t.n}: internet → ${t.steps.map((s) => s.to_label.toLowerCase()).join(' → ')}` })
+        onEvent?.({ kind: 'tunnel', level: t.state === 'open' ? 'bad' : 'warn', text: `Tunnel ${t.n}: internet → ${t.steps.map((s) => s.to_label.toLowerCase()).join(' → ')}` })
       }
       await sleep(300 * speed)
       onEvent?.({ kind: 'done', text: run.summary, level: 'info' })
@@ -161,7 +161,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
 
   return (
     <svg className={`tmap ${compact ? 'tmap-compact' : ''}`} viewBox="0 0 1000 640" role="img"
-      aria-label={`Przekrój biura ${org.name}: kable sieciowe pod podłogą prowadzą do ${org.chambers.length} miejsc, które sprawdza kret.`}>
+      aria-label={`Cross-section of the ${org.name} office: network cables under the floor lead to ${org.chambers.length} places the mole checks.`}>
       <defs>
         <linearGradient id="tm-room" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0" stopColor="#191c22" />
@@ -231,7 +231,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
       {Array.from({ length: 25 }, (_, i) => (
         <rect key={i} x={i * 40 + 1} y="137" width="38" height="6" rx="1" fill="#323844" />
       ))}
-      <text x="16" y="168" className="tm-small">Pod podłogą: kable sieciowe</text>
+      <text x="16" y="168" className="tm-small">Under the floor: network cables</text>
 
       {/* cables to chambers */}
       {org.chambers.map((c) => {
@@ -255,7 +255,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
       </g>
 
       {/* targets */}
-      <text x="16" y="548" className="tm-small">To, co boli</text>
+      <text x="16" y="548" className="tm-small">What is at stake</text>
       {org.targets.map((t) => {
         const hit = hitTargets.has(t.id) || impact?.at_risk.includes(t.id)
         return (
@@ -263,7 +263,7 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
             <rect x="-92" y="-28" width="184" height="56" rx="12" />
             <g color={hit ? 'var(--bad)' : 'var(--muted)'}><IconG name={TARGET_ICON[t.id] ?? 'shield'} x={-62} y={0} size={24} /></g>
             <text x="-38" y="-2" className="tm-target-name">{t.label}</text>
-            <text x="-38" y="15" className="tm-small">{hit ? 'w zasięgu ataku' : run ? 'bezpieczne' : ''}</text>
+            <text x="-38" y="15" className="tm-small">{hit ? 'within reach' : run ? 'safe' : ''}</text>
           </g>
         )
       })}

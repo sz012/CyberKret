@@ -66,7 +66,7 @@ def test_sync_stores_new_messages_read_only(client, monkeypatch):
 def test_wrong_password_gives_clear_message(client, monkeypatch):
     configure(monkeypatch, password="zle")
     r = client.post("/api/mail/sync")
-    assert r.status_code == 400 and "hasło aplikacji" in r.json()["detail"]
+    assert r.status_code == 400 and "app password" in r.json()["detail"]
 
 
 def test_not_configured(client, monkeypatch):

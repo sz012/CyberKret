@@ -1,11 +1,11 @@
-"""Kret engine: finds attack paths ("tunnels") from the internet to what hurts, and picks the moves that close most."""
+"""Mole engine: finds attack paths ("tunnels") from the internet to what hurts, and picks the moves that close most."""
 from .techniques import ENTRY, POSITIONS, TECHNIQUES
 
 SOURCE_LABEL = {
-    "kret": "sprawdził kret",
-    "answers": "z Twoich odpowiedzi",
-    "unverified": "niepotwierdzone",
-    "fixed": "zasypane po incydencie",
+    "kret": "checked by the mole",
+    "answers": "from your answers",
+    "unverified": "unconfirmed",
+    "fixed": "filled in after an incident",
 }
 
 
@@ -119,7 +119,7 @@ def chamber_findings(org: dict, tunnels: list[dict]) -> list[dict]:
             elif s["state"] == "missing":
                 level, text = ("bad" if s["id"] in on_open_path else "warn"), s["problem"]
             else:
-                level, text = "warn", s["problem"] + " (niepotwierdzone)"
+                level, text = "warn", s["problem"] + " (unconfirmed)"
             items.append({
                 "safeguard": s["id"], "label": s["label"], "level": level, "text": text,
                 "state": s["state"], "source": s["source"], "source_label": SOURCE_LABEL.get(s["source"], s["source"]),
@@ -135,23 +135,15 @@ def summary_line(tunnels: list[dict], moves: list[dict]) -> str:
     open_n = sum(1 for t in tunnels if t["state"] == "open")
     poss_n = len(tunnels) - open_n
     if not tunnels:
-        return "Kret nie znalazł żadnego tunelu do akt, pieniędzy ani do zatrzymania pracy. Tak trzymać."
+        return "The mole found no tunnel to client files or money, and no way to stop the business. Keep it up."
     targets = sorted({t["target_label"] for t in tunnels})
     first = moves[0] if moves else None
-    head = f"Kret znalazł {len(tunnels)} {_tunele(len(tunnels))} prowadzących do: {', '.join(targets).lower()}."
+    head = f"The mole found {len(tunnels)} {'tunnel' if len(tunnels) == 1 else 'tunnels'} leading to: {', '.join(targets).lower()}."
     if poss_n:
-        head += f" {open_n} otwartych, {poss_n} możliwych."
+        head += f" {open_n} open, {poss_n} possible."
     if first:
-        head += f" Zacznij od: {first['label'].lower()} ({first['effort_min']} min), to zamyka {len(first['closes'])} z {len(tunnels)}."
+        head += f" Start with: {first['label'][:1].lower() + first['label'][1:]} ({first['effort_min']} min), it closes {len(first['closes'])} of {len(tunnels)}."
     return head
-
-
-def _tunele(n: int) -> str:
-    if n == 1:
-        return "tunel"
-    if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14):
-        return "tunele"
-    return "tuneli"
 
 
 def run(org: dict) -> dict:

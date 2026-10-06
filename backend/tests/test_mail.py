@@ -18,12 +18,12 @@ def test_phishing_is_danger_with_key_signals(org):
 
 
 def test_legit_client_and_boss_are_safe(org):
-    for name in ("02_lis_klient.eml", "04_szef_rozprawa.eml"):
+    for name in ("02_lis_client.eml", "04_boss_hearing.eml"):
         assert an.analyze(load(name), org, use_llm=False)["verdict"] == "safe", name
 
 
 def test_parcel_scam_link_mismatch(org):
-    r = an.analyze(load("03_kurier_doplata.eml"), org, use_llm=False)
+    r = an.analyze(load("03_courier_fee.eml"), org, use_llm=False)
     assert r["verdict"] == "danger"
     assert "link_mismatch" in {i["type"] for i in r["indicators"]}
 

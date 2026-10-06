@@ -21,7 +21,7 @@ export default function Demo() {
   const { time, playing, setPlaying, duration, timeline, index, shot, seek, toggle, voices, error, setError, loadVoices, loadingVoice } = player
 
   useEffect(() => {
-    document.title = 'cyberKret · Demo'
+    document.title = 'cyberMole · Demo'
     const controller = new AbortController()
     fetch('/api/demo/presentation', { signal: controller.signal })
       .then((response) => { if (!response.ok) throw new Error(); return response.json() })
@@ -61,9 +61,9 @@ export default function Demo() {
     try {
       if (document.fullscreenElement) await document.exitFullscreen()
       else if (root.current?.requestFullscreen) await root.current.requestFullscreen()
-      else setError('Ta przeglądarka nie udostępnia pełnego ekranu. Otwórz demo w Chrome lub Safari.')
+      else setError('This browser does not offer full screen. Open the demo in Chrome or Safari.')
     } catch {
-      setError('Nie udało się włączyć pełnego ekranu. Użyj opcji pełnego ekranu w przeglądarce.')
+      setError('Could not enter full screen. Use the full screen option of your browser.')
     }
   }
 
@@ -78,56 +78,56 @@ export default function Demo() {
   return (
     <div ref={root} className={`demo ${clean ? 'demo-clean' : ''} ${playing ? 'demo-playing' : 'demo-paused'}`}>
       <header className="demo-header">
-        <Link to="/" className="brand" aria-label="cyberKret, strona główna"><BrandMark size={32} /><Wordmark /></Link>
-        <span className="demo-header-context">{started ? shot.label : 'Historia jednej firmy'}</span>
-        <span className="demo-fiction">Przykład: fikcyjna firma</span>
+        <Link to="/" className="brand" aria-label="cyberMole, home"><BrandMark size={32} /><Wordmark /></Link>
+        <span className="demo-header-context">{started ? shot.label : 'The story of one company'}</span>
+        <span className="demo-fiction">Example: a fictional company</span>
       </header>
 
-      <main className="demo-stage" aria-label="Prezentacja cyberKreta">
+      <main className="demo-stage" aria-label="cyberMole presentation">
         {!started || !data ? (
           <div className="demo-poster">
             <div className="demo-poster-cables" aria-hidden="true"><span /><span /><span /><i /></div>
             <div className="demo-poster-copy">
-              <p>cyberKret w działaniu</p>
-              <h1>Zanim mały błąd<br />stanie się<br /><em>dużym problemem.</em></h1>
-              <p>Jedna kancelaria. Jedna podejrzana faktura.<br />I kret, który wie, gdzie szukać.</p>
+              <p>cyberMole in action</p>
+              <h1>Before a small mistake<br />turns into<br /><em>a big problem.</em></h1>
+              <p>One law office. One suspicious invoice.<br />And a mole that knows where to look.</p>
               <button className="btn btn-lamp btn-lg" disabled={!data || Boolean(countdown)} onClick={() => { setStarted(true); toggle() }}>
-                <span aria-hidden="true">▶</span> {data ? `Obejrzyj demo · ${timeLabel(duration)}` : loadError ? 'Demo niedostępne' : 'Przygotowuję prezentację…'}
+                <span aria-hidden="true">▶</span> {data ? `Watch the demo · ${timeLabel(duration)}` : loadError ? 'Demo unavailable' : 'Preparing the presentation…'}
               </button>
-              {loadError && <div role="alert" className="demo-load-error"><p>Nie można pobrać scenariusza. Sprawdź, czy backend działa.</p><button className="btn btn-ghost" onClick={() => { setLoadError(false); setAttempt((value) => value + 1) }}>Spróbuj ponownie</button></div>}
-              <small>Wyniki reguł aplikacji na przykładowych danych.</small>
+              {loadError && <div role="alert" className="demo-load-error"><p>Cannot load the scenario. Check that the backend is running.</p><button className="btn btn-ghost" onClick={() => { setLoadError(false); setAttempt((value) => value + 1) }}>Try again</button></div>}
+              <small>Results of the app's rules on sample data.</small>
             </div>
           </div>
         ) : <DemoScenes id={shot.id} progress={Math.min(1, (time - shot.start) / shot.duration)} data={data} />}
       </main>
 
-      {countdown > 0 && <div className="demo-countdown" role="status"><b>{countdown}</b><span>Za chwilę zaczynamy</span></div>}
+      {countdown > 0 && <div className="demo-countdown" role="status"><b>{countdown}</b><span>Starting in a moment</span></div>}
 
       <div className="demo-controls">
-        <div className="demo-progress"><input aria-label="Pozycja prezentacji" type="range" min="0" max={duration} step="0.1" value={time} disabled={!data || Boolean(countdown)} onChange={(event) => { setStarted(true); seek(Number(event.target.value)) }} style={{ '--progress': `${100 * time / duration}%` } as React.CSSProperties} /></div>
+        <div className="demo-progress"><input aria-label="Presentation position" type="range" min="0" max={duration} step="0.1" value={time} disabled={!data || Boolean(countdown)} onChange={(event) => { setStarted(true); seek(Number(event.target.value)) }} style={{ '--progress': `${100 * time / duration}%` } as React.CSSProperties} /></div>
         <div className="demo-transport">
-          <button className="demo-control demo-play" disabled={!data || Boolean(countdown) || loadingVoice} aria-label={playing ? 'Wstrzymaj' : time >= duration ? 'Odtwórz od początku' : 'Odtwórz'} onClick={() => { setStarted(true); toggle() }}>{playing ? 'Ⅱ' : '▶'}</button>
+          <button className="demo-control demo-play" disabled={!data || Boolean(countdown) || loadingVoice} aria-label={playing ? 'Pause' : time >= duration ? 'Play from the start' : 'Play'} onClick={() => { setStarted(true); toggle() }}>{playing ? 'Ⅱ' : '▶'}</button>
           <span className="demo-time">{timeLabel(time)} <span>/ {timeLabel(duration)}</span></span>
-          <nav className="demo-chapters" aria-label="Sceny prezentacji">
+          <nav className="demo-chapters" aria-label="Presentation scenes">
             {timeline.map((scene, i) => <button key={scene.id} aria-label={`${i + 1}. ${scene.label}`} aria-current={index === i ? 'step' : undefined} disabled={!data || Boolean(countdown)} onClick={() => { setStarted(true); seek(scene.start) }}><span>0{i + 1}</span><span>{scene.label}</span></button>)}
           </nav>
-          <button className="demo-control" aria-expanded={settings} onClick={() => setSettings((value) => !value)}><Icon name="upload" size={17} /><span>Lektor i nagranie</span></button>
-          <button className="demo-control demo-fullscreen" aria-label="Pełny ekran" onClick={fullScreen}>⛶</button>
+          <button className="demo-control" aria-expanded={settings} onClick={() => setSettings((value) => !value)}><Icon name="upload" size={17} /><span>Narration and recording</span></button>
+          <button className="demo-control demo-fullscreen" aria-label="Full screen" onClick={fullScreen}>⛶</button>
         </div>
       </div>
 
-      {settings && !clean && <section className="demo-settings" aria-label="Ustawienia nagrania">
-        <div className="demo-settings-heading"><h2>Przygotuj nagranie</h2><button className="demo-control" aria-label="Zamknij ustawienia" onClick={() => setSettings(false)}>×</button></div>
-        <p>Wczytaj nagrania lektora do wybranych scen. Każda scena zaczeka na koniec swojej wypowiedzi.</p>
-        <label className="btn btn-ghost demo-audio-upload"><Icon name="upload" size={18} />{loadingVoice ? 'Wczytuję…' : 'Wczytaj MP3 lub WAV'}<input type="file" multiple accept="audio/mpeg,audio/wav,audio/x-wav,audio/mp4,.mp3,.wav,.m4a" disabled={loadingVoice} onChange={(event) => { void loadVoices(event.target.files); event.target.value = '' }} /></label>
-        <ol>{timeline.map((scene, i) => <li key={scene.id}><span>0{i + 1} · {scene.label}</span><span className={voices[i] ? 'ok' : 'muted'}>{voices[i] ? voices[i].name : i === 0 ? 'bez lektora' : 'brak nagrania'}</span></li>)}</ol>
-        <p className="small muted">Nazwy plików: 02-firma.mp3, 03-tunele.mp3, 04-ruch.mp3, 05-mail.mp3, 06-plan.mp3, 07-final.mp3. Pliki pozostają w tej przeglądarce do odświeżenia strony.</p>
-        <button className="btn btn-lamp" disabled={!data || loadingVoice} onClick={startRecording}>Ukryj panel i odtwórz za 3 s</button>
-        <p className="small muted">Włącz nagrywanie ekranu osobno. Esc pokazuje panel. Spacja zatrzymuje. Strzałki przewijają o 5 s.</p>
+      {settings && !clean && <section className="demo-settings" aria-label="Recording settings">
+        <div className="demo-settings-heading"><h2>Prepare a recording</h2><button className="demo-control" aria-label="Close settings" onClick={() => setSettings(false)}>×</button></div>
+        <p>Load narration clips for the scenes you want. Each scene waits until its clip ends.</p>
+        <label className="btn btn-ghost demo-audio-upload"><Icon name="upload" size={18} />{loadingVoice ? 'Loading…' : 'Load MP3 or WAV'}<input type="file" multiple accept="audio/mpeg,audio/wav,audio/x-wav,audio/mp4,.mp3,.wav,.m4a" disabled={loadingVoice} onChange={(event) => { void loadVoices(event.target.files); event.target.value = '' }} /></label>
+        <ol>{timeline.map((scene, i) => <li key={scene.id}><span>0{i + 1} · {scene.label}</span><span className={voices[i] ? 'ok' : 'muted'}>{voices[i] ? voices[i].name : i === 0 ? 'no narration' : 'no recording'}</span></li>)}</ol>
+        <p className="small muted">File names: 02-company.mp3, 03-tunnels.mp3, 04-move.mp3, 05-mail.mp3, 06-plan.mp3, 07-final.mp3. The files stay in this browser until the page is reloaded.</p>
+        <button className="btn btn-lamp" disabled={!data || loadingVoice} onClick={startRecording}>Hide the panel and play in 3 s</button>
+        <p className="small muted">Start your screen recorder separately. Esc shows the panel. Space pauses. Arrow keys skip 5 s.</p>
       </section>}
 
-      {clean && !playing && !countdown && <button className="demo-show-controls" onClick={() => setClean(false)}>Pokaż sterowanie</button>}
-      {error && <div className="demo-error" role="alert"><span>{error}</span><button aria-label="Zamknij komunikat" onClick={() => setError('')}>×</button></div>}
+      {clean && !playing && !countdown && <button className="demo-show-controls" onClick={() => setClean(false)}>Show controls</button>}
+      {error && <div className="demo-error" role="alert"><span>{error}</span><button aria-label="Close message" onClick={() => setError('')}>×</button></div>}
     </div>
   )
 }
