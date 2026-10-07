@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BrandMark, Wordmark } from '../components/BrandMark'
+import { Wordmark } from '../components/BrandMark'
 import { Icon } from '../components/icons'
 import DemoScenes, { type Presentation } from './DemoScenes'
 import { timeLabel } from './timeline'
@@ -78,7 +78,7 @@ export default function Demo() {
   return (
     <div ref={root} className={`demo ${clean ? 'demo-clean' : ''} ${playing ? 'demo-playing' : 'demo-paused'}`}>
       <header className="demo-header">
-        <Link to="/" className="brand" aria-label="cyberMole, home"><BrandMark size={32} /><Wordmark /></Link>
+        <Link to="/" className="brand" aria-label="cyberMole, home"><Wordmark /></Link>
         <span className="demo-header-context">{started ? shot.label : 'The story of one company'}</span>
         <span className="demo-fiction">Example: a fictional company</span>
       </header>

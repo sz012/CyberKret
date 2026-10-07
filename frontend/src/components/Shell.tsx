@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Health, Org } from '../api/types'
-import { BrandMark, Wordmark } from './BrandMark'
+import { Wordmark } from './BrandMark'
 import { Icon } from './icons'
 import { useHealth } from './useHealth'
 
@@ -43,7 +43,6 @@ export default function Shell() {
     <div className="shell">
       <header className="topbar">
         <Link to="/app" className="brand" aria-label="cyberMole, dashboard">
-          <BrandMark />
           <span>
             <Wordmark />
             <small>{org?.name || 'Your company'}</small>

@@ -38,6 +38,6 @@ def health():
     return {
         "ok": True,
         "llm": {"available": bool(m), "model": m, "configured": config.OLLAMA_MODEL, "url": config.OLLAMA_URL,
-                "models": models, "mode": "lokalny model" if m else "tryb bez modelu"},
+                "models": models, "mode": "local model" if m else "no-model mode"},
         "external_bytes": 0,
     }

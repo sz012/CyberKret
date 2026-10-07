@@ -1,4 +1,4 @@
-import { MARK_LAMP, MARK_STROKES, MOLE_LETTERS } from './markPaths'
+import { MARK_LAMP, MARK_STROKES, MOLE_LAMP, MOLE_LETTERS } from './markPaths'
 
 export function BrandMark({ size = 30, paper = false }: { size?: number; paper?: boolean }) {
   return (
@@ -15,8 +15,9 @@ export function Wordmark() {
   return (
     <span className="wordmark" role="img" aria-label="cyberMole">
       <span aria-hidden="true">cyber</span>
-      <svg className="wordmark-mole" viewBox="10 6.25 142 51.5" aria-hidden="true">
+      <svg className="wordmark-mole" viewBox="10 6.25 162.5 51.5" aria-hidden="true">
         <path d={MOLE_LETTERS} fill="none" stroke="currentColor" strokeWidth="7.5" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={MOLE_LAMP.x} cy={MOLE_LAMP.y} r={MOLE_LAMP.r} fill="var(--lamp)" />
       </svg>
     </span>
   )

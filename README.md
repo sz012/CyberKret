@@ -41,6 +41,8 @@ npm install
 npm run dev
 ```
 
+If port 8000 is taken, start the backend on another port and point the proxy at it: `API_URL=http://127.0.0.1:8010 npm run dev`.
+
 Local model (optional, without it the app uses rules and templates). The default fits a Mac with 8 GB of RAM:
 
 ```bash

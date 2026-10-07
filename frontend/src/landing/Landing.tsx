@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { BrandMark, Wordmark } from '../components/BrandMark'
+import { Wordmark } from '../components/BrandMark'
 import KretFilm from './film/KretFilm'
 import './landing.css'
 
@@ -13,7 +13,6 @@ export default function Landing() {
     <div className="landing">
       <nav className="lnav" aria-label="cyberMole">
         <Link to="/" className="brand" aria-label="cyberMole, home">
-          <BrandMark size={34} />
           <Wordmark />
         </Link>
         <div className="lnav-links">

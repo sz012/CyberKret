@@ -144,7 +144,7 @@ export default function DemoScenes({ id, progress, data }: { id: string; progres
   return (
     <div className="demo-scene demo-finale" key={id}>
       <div className="demo-finale-orbit" aria-hidden="true"><span /><span /><span /></div>
-      <div className="demo-finale-brand"><BrandMark size={86} /><Wordmark /></div>
+      <div className="demo-finale-brand"><Wordmark /></div>
       <h1>Better your own mole<br /><em>gets in first.</em></h1>
       <p>See the threat. Set priorities. Act.</p>
       <div className="demo-private"><Icon name="chip" size={21} /><span>Analysis runs locally. Company data stays on your computer.</span></div>

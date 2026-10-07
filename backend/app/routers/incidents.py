@@ -130,7 +130,7 @@ def action(iid: int, aid: str, body: ActionStatus):
         st[aid] = body.status
         db.update_incident(iid, action_status=st)
         if body.status == "done":
-            db.add_event(iid, "action", f"Zrobione: {a['title']} ({org_mod.role_label(db.get_org(), a['role'])}).")
+            db.add_event(iid, "action", f"Done: {a['title']} ({org_mod.role_label(db.get_org(), a['role'])}).")
     return _full(iid)
 
 
