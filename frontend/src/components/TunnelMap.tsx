@@ -59,7 +59,7 @@ function tunnelPath(org: Org, t: Tunnel) {
   const tg = org.targets.find((x) => x.id === t.target)!
   const first = ch[t.chambers[0]]
   const entry = { x: (CLOUD.x + first.x) / 2 + 20, y: 150 }
-  const pts = [{ x: CLOUD.x, y: CLOUD.y + 22 }, entry, ...t.chambers.map((id) => ({ x: ch[id].x, y: ch[id].y })), { x: tg.x, y: tg.y - 10 }]
+  const pts = [{ x: CLOUD.x, y: CLOUD.y + 22 }, entry, ...t.chambers.map((id) => ({ x: ch[id].x, y: ch[id].y })), { x: tg.x, y: tg.y - 28 }]
   return smooth(pts)
 }
 
@@ -260,10 +260,10 @@ export default function TunnelMap({ org, run, digToken, fast, onEvent, selected,
         const hit = hitTargets.has(t.id) || impact?.at_risk.includes(t.id)
         return (
           <g key={t.id} transform={`translate(${t.x} ${t.y})`} className={`tm-target ${hit ? 'hit' : 'safe'}`}>
-            <rect x="-92" y="-28" width="184" height="56" rx="12" />
-            <g color={hit ? 'var(--bad)' : 'var(--muted)'}><IconG name={TARGET_ICON[t.id] ?? 'shield'} x={-62} y={0} size={24} /></g>
-            <text x="-38" y="-2" className="tm-target-name">{t.label}</text>
-            <text x="-38" y="15" className="tm-small">{hit ? 'within reach' : run ? 'safe' : ''}</text>
+            <rect x="-102" y="-28" width="204" height="56" rx="12" />
+            <g color={hit ? 'var(--bad)' : 'var(--muted)'}><IconG name={TARGET_ICON[t.id] ?? 'shield'} x={-68} y={0} size={24} /></g>
+            <text x="-44" y="-2" className="tm-target-name">{t.label}</text>
+            <text x="-44" y="15" className="tm-small">{hit ? 'within reach' : run ? 'safe' : ''}</text>
           </g>
         )
       })}

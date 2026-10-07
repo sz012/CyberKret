@@ -2,6 +2,10 @@
   <img src="docs/intro.gif" width="800" alt="Opening animation: something moves in the office network at night. It is your own mole, which then shows the path an attacker would take to client files.">
 </p>
 
+<p align="center">
+  <img src="docs/cyberMole-banner.jpg" width="560" alt="cyberMole: your company has tunnels, you just can't see them. The attack map with red tunnels to client files, money and office operations, a mail verdict and an incident plan.">
+</p>
+
 <p align="center"><b>Slides</b> (PDF): <a href="docs/cyberMole-presentation.pdf">cyberMole-presentation.pdf</a></p>
 
 cyberMole is a local security assistant for small companies without an IT department. It maps the company, finds the paths an attacker would take from the internet to client data, money or a stopped business ("tunnels"), and picks the changes that close the most of them. When something happens, it walks the team through the incident. Everything runs on one computer and the language model is local, so the company's data never leaves it.
