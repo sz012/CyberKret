@@ -24,7 +24,7 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "hf.co/second-state/Bielik-4.5B-v3.0-In
 OLLAMA_CTX = int(os.getenv("OLLAMA_CTX", "4096"))
 LLM_TIMEOUT = float(os.getenv("LLM_TIMEOUT", "120"))
 LLM_DISABLED = os.getenv("LLM_DISABLED", "0") == "1"
-DB_PATH = os.getenv("DB_PATH", str(APP_DIR.parent / "cyberkret.db"))
+DB_PATH = os.getenv("DB_PATH", str(APP_DIR.parent / "cybermole.db"))
 
 IMAP_HOST = os.getenv("IMAP_HOST", "imap.gmail.com")
 IMAP_PORT = int(os.getenv("IMAP_PORT", "993"))

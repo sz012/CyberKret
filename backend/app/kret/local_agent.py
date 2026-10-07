@@ -1,4 +1,4 @@
-"""Read-only checks of the computer the kret runs on. Every command is a status query with a timeout; nothing is changed."""
+"""Read-only checks of the computer the mole runs on. Every command is a status query with a timeout; nothing is changed."""
 import platform
 import subprocess
 
@@ -16,7 +16,7 @@ def _run(cmd: list[str]) -> str | None:
 def _check(id_, label, cmd, ok_if, ok_text, bad_text, fix):
     out = _run(cmd)
     if out is None:
-        return {"id": id_, "label": label, "level": "unknown", "text": "nie udało się sprawdzić", "raw": None, "fix": fix}
+        return {"id": id_, "label": label, "level": "unknown", "text": "could not check", "raw": None, "fix": fix}
     ok = ok_if(out.lower())
     return {"id": id_, "label": label, "level": "ok" if ok else "bad", "text": ok_text if ok else bad_text,
             "raw": out.splitlines()[0] if out else "", "fix": None if ok else fix}
@@ -26,25 +26,25 @@ def check() -> dict:
     system = platform.system()
     if system != "Darwin":
         return {"system": system, "supported": False, "checks": [],
-                "note": "W prototypie lokalny agent obsługuje macOS. Windows: w planie (BitLocker, Defender, Firewall)."}
+                "note": "In this prototype the local agent supports macOS. Windows is planned (BitLocker, Defender, Firewall)."}
     version = _run(["sw_vers", "-productVersion"]) or "?"
     checks = [
-        _check("firewall", "Zapora sieciowa", ["/usr/libexec/ApplicationFirewall/socketfilterfw", "--getglobalstate"],
-               lambda o: "enabled" in o or "state = 1" in o, "włączona", "wyłączona",
-               "Ustawienia systemowe → Sieć → Zapora: włącz."),
-        _check("filevault", "Szyfrowanie dysku (FileVault)", ["fdesetup", "status"],
-               lambda o: "filevault is on" in o, "włączone", "wyłączone",
-               "Ustawienia systemowe → Prywatność i ochrona → FileVault: włącz."),
-        _check("gatekeeper", "Ochrona przed nieznanymi aplikacjami", ["spctl", "--status"],
-               lambda o: "assessments enabled" in o, "włączona", "wyłączona",
-               "W Terminalu: sudo spctl --master-enable"),
-        _check("sip", "Ochrona integralności systemu", ["csrutil", "status"],
-               lambda o: "enabled" in o, "włączona", "wyłączona",
-               "Włącz SIP z trybu odzyskiwania (csrutil enable)."),
-        _check("autoupdate", "Automatyczne sprawdzanie aktualizacji",
+        _check("firewall", "Firewall", ["/usr/libexec/ApplicationFirewall/socketfilterfw", "--getglobalstate"],
+               lambda o: "enabled" in o or "state = 1" in o, "on", "off",
+               "System Settings → Network → Firewall: turn it on."),
+        _check("filevault", "Disk encryption (FileVault)", ["fdesetup", "status"],
+               lambda o: "filevault is on" in o, "on", "off",
+               "System Settings → Privacy & Security → FileVault: turn it on."),
+        _check("gatekeeper", "Protection from unknown apps", ["spctl", "--status"],
+               lambda o: "assessments enabled" in o, "on", "off",
+               "In Terminal: sudo spctl --master-enable"),
+        _check("sip", "System Integrity Protection", ["csrutil", "status"],
+               lambda o: "enabled" in o, "on", "off",
+               "Turn SIP on from recovery mode (csrutil enable)."),
+        _check("autoupdate", "Automatic update checks",
                ["defaults", "read", "/Library/Preferences/com.apple.SoftwareUpdate", "AutomaticCheckEnabled"],
-               lambda o: o.strip() == "1" or "does not exist" in o, "włączone", "wyłączone",
-               "Ustawienia systemowe → Ogólne → Uaktualnienia: włącz automatyczne."),
+               lambda o: o.strip() == "1" or "does not exist" in o, "on", "off",
+               "System Settings → General → Software Update: turn on automatic updates."),
     ]
     return {"system": f"macOS {version}", "hostname": platform.node(), "supported": True, "checks": checks}
 
@@ -58,9 +58,9 @@ def apply_to_org(org: dict, result: dict) -> list[str]:
         if s["id"] == "disk_encryption":
             s["source"] = "kret"
             if fv["level"] == "ok":
-                s["evidence"] = "Kret sprawdził ten komputer: FileVault włączony. Pozostałe stanowiska: z Twoich odpowiedzi."
+                s["evidence"] = "The mole checked this computer: FileVault is on. Other workstations: from your answers."
             else:
                 s["state"] = "missing"
-                s["evidence"] = "Kret sprawdził ten komputer: FileVault wyłączony."
+                s["evidence"] = "The mole checked this computer: FileVault is off."
             return ["disk_encryption"]
     return []

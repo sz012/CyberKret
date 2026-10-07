@@ -17,7 +17,7 @@ PENDING = {"01_biurex_phishing"}  # arrives live during the demo
 
 @router.get("/presentation")
 def presentation():
-    org = json.loads((config.SEED_DIR / "kancelaria_nowak.json").read_text())
+    org = json.loads((config.SEED_DIR / "nowak_law_office.json").read_text())
     before = run(org)
     improved = json.loads(json.dumps(org))
     first = before["moves"][0]["safeguard"]
@@ -35,7 +35,7 @@ def presentation():
 
 def reset() -> None:
     db.wipe()
-    db.save_org(json.loads((config.SEED_DIR / "kancelaria_nowak.json").read_text()))
+    db.save_org(json.loads((config.SEED_DIR / "nowak_law_office.json").read_text()))
     from ..mail.analyze import parse
 
     paths = sorted((config.SEED_DIR / "emails").glob("*.eml"))

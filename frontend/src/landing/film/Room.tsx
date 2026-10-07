@@ -181,21 +181,21 @@ export function Monitor({ t }: { t: number }) {
       <rect x="556" y="248" width="148" height="80" rx="2" fill="#080a0d" />
       <g opacity={idle}>
         <text x="630" y="292" textAnchor="middle" className="kf-lock">23:47</text>
-        <text x="630" y="308" textAnchor="middle" className="kf-lock-sub">ekran zablokowany</text>
+        <text x="630" y="308" textAnchor="middle" className="kf-lock-sub">screen locked</text>
       </g>
       <g opacity={alert}>
         <rect x="556" y="248" width="148" height="80" rx="2" fill="#2a0e0f" opacity={0.8 + 0.2 * wave(t, 700)} />
         <path d="M630 258l9 16h-18z" fill="none" stroke="#ff6159" strokeWidth="1.8" strokeLinejoin="round" />
         <path d="M630 264.5v4.5M630 271.6v.4" stroke="#ff6159" strokeWidth="1.8" strokeLinecap="round" />
-        <text x="630" y="296" textAnchor="middle" className="kf-screen">Nieznany ruch w sieci</text>
+        <text x="630" y="296" textAnchor="middle" className="kf-screen">Unknown network traffic</text>
         <text x="630" y="311" textAnchor="middle" className="kf-screen-sub">port 3 · {stamp}</text>
       </g>
       <g opacity={ok}>
         <rect x="556" y="248" width="148" height="80" rx="2" fill="#0d1712" />
         <circle cx="630" cy="268" r="9" fill="none" stroke="#5fd08a" strokeWidth="1.6" />
         <path d="M625.5 268.2l3.2 3.2 6-6.6" fill="none" stroke="#5fd08a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <text x="630" y="296" textAnchor="middle" className="kf-screen ok">Rozpoznano: cyberKret</text>
-        <text x="630" y="311" textAnchor="middle" className="kf-screen-sub ok">test autoryzowany</text>
+        <text x="630" y="296" textAnchor="middle" className="kf-screen ok">Identified: cyberMole</text>
+        <text x="630" y="311" textAnchor="middle" className="kf-screen-sub ok">authorized test</text>
       </g>
       <circle cx="704" cy="332" r="1.3" fill={alert > 0.5 ? '#ff6159' : '#5fd08a'} opacity="0.8" />
       <rect x="520" y="352" width="240" height="3" fill={alert > ok ? '#ff6159' : '#5fd08a'} opacity={0.12 * Math.max(alert, ok)} />

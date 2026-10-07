@@ -1,0 +1,396 @@
+{
+  "demo": true,
+  "name": "Nowak Law Office",
+  "domain": "nowak-law.example",
+  "phone": "+48 12 000 00 00",
+  "description": "A legal counsel office, 8 people, Microsoft 365, a NAS file server, a WordPress website.",
+  "mailbox_owner": "grace",
+  "people": [
+    {
+      "id": "nowak",
+      "name": "Jan Nowak",
+      "role": "Legal counsel, head of the office",
+      "duty": "boss"
+    },
+    {
+      "id": "grace",
+      "name": "Grace Kowalska",
+      "role": "Accounting",
+      "duty": "finance"
+    },
+    {
+      "id": "anna",
+      "name": "Anna Wiśniewska",
+      "role": "Front office",
+      "duty": "office"
+    },
+    {
+      "id": "piotr",
+      "name": "Piotr Zieliński",
+      "role": "External IT, 2 hours a week",
+      "duty": "it"
+    }
+  ],
+  "chambers": [
+    {
+      "id": "siec",
+      "label": "Network & router",
+      "icon": "router",
+      "x": 120,
+      "y": 250,
+      "blurb": "The operator's router, Wi-Fi, port forwarding",
+      "dig": "I ride the cable to the router and look at what the internet can see"
+    },
+    {
+      "id": "komputery",
+      "label": "Computers",
+      "icon": "laptop",
+      "x": 235,
+      "y": 375,
+      "blurb": "8 Windows workstations and the owner's Mac",
+      "dig": "I visit 8 workstations and check the admin accounts"
+    },
+    {
+      "id": "konta",
+      "label": "Accounts & passwords",
+      "icon": "key",
+      "x": 380,
+      "y": 455,
+      "blurb": "The whole team's Microsoft 365 accounts",
+      "dig": "I check how people sign in to Microsoft 365"
+    },
+    {
+      "id": "poczta",
+      "label": "Email & domain",
+      "icon": "mail",
+      "x": 620,
+      "y": 455,
+      "blurb": "The nowak-law.example domain and its DNS records",
+      "dig": "I read the domain's SPF and DMARC records"
+    },
+    {
+      "id": "procedury",
+      "label": "Payments",
+      "icon": "coins",
+      "x": 765,
+      "y": 375,
+      "blurb": "How accounting handles bank account changes",
+      "dig": "I ask accounting how they change account numbers"
+    },
+    {
+      "id": "kopie",
+      "label": "Backups",
+      "icon": "disk",
+      "x": 880,
+      "y": 250,
+      "blurb": "A NAS in the cabinet, a backup every night",
+      "dig": "I go down to the backup server"
+    },
+    {
+      "id": "www",
+      "label": "Website",
+      "icon": "globe",
+      "x": 500,
+      "y": 300,
+      "blurb": "WordPress at an external host",
+      "dig": "I check the website and its certificate"
+    }
+  ],
+  "targets": [
+    {
+      "id": "client_data_read",
+      "label": "Client files",
+      "harm": "A leak of privileged information and clients' personal data",
+      "weight": 3,
+      "x": 270,
+      "y": 575
+    },
+    {
+      "id": "money_stolen",
+      "label": "Money",
+      "harm": "A payment to a fraudster's account",
+      "weight": 2,
+      "x": 500,
+      "y": 575
+    },
+    {
+      "id": "operations_stopped",
+      "label": "Office operations",
+      "harm": "Encrypted drives and backups, the office comes to a halt",
+      "weight": 3,
+      "x": 730,
+      "y": 575
+    }
+  ],
+  "safeguards": [
+    {
+      "id": "router_no_rdp",
+      "chamber": "siec",
+      "label": "Remote desktop hidden from the internet",
+      "state": "missing",
+      "source": "answers",
+      "problem": "remote desktop (RDP, port 3389) open to the whole internet",
+      "ok_text": "remote desktop is not visible from the internet",
+      "evidence": "The router forwards port 3389 to the owner's computer. The previous IT person set it up that way.",
+      "fix": "Remove the port 3389 forwarding on the router. Use a VPN to work from home.",
+      "effort_min": 15,
+      "cost": "free"
+    },
+    {
+      "id": "unique_admin_passwords",
+      "chamber": "komputery",
+      "label": "Every computer has a different admin password",
+      "state": "missing",
+      "source": "answers",
+      "problem": "an \"admin\" account with the same password on 3 computers",
+      "ok_text": "every computer has its own admin password",
+      "evidence": "The admin password is the same on the owner's, the front office's and accounting's computers.",
+      "fix": "Set different admin passwords (Windows LAPS does it automatically). Staff work on accounts without admin rights.",
+      "effort_min": 60,
+      "cost": "free"
+    },
+    {
+      "id": "pcs_updated",
+      "chamber": "komputery",
+      "label": "System and programs up to date",
+      "state": "present",
+      "source": "answers",
+      "problem": "computers without updates",
+      "ok_text": "8 of 8 computers updated",
+      "evidence": "Automatic Windows updates are on for every workstation.",
+      "fix": "Turn on automatic updates.",
+      "effort_min": 20,
+      "cost": "free"
+    },
+    {
+      "id": "disk_encryption",
+      "chamber": "komputery",
+      "label": "Drives encrypted",
+      "state": "present",
+      "source": "answers",
+      "problem": "laptop drives are not encrypted",
+      "ok_text": "drives encrypted (BitLocker, FileVault)",
+      "evidence": "BitLocker is on for the laptops.",
+      "fix": "Turn on BitLocker / FileVault.",
+      "effort_min": 30,
+      "cost": "free"
+    },
+    {
+      "id": "m365_mfa",
+      "chamber": "konta",
+      "label": "Two-step login (MFA) in Microsoft 365",
+      "state": "missing",
+      "source": "answers",
+      "problem": "2 of 8 accounts without two-step login, accounting among them",
+      "ok_text": "every account has two-step login",
+      "evidence": "Accounting's and the front office's accounts sign in with a password alone.",
+      "fix": "Turn on MFA (the Microsoft Authenticator app) for every account. Start with accounting.",
+      "effort_min": 45,
+      "cost": "free"
+    },
+    {
+      "id": "domain_spf",
+      "chamber": "poczta",
+      "label": "SPF record",
+      "state": "present",
+      "source": "kret",
+      "problem": "no SPF record",
+      "ok_text": "SPF record in place",
+      "evidence": "v=spf1 include:spf.protection.outlook.com -all",
+      "fix": "Add an SPF record.",
+      "effort_min": 20,
+      "cost": "free"
+    },
+    {
+      "id": "domain_dmarc",
+      "chamber": "poczta",
+      "label": "DMARC record (protection against spoofing)",
+      "state": "missing",
+      "source": "kret",
+      "problem": "domain without DMARC, anyone can send an email \"from the office\"",
+      "ok_text": "DMARC with a reject policy",
+      "evidence": "No TXT record at _dmarc.nowak-law.example.",
+      "fix": "Add a _dmarc TXT record with p=quarantine, after 2 weeks p=reject.",
+      "effort_min": 30,
+      "cost": "free"
+    },
+    {
+      "id": "payment_callback_rule",
+      "chamber": "procedury",
+      "label": "Account number changes are confirmed by phone",
+      "state": "missing",
+      "source": "answers",
+      "problem": "an email is enough to change an account number",
+      "ok_text": "account number changes are always confirmed by phone",
+      "evidence": "Accounting updates vendors' account numbers based on an email.",
+      "fix": "Set a rule: account number changes are confirmed by phone on the number from the contract. Print it and pin it by the accounting desk.",
+      "effort_min": 10,
+      "cost": "free"
+    },
+    {
+      "id": "backup_offline",
+      "chamber": "kopie",
+      "label": "A backup kept off the network",
+      "state": "missing",
+      "source": "answers",
+      "problem": "the backup drive is always connected and would be encrypted with everything else",
+      "ok_text": "one backup is kept offline",
+      "evidence": "The NAS is mapped as drive Z: on every computer.",
+      "fix": "Once a week back up to a USB drive that goes back into the safe afterwards. Unmap the NAS from the computers.",
+      "effort_min": 30,
+      "cost": "about 300 PLN for a drive"
+    },
+    {
+      "id": "backup_tested",
+      "chamber": "kopie",
+      "label": "Backup restore tested",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "nobody has checked whether files can be restored from the backup",
+      "ok_text": "restore tested this quarter",
+      "evidence": "Nobody knows when files were last restored from the backup.",
+      "fix": "Restore one folder from the backup and check that the files open.",
+      "effort_min": 30,
+      "cost": "free"
+    },
+    {
+      "id": "website_updated",
+      "chamber": "www",
+      "label": "WordPress and plugins up to date",
+      "state": "present",
+      "source": "answers",
+      "problem": "outdated WordPress",
+      "ok_text": "CMS up to date",
+      "evidence": "The host updates WordPress automatically.",
+      "fix": "Turn on automatic updates.",
+      "effort_min": 15,
+      "cost": "free"
+    },
+    {
+      "id": "website_https",
+      "chamber": "www",
+      "label": "HTTPS and a valid certificate",
+      "state": "present",
+      "source": "kret",
+      "problem": "website without HTTPS",
+      "ok_text": "certificate valid, redirect to HTTPS",
+      "evidence": "The certificate is valid for 61 more days.",
+      "fix": "Turn on HTTPS at the host.",
+      "effort_min": 15,
+      "cost": "free"
+    }
+  ],
+  "contacts": [
+    {
+      "name": "Biurex Office Supplies",
+      "domain": "biurex.example",
+      "phone": "+48 12 345 67 89",
+      "note": "office supplies vendor, invoices every month"
+    },
+    {
+      "name": "Lis Transport, Marek Lis",
+      "domain": "lis-transport.example",
+      "phone": "+48 600 100 200",
+      "note": "client of the office"
+    },
+    {
+      "name": "ExpresPak",
+      "domain": "expres-pak.example",
+      "phone": "",
+      "note": "courier company"
+    }
+  ],
+  "fallbacks": [
+    {
+      "id": "phone",
+      "label": "Office phone",
+      "note": "at the front office, works without email"
+    },
+    {
+      "id": "sms",
+      "label": "Text messages to clients",
+      "note": "from the office phone"
+    },
+    {
+      "id": "offline_copy",
+      "label": "Offline copy of the files",
+      "note": "a USB drive in the safe, Jan Nowak has the key"
+    },
+    {
+      "id": "spare_laptop",
+      "label": "Spare laptop",
+      "note": "no email access, for writing documents"
+    },
+    {
+      "id": "printed_card",
+      "label": "The mole card in the drawer",
+      "note": "a printed guide and phone numbers"
+    }
+  ],
+  "continuity": [
+    {
+      "id": "court",
+      "label": "Court deadline tomorrow at 10:00",
+      "critical": true,
+      "fallback": "The filing from the offline copy, printed on the spare laptop.",
+      "confirmations": [
+        [
+          "court_doc",
+          "Filing printed from the offline copy"
+        ],
+        [
+          "court_folder",
+          "Folder with the power of attorney ready"
+        ],
+        [
+          "court_sub",
+          "Stand-in agreed in case of illness"
+        ]
+      ]
+    },
+    {
+      "id": "payments",
+      "label": "Payments and invoices",
+      "critical": true,
+      "fallback": "Payments only after confirmation by phone.",
+      "confirmations": [
+        [
+          "pay_hold",
+          "Payments to new account numbers on hold"
+        ],
+        [
+          "pay_bank",
+          "The bank knows about the fraud attempt"
+        ]
+      ]
+    },
+    {
+      "id": "clients",
+      "label": "Contact with clients",
+      "critical": false,
+      "fallback": "Phone and text messages from the office number.",
+      "confirmations": [
+        [
+          "cl_sms",
+          "Clients got a warning by text"
+        ],
+        [
+          "cl_web",
+          "Notice on the website"
+        ]
+      ]
+    },
+    {
+      "id": "email",
+      "label": "Email",
+      "critical": false,
+      "fallback": "Untrusted until further notice. Important matters by phone.",
+      "confirmations": [
+        [
+          "mail_clean",
+          "The IT person confirmed the mailbox is clean"
+        ]
+      ]
+    }
+  ]
+}

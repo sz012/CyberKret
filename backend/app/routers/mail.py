@@ -40,7 +40,7 @@ def inbox():
 def message(mail_id: str):
     r = db.get_mail(mail_id)
     if not r:
-        raise HTTPException(404, "Nie ma takiego maila")
+        raise HTTPException(404, "No such email")
     s = mail_an.summarize(mail_an.parse(r["eml"]))
     s.pop("html")
     return {"id": r["id"], "received_at": r["received_at"], **s,
@@ -50,7 +50,7 @@ def message(mail_id: str):
 def _row(mail_id: str):
     r = db.get_mail(mail_id)
     if not r:
-        raise HTTPException(404, "Nie ma takiego maila")
+        raise HTTPException(404, "No such email")
     return r
 
 
@@ -84,11 +84,11 @@ async def explain(mail_id: str):
 @router.post("/mail/deliver-next")
 def deliver_next():
     if not db.get_org().get("demo"):
-        raise HTTPException(409, "Maile demo działają tylko w firmie demo.")
+        raise HTTPException(409, "Demo emails only work in the demo company.")
     with db.conn() as c:
         r = c.execute("SELECT id FROM mail WHERE mailbox = ? AND delivered = 0 ORDER BY id LIMIT 1", (MAILBOX,)).fetchone()
     if not r:
-        raise HTTPException(409, "Brak kolejnych maili w scenariuszu demo")
+        raise HTTPException(409, "No more emails in the demo scenario")
     db.deliver_mail(r["id"])
     return {"id": r["id"]}
 
@@ -105,7 +105,7 @@ async def sync():
 def upload(body: UploadEml):
     msg = mail_an.parse(body.eml)
     if not msg.get("From") and not msg.get("Subject"):
-        raise HTTPException(422, "To nie wygląda na plik .eml")
+        raise HTTPException(422, "This does not look like an .eml file")
     mid = "upload-" + uuid.uuid4().hex[:8]
     db.upsert_mail(mid, MAILBOX, body.eml, True, db.now())
     return {"id": mid}
@@ -116,7 +116,7 @@ def _analyze_text(text: str) -> dict:
         msg = mail_an.parse(text)
     else:
         msg = EmailMessage()
-        msg["Subject"] = "Wklejona wiadomość"
+        msg["Subject"] = "Pasted message"
         msg.set_content(text)
     org = db.get_org()
     return mail_an.analyze(msg, org, org_mod.first_name(org_mod.mailbox_owner(org)))

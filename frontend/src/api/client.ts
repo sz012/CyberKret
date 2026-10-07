@@ -9,7 +9,7 @@ async function req<T>(method: string, path: string, body?: unknown): Promise<T> 
     body: body === undefined ? undefined : JSON.stringify(body),
   })
   if (!res.ok) {
-    let msg = `Błąd ${res.status}`
+    let msg = `Error ${res.status}`
     try {
       const j = await res.json()
       if (typeof j.detail === 'string') msg = j.detail

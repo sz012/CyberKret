@@ -29,7 +29,7 @@ def test_new_fact_rebuilds_plan_and_keeps_statuses(client):
     assert "signout" not in ids(inc)
     assert next(a for a in inc["situation"]["plan"] if a["id"] == "hold_payments")["status"] == "done"
     log = " ".join(e["message"] for e in inc["events"])
-    assert "Plan przebudowany" in log and "Wykonane wcześniej zostają w dzienniku" in log
+    assert "Plan rebuilt" in log and "Steps done earlier stay in the log" in log
 
 
 def test_paid_adds_bank_recall(client):
@@ -64,7 +64,7 @@ def test_close_and_fill_tunnels(client):
     inc = new_incident(client)
     client.post(f"/api/incidents/{inc['id']}/close")
     client.post("/api/kret/apply", json={"safeguards": ["payment_callback_rule", "domain_dmarc", "m365_mfa"]})
-    after = client.post("/api/kret/run", params={"label": "po zasypaniu"}).json()
+    after = client.post("/api/kret/run", params={"label": "after filling in"}).json()
     assert len(after["tunnels"]) < len(before["tunnels"])
     assert "money_stolen" not in {t["target"] for t in after["tunnels"]}
 
@@ -77,7 +77,7 @@ def test_state_survives_reload(client):
 
 
 def test_demo_domain_uses_fixture(client):
-    r = client.post("/api/kret/domain-check", json={"domain": "kancelaria-nowak.example", "consent": True}).json()
+    r = client.post("/api/kret/domain-check", json={"domain": "nowak-law.example", "consent": True}).json()
     assert r["demo"] and "domain_dmarc" in r["applied"]
 
 
@@ -90,21 +90,21 @@ def test_phases_follow_plan_continuity_and_lessons(client):
     inc = new_incident(client)
     iid = inc["id"]
     phases = {p["id"]: p for p in inc["situation"]["phases"]}
-    assert [p["label"] for p in inc["situation"]["phases"]] == ["Zatrzymaj", "Oceń", "Zawiadom", "Utrzymaj działanie", "Wnioski"]
+    assert [p["label"] for p in inc["situation"]["phases"]] == ["Stop", "Assess", "Notify", "Keep running", "Learn"]
     assert phases["stop"]["done"] == 0 and phases["stop"]["total"] >= 1
     client.patch(f"/api/incidents/{iid}/actions/hold_payments", json={"status": "done"})
     inc = client.patch(f"/api/incidents/{iid}/confirmations/court_doc", json={"done": True}).json()
     phases = {p["id"]: p for p in inc["situation"]["phases"]}
     assert phases["stop"]["done"] == 1
     assert phases["continue"]["done"] == 1
-    assert phases["learn"] == {"id": "learn", "label": "Wnioski", "done": 0, "total": 3}
+    assert phases["learn"] == {"id": "learn", "label": "Learn", "done": 0, "total": 3}
 
 
 def test_emergency_card_lists_safe_first_steps_and_channels(client):
     card = client.get("/api/org/card").json()
-    assert card["org"] == "Kancelaria Nowak"
-    assert card["first_steps"][0]["title"] == "Wstrzymaj przelewy na nowe numery kont"
+    assert card["org"] == "Nowak Law Office"
+    assert card["first_steps"][0]["title"] == "Stop payments to new account numbers"
     assert all(step["role"] for step in card["first_steps"])
-    assert {f["label"] for f in card["fallbacks"]} >= {"Telefon kancelarii", "Kopia akt offline"}
+    assert {f["label"] for f in card["fallbacks"]} >= {"Office phone", "Offline copy of the files"}
     assert all(c["phone"] for c in card["contacts"])
     assert any("UODO" in rule for rule in card["rules"])

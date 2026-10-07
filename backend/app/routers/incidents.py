@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/incidents", tags=["incidents"])
 def _load(iid: int) -> dict:
     inc = db.get_incident(iid)
     if not inc:
-        raise HTTPException(404, "Nie ma takiego incydentu")
+        raise HTTPException(404, "No such incident")
     return inc
 
 
@@ -34,7 +34,7 @@ def types():
 @router.post("")
 def create(body: NewIncident):
     if body.type not in pb.PLAYBOOKS:
-        raise HTTPException(422, "Nie ma takiego poradnika")
+        raise HTTPException(422, "No such playbook")
     facts = []
     if body.mail_id:
         r = db.get_mail(body.mail_id)
@@ -44,9 +44,9 @@ def create(body: NewIncident):
     org = db.get_org()
     sit = engine.situation(db.get_incident(iid), org)
     db.update_incident(iid, plan_ids=[a["id"] for a in sit["plan"]])
-    db.add_event(iid, "start", f"Zgłoszono incydent: {pb.get(body.type).LABEL}."
-                 + (f" Kret pocztowy przekazał {len(facts)} faktów." if facts else ""))
-    db.add_event(iid, "plan", f"Plan startowy: {len(sit['plan'])} kroków, {len(sit['act_now'])} do zrobienia od razu.")
+    db.add_event(iid, "start", f"Incident reported: {pb.get(body.type).LABEL}."
+                 + (f" The mail mole passed on {len(facts)} facts." if facts else ""))
+    db.add_event(iid, "plan", f"Starting plan: {len(sit['plan'])} steps, {len(sit['act_now'])} to do right away.")
     return _full(iid)
 
 
@@ -76,7 +76,7 @@ def answers(iid: int, body: Answers):
     for k, v in body.answers.items():
         q = pb.question(org, book, k)
         if not q or v not in {o[0] for o in q["options"]}:
-            raise HTTPException(422, f"Niepoprawna odpowiedź: {k}={v}")
+            raise HTTPException(422, f"Invalid answer: {k}={v}")
         if new.get(k) != v:
             new[k] = v
             answered_at[k] = db.now()
@@ -93,30 +93,30 @@ def answers(iid: int, body: Answers):
     db.update_incident(iid, plan_ids=new_ids)
 
     for q, label in changed:
-        db.add_event(iid, "fact", f"Nowy fakt: {q['text']} → {label}")
+        db.add_event(iid, "fact", f"New fact: {q['text']} → {label}")
     for h_id, h in sit["hypotheses"].items():
         if hyp_before[h_id]["level"] != h["level"]:
             db.add_event(iid, "hypothesis", f"{h['label']}: {_lvl(hyp_before[h_id]['level'])} → {_lvl(h['level'])}.")
     if added or removed:
         title = {a["id"]: a["title"] for a in book.ACTIONS}
         done_removed = [i for i in removed if inc["action_status"].get(i) == "done"]
-        msg = f"Plan przebudowany: +{len(added)} {_kroki(len(added))}, −{len(removed)} {_kroki(len(removed))}."
+        msg = f"Plan rebuilt: +{len(added)} {_steps(len(added))}, −{len(removed)} {_steps(len(removed))}."
         if added:
-            msg += " Dochodzi: " + "; ".join(title[i] for i in added) + "."
+            msg += " Added: " + "; ".join(title[i] for i in added) + "."
         if removed:
-            msg += " Odpada: " + "; ".join(title[i] for i in removed) + "."
+            msg += " Dropped: " + "; ".join(title[i] for i in removed) + "."
         if done_removed:
-            msg += " Wykonane wcześniej zostają w dzienniku: " + "; ".join(title[i] for i in done_removed) + "."
+            msg += " Steps done earlier stay in the log: " + "; ".join(title[i] for i in done_removed) + "."
         db.add_event(iid, "plan", msg)
     return _full(iid)
 
 
 def _lvl(level: str) -> str:
-    return {"likely": "prawdopodobne", "possible": "możliwe", "unlikely": "mało prawdopodobne"}[level]
+    return {"likely": "likely", "possible": "possible", "unlikely": "unlikely"}[level]
 
 
-def _kroki(n: int) -> str:
-    return "krok" if n == 1 else "kroki" if n in (2, 3, 4) else "kroków"
+def _steps(n: int) -> str:
+    return "step" if n == 1 else "steps"
 
 
 @router.patch("/{iid}/actions/{aid}")
@@ -124,13 +124,13 @@ def action(iid: int, aid: str, body: ActionStatus):
     inc = _load(iid)
     a = pb.action(pb.get(inc["type"]), aid)
     if not a:
-        raise HTTPException(404, "Nie ma takiego kroku")
+        raise HTTPException(404, "No such step")
     st = dict(inc["action_status"])
     if st.get(aid, "todo") != body.status:
         st[aid] = body.status
         db.update_incident(iid, action_status=st)
         if body.status == "done":
-            db.add_event(iid, "action", f"Zrobione: {a['title']} ({org_mod.role_label(db.get_org(), a['role'])}).")
+            db.add_event(iid, "action", f"Done: {a['title']} ({org_mod.role_label(db.get_org(), a['role'])}).")
     return _full(iid)
 
 
@@ -140,15 +140,15 @@ def confirm(iid: int, cid: str, body: Confirmation):
     org = db.get_org()
     labels = {c_id: label for c in org.get("continuity", []) for c_id, label in c["confirmations"]}
     if cid not in labels:
-        raise HTTPException(404, "Nie ma takiego potwierdzenia")
+        raise HTTPException(404, "No such confirmation")
     before = engine.continuity(inc["answers"], inc["confirmations"], org)["maintained"]
     conf = dict(inc["confirmations"])
     conf[cid] = body.done
     db.update_incident(iid, confirmations=conf)
-    db.add_event(iid, "continuity", ("Potwierdzone: " if body.done else "Cofnięte potwierdzenie: ") + labels[cid] + ".")
+    db.add_event(iid, "continuity", ("Confirmed: " if body.done else "Confirmation withdrawn: ") + labels[cid] + ".")
     after = engine.continuity(inc["answers"], conf, org)["maintained"]
     if after and not before:
-        db.add_event(iid, "continuity", "Działalność krytyczna utrzymana. Poczta pozostaje niezaufana.")
+        db.add_event(iid, "continuity", "Critical work is running. Email stays untrusted.")
     return _full(iid)
 
 
@@ -157,8 +157,8 @@ def close(iid: int):
     inc = _load(iid)
     if inc["status"] != "closed":
         db.update_incident(iid, status="closed", closed_at=db.now())
-        lesson = " Kret proponuje zasypać tunele, którymi przyszło zagrożenie." if pb.get(inc["type"]).LESSONS else ""
-        db.add_event(iid, "close", f"Incydent zamknięty.{lesson}")
+        lesson = " The mole suggests filling in the tunnels the threat came through." if pb.get(inc["type"]).LESSONS else ""
+        db.add_event(iid, "close", f"Incident closed.{lesson}")
     return _full(iid)
 
 

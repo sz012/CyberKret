@@ -23,11 +23,11 @@ function AppFrame({ active, children }: { active: string; children: React.ReactN
   return (
     <div className="demo-window">
       <div className="demo-window-top">
-        <span className="demo-window-brand"><BrandMark size={21} /> Kancelaria Nowak</span>
+        <span className="demo-window-brand"><BrandMark size={21} /> Nowak Law Office</span>
         <div className="demo-window-tabs" aria-hidden="true">
-          {['Pulpit', 'Tunele', 'Kret pocztowy', 'Incydent'].map((label) => <span key={label} className={active === label ? 'active' : ''}>{label}</span>)}
+          {['Dashboard', 'Tunnels', 'Mail mole', 'Incident'].map((label) => <span key={label} className={active === label ? 'active' : ''}>{label}</span>)}
         </div>
-        <span className="demo-local"><span /> lokalnie</span>
+        <span className="demo-local"><span /> local</span>
       </div>
       {children}
     </div>
@@ -46,20 +46,20 @@ export default function DemoScenes({ id, progress, data }: { id: string; progres
   if (id === 'company') return (
     <div className="demo-scene demo-split" key={id}>
       <div className="demo-story">
-        <p className="demo-chapter">01 / Twoja firma</p>
-        <h1>Mała firma.<br /><em>Duża odpowiedzialność.</em></h1>
-        <p>Akta klientów. Płatności. Terminy.<br />A na miejscu nie ma działu IT.</p>
-        <div className="demo-story-note"><Icon name="briefcase" /> Poznaj Kancelarię Nowak.</div>
+        <p className="demo-chapter">01 / Your company</p>
+        <h1>A small company.<br /><em>A big responsibility.</em></h1>
+        <p>Client files. Payments. Deadlines.<br />And no IT department on site.</p>
+        <div className="demo-story-note"><Icon name="briefcase" /> Meet Nowak Law Office.</div>
       </div>
-      <AppFrame active="Pulpit">
+      <AppFrame active="Dashboard">
         <div className="demo-company-hero">
           <Mascot size={155} pose="report" />
-          <div><p>Kancelaria Nowak</p><h2>Od czego<br />zaczniemy?</h2><span className="demo-firm-size">8 osób · kancelaria prawna</span></div>
+          <div><p>Nowak Law Office</p><h2>Where do<br />we start?</h2><span className="demo-firm-size">8 people · law office</span></div>
         </div>
         <div className="demo-company-assets">
           {org.targets.map((target, i) => <div key={target.id}><Icon name={['folder', 'money', 'briefcase'][i]} size={27} /><strong>{target.label}</strong><span>{target.harm}</span></div>)}
         </div>
-        <div className="demo-window-foot"><Icon name="shield" size={17} /> Najpierw sprawdź, co wymaga uwagi.</div>
+        <div className="demo-window-foot"><Icon name="shield" size={17} /> First check what needs attention.</div>
       </AppFrame>
     </div>
   )
@@ -67,29 +67,29 @@ export default function DemoScenes({ id, progress, data }: { id: string; progres
   if (id === 'tunnels' || id === 'fix') return (
     <div className="demo-scene demo-split demo-map-scene" key={id}>
       <div className="demo-story">
-        <p className="demo-chapter">{id === 'fix' ? '03 / Pierwszy ruch' : '02 / Droga ataku'}</p>
-        <h1>{id === 'fix' ? <>Wiesz, od czego<br /><em>zacząć.</em></> : <>Tak można dotrzeć<br /><em>do Twoich danych.</em></>}</h1>
+        <p className="demo-chapter">{id === 'fix' ? '03 / First move' : '02 / Attack path'}</p>
+        <h1>{id === 'fix' ? <>You know where<br /><em>to start.</em></> : <>This is how someone<br /><em>reaches your data.</em></>}</h1>
         {id === 'tunnels' ? <>
-          <p>Kret łączy słabe punkty w konkretne drogi ataku.</p>
+          <p>The mole links weak spots into concrete attack paths.</p>
           <div className="demo-route">
             <span><Icon name="globe" size={18} /> Internet</span>
             {route.steps.map((step, i) => <span key={step.technique} className={progress > (i + 1) * 0.16 ? 'revealed' : ''}><i />{step.to_label}</span>)}
           </div>
-          <small className="demo-evidence-note">Wynik modelu zagrożeń na podstawie zabezpieczeń firmy demo.</small>
+          <small className="demo-evidence-note">Result of the threat model based on the demo company's safeguards.</small>
         </> : <>
           <p>{first.label}.</p>
-          <div className="demo-move"><span><Icon name="clock" /> {first.effort_min} minut</span><span>{first.cost}</span></div>
+          <div className="demo-move"><span><Icon name="clock" /> {first.effort_min} minutes</span><span>{first.cost}</span></div>
           <div className={`demo-impact ${fixed ? 'resolved' : ''}`}>
             <b>{fixed ? after.tunnels.length : before.tunnels.length}</b>
-            <span>{fixed ? 'drogi pozostają do zamknięcia' : 'dróg ataku przed zmianą'}</span>
+            <span>{fixed ? 'paths left to close' : 'attack paths before the change'}</span>
           </div>
-          <p className="demo-evidence-note">Symulacja po wdrożeniu zalecenia. Kret nie zmienia ustawień routera.</p>
+          <p className="demo-evidence-note">Simulation after applying the advice. The mole does not change the router's settings.</p>
         </>}
       </div>
-      <AppFrame active="Tunele">
-        <div className="demo-map-heading"><span>{fixed ? 'Po pierwszej zmianie' : 'Mapa zagrożeń'}</span><b className={fixed ? 'ok' : 'bad'}>{run.tunnels.length} {plural(run.tunnels.length, 'tunel', 'tunele', 'tuneli')}</b></div>
+      <AppFrame active="Tunnels">
+        <div className="demo-map-heading"><span>{fixed ? 'After the first change' : 'Threat map'}</span><b className={fixed ? 'ok' : 'bad'}>{run.tunnels.length} {plural(run.tunnels.length, 'tunnel', 'tunnels')}</b></div>
         <Map org={org} run={run} selected={fixed ? null : route.id} />
-        <div className={`demo-window-foot ${fixed ? 'ok' : ''}`}><Icon name={fixed ? 'check' : 'key'} size={17} />{fixed ? `${first.closes.length} drogi ataku zamknięte jednym ruchem.` : 'Sieć, komputery, konta, poczta, kopie i procedury.'}</div>
+        <div className={`demo-window-foot ${fixed ? 'ok' : ''}`}><Icon name={fixed ? 'check' : 'key'} size={17} />{fixed ? `${first.closes.length} attack paths closed with one move.` : 'Network, computers, accounts, email, backups and procedures.'}</div>
       </AppFrame>
     </div>
   )
@@ -100,21 +100,21 @@ export default function DemoScenes({ id, progress, data }: { id: string; progres
     return (
       <div className="demo-scene demo-split" key={id}>
         <div className="demo-story">
-          <p className="demo-chapter">04 / Kret pocztowy</p>
-          <h1>Wygląda jak faktura.<br /><em>Jest próbą oszustwa.</em></h1>
-          <p>Kret wskazuje konkretne sygnały, zanim ktoś wykona przelew.</p>
+          <p className="demo-chapter">04 / Mail mole</p>
+          <h1>It looks like an invoice.<br /><em>It is a scam.</em></h1>
+          <p>The mole points to concrete signs before anyone sends money.</p>
           <div className="demo-signals">
             {signals.map((signal, i) => <div key={signal.type} className={progress >= i * 0.18 ? 'revealed' : ''}><span>0{i + 1}</span><p><strong>{signal.title}</strong><small>{signal.quote || signal.detail}</small></p></div>)}
           </div>
         </div>
-        <AppFrame active="Kret pocztowy">
+        <AppFrame active="Mail mole">
           <div className="demo-mail-header"><span className="demo-mail-avatar">B</span><div><b>{mail.mail.from_name}</b><span>{mail.mail.from_addr}</span></div><Icon name="mail" /></div>
           <div className="demo-mail-body">
             <h2>{mail.mail.subject}</h2>
-            <p>Dzień dobry Pani Grażyno,</p>
-            <p>w związku ze zmianą banku prosimy o przelew za fakturę FV/09/2026 na <mark className={progress > 0.18 ? 'lit' : ''}>nowy numer rachunku</mark>.</p>
-            <p>Płatność jest pilna, prosimy o realizację do końca dnia.</p>
-            <div className={`demo-attachment ${progress > 0.36 ? 'flagged' : ''}`}><Icon name="paperclip" /><span>faktura_FV-09-2026.pdf<b>.html</b></span></div>
+            <p>Dear Grace,</p>
+            <p>as we have changed banks, please pay invoice FV/09/2026 to our <mark className={progress > 0.18 ? 'lit' : ''}>new account number</mark>.</p>
+            <p>The payment is urgent, please complete it by the end of the day.</p>
+            <div className={`demo-attachment ${progress > 0.36 ? 'flagged' : ''}`}><Icon name="paperclip" /><span>invoice_FV-09-2026.pdf<b>.html</b></span></div>
           </div>
           <div className={`demo-verdict ${progress > 0.52 ? 'revealed' : ''}`}><Icon name="alert" size={25} /><div><strong>{mail.label}</strong><p>{mail.what_to_do}</p></div></div>
         </AppFrame>
@@ -125,18 +125,18 @@ export default function DemoScenes({ id, progress, data }: { id: string; progres
   if (id === 'incident') return (
     <div className="demo-scene demo-split" key={id}>
       <div className="demo-story">
-        <p className="demo-chapter">05 / Plan działania</p>
-        <h1>Każdy wie,<br /><em>co robić dalej.</em></h1>
-        <p>Kilka odpowiedzi. Konkretne zadania.<br />Przypisane do osób w Twojej firmie.</p>
-        <div className="demo-answer"><span>Czy przelew już wyszedł?</span><b><Icon name="check" size={18} /> Nie</b></div>
-        <small className="demo-evidence-note">Plan uwzględnia odpowiedzi z tego scenariusza.</small>
+        <p className="demo-chapter">05 / Action plan</p>
+        <h1>Everyone knows<br /><em>what to do next.</em></h1>
+        <p>A few answers. Concrete tasks.<br />Assigned to people in your company.</p>
+        <div className="demo-answer"><span>Has the payment gone out yet?</span><b><Icon name="check" size={18} /> No</b></div>
+        <small className="demo-evidence-note">The plan takes the answers from this scenario into account.</small>
       </div>
-      <AppFrame active="Incydent">
-        <div className="demo-plan-title"><Icon name="shield" size={29} /><div><h2>Zatrzymaj. Sprawdź. Działaj.</h2><span>Podejrzana faktura · pierwsze kroki</span></div></div>
+      <AppFrame active="Incident">
+        <div className="demo-plan-title"><Icon name="shield" size={29} /><div><h2>Stop. Check. Act.</h2><span>Suspicious invoice · first steps</span></div></div>
         <div className="demo-actions">
-          {situation.plan.slice(0, 3).map((action, i) => <div key={action.id} className={progress >= i * 0.15 ? 'revealed' : ''}><span className="demo-action-index">{i + 1}</span><div><span className="demo-owner">{action.role_label} · teraz</span><h3>{action.title}</h3><p>{action.detail}</p></div></div>)}
+          {situation.plan.slice(0, 3).map((action, i) => <div key={action.id} className={progress >= i * 0.15 ? 'revealed' : ''}><span className="demo-action-index">{i + 1}</span><div><span className="demo-owner">{action.role_label} · now</span><h3>{action.title}</h3><p>{action.detail}</p></div></div>)}
         </div>
-        <div className="demo-window-foot"><Icon name="phone" size={17} /> Numer kontrahenta z umowy, nie z podejrzanego maila.</div>
+        <div className="demo-window-foot"><Icon name="phone" size={17} /> The vendor's number from the contract, not from the suspicious email.</div>
       </AppFrame>
     </div>
   )
@@ -144,11 +144,11 @@ export default function DemoScenes({ id, progress, data }: { id: string; progres
   return (
     <div className="demo-scene demo-finale" key={id}>
       <div className="demo-finale-orbit" aria-hidden="true"><span /><span /><span /></div>
-      <div className="demo-finale-brand"><BrandMark size={86} /><Wordmark /></div>
-      <h1>Lepiej, żeby pierwszy<br />był <em>Twój kret.</em></h1>
-      <p>Zobacz zagrożenie. Ustal priorytety. Działaj.</p>
-      <div className="demo-private"><Icon name="chip" size={21} /><span>Analiza lokalnie. Dane firmy na Twoim komputerze.</span></div>
-      <Link className="btn btn-lamp btn-lg demo-end-link" to="/app">Otwórz aplikację <span aria-hidden="true">↗</span></Link>
+      <div className="demo-finale-brand"><Wordmark /></div>
+      <h1>Better your own mole<br /><em>gets in first.</em></h1>
+      <p>See the threat. Set priorities. Act.</p>
+      <div className="demo-private"><Icon name="chip" size={21} /><span>Analysis runs locally. Company data stays on your computer.</span></div>
+      <Link className="btn btn-lamp btn-lg demo-end-link" to="/app">Open the app <span aria-hidden="true">↗</span></Link>
     </div>
   )
 }

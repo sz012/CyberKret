@@ -40,9 +40,9 @@ def continuity(answers: dict, confirmations: dict, org: dict) -> dict:
                       "top": c["id"] == prio, "fallback": c["fallback"], "status": status, "confirmations": confs})
     critical = [i for i in items if i["critical"]]
     maintained = all(all(x["done"] for x in i["confirmations"]) for i in critical)
-    name = org.get("name") or "Firma"
+    name = org.get("name") or "The company"
     return {"items": items, "maintained": maintained,
-            "banner": f"{name} działa. Poczta pozostaje niezaufana." if maintained else None}
+            "banner": f"{name} is up and running. Email stays untrusted." if maintained else None}
 
 
 def phases(steps: list[dict], cont: dict, lessons: list[dict]) -> list[dict]:
@@ -79,7 +79,7 @@ def situation(inc: dict, org: dict) -> dict:
     for s in steps:
         s["status"] = status.get(s["id"], "todo")
 
-    confirmed = [{"text": f["title"] + (f": {f['detail']}" if f.get("detail") else ""), "source": "kret pocztowy"}
+    confirmed = [{"text": f["title"] + (f": {f['detail']}" if f.get("detail") else ""), "source": "mail mole"}
                  for f in facts if f.get("severity") in ("high", "medium")]
     unverified = []
     qs = pb.questions(org, book)
@@ -87,7 +87,7 @@ def situation(inc: dict, org: dict) -> dict:
         if q["id"] == "priority":
             continue
         kind, text = book.FACTS[(q["id"], answers.get(q["id"], UNKNOWN))]
-        src = "z Twoich odpowiedzi" if q["id"] in answers else "brak odpowiedzi"
+        src = "from your answers" if q["id"] in answers else "no answer"
         (confirmed if kind == "confirmed" else unverified).append({"text": text, "source": src, "question": q["id"]})
 
     cont = continuity(answers, inc["confirmations"], org)

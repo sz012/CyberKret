@@ -136,7 +136,7 @@ export default function KretFilm({ time, presentation = false }: { time?: number
   const ended = t >= END
 
   return (
-    <section ref={stage} className="kf" aria-label="Animacja: nocą w biurze coś porusza się w kablach. To kret, który sprawdza sieć i pokazuje drogę włamywacza.">
+    <section ref={stage} className="kf" aria-label="Animation: at night something moves through the office cables. It is your own mole, which checks the network and shows the path an intruder would take.">
       <svg className="kf-svg" viewBox={`${vx + shakeX} ${vy + shakeY} ${vw} ${vh}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <Defs />
         <Room />
@@ -176,47 +176,47 @@ export default function KretFilm({ time, presentation = false }: { time?: number
         {caption?.key === 'night' && (
           <div className="kf-caption" key="night">
             <p className="kf-kicker">
-              {clock} · Kancelaria Nowak
+              {clock} · Nowak Law Office
             </p>
-            <h1>Biuro jest puste.</h1>
+            <h1>The office is empty.</h1>
           </div>
         )}
         {caption?.key === 'motion' && (
           <div className="kf-caption" key="motion">
-            <h1>Coś porusza się w&nbsp;kablach.</h1>
+            <h1>Something is moving in the&nbsp;cables.</h1>
           </div>
         )}
         {caption?.key === 'alarm' && (
           <div className="kf-caption alarm" key="alarm">
-            <h1>Ktoś jest w&nbsp;Twojej sieci?</h1>
+            <h1>Is someone in your&nbsp;network?</h1>
           </div>
         )}
         {caption?.key === 'calm' && (
           <div className="kf-caption" key="calm">
             <h1>
-              Spokojnie.
-              {t >= T.ident && <span className="kf-accent">To&nbsp;Twój kret.</span>}
+              Relax.
+              {t >= T.ident && <span className="kf-accent">It&apos;s your&nbsp;mole.</span>}
             </h1>
           </div>
         )}
         {caption?.key === 'purpose' && (
           <div className="kf-caption" key="purpose">
-            <h1>Znajdź lukę, zanim znajdzie ją włamywacz.</h1>
-            {t >= T.sub && <p className="kf-sub">Kret pokazuje drogę do Twoich danych i&nbsp;mówi, co zamknąć najpierw.</p>}
+            <h1>Find the way in before an attacker&nbsp;does.</h1>
+            {t >= T.sub && <p className="kf-sub">The mole shows the path to your data and tells you what to close&nbsp;first.</p>}
             {t >= T.cta && !presentation && (
               <div className="kf-cta">
-                <Link className="btn btn-lamp btn-lg" to="/app">Otwórz aplikację</Link>
-                <button type="button" className="kf-link" onClick={play}>Obejrzyj jeszcze raz</button>
+                <Link className="btn btn-lamp btn-lg" to="/app">Open the app</Link>
+                <button type="button" className="kf-link" onClick={play}>Watch again</button>
               </div>
             )}
-            {t >= T.cta && !presentation && <p className="kf-pillars">symulacja ataku · plan po incydencie · lokalny agent AI</p>}
+            {t >= T.cta && !presentation && <p className="kf-pillars">attack simulation · incident support · local&nbsp;AI</p>}
           </div>
         )}
       </div>
 
       {!ended && !presentation && (
         <button type="button" className="kf-skip" onClick={skip}>
-          Pomiń
+          Skip
         </button>
       )}
     </section>

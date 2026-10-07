@@ -1,7 +1,7 @@
 """Registry of incident playbooks and what they share: priorities, phases and the 24-hour priority question.
 
 Each playbook module has questions, facts for every answer, hypotheses, actions with `when(ctx)` rules, messages,
-lessons, map impact and the UODO rule. The plan is recomputed from scratch after every new fact.
+lessons, map impact and the data protection authority (UODO) rule. The plan is recomputed from scratch after every new fact.
 """
 from types import ModuleType
 
@@ -12,10 +12,10 @@ __all__ = ["NO", "UNKNOWN", "YES"]
 
 PLAYBOOKS: dict[str, ModuleType] = {p.ID: p for p in (fake_invoice, ransomware, lost_laptop, account_takeover, outage)}
 
-PRIORITY = {"now": "Teraz", "15min": "W 15 minut", "1h": "W ciągu godziny", "verify": "Do ustalenia"}
+PRIORITY = {"now": "Now", "15min": "Within 15 minutes", "1h": "Within the hour", "verify": "To find out"}
 
-PHASES = [("stop", "Zatrzymaj"), ("assess", "Oceń"), ("notify", "Zawiadom"), ("continue", "Utrzymaj działanie"),
-          ("learn", "Wnioski")]
+PHASES = [("stop", "Stop"), ("assess", "Assess"), ("notify", "Notify"), ("continue", "Keep running"),
+          ("learn", "Learn")]
 
 
 def get(type_: str) -> ModuleType:
@@ -28,7 +28,7 @@ def types() -> list[dict]:
 
 def questions(org: dict, pb: ModuleType) -> list[dict]:
     options = [(c["id"], c["label"]) for c in org.get("continuity", []) if c["id"] != "email"]
-    return [*pb.QUESTIONS, {"id": "priority", "text": "Co jest najważniejsze w ciągu 24 godzin?", "options": options}]
+    return [*pb.QUESTIONS, {"id": "priority", "text": "What matters most in the next 24 hours?", "options": options}]
 
 
 def question(org: dict, pb: ModuleType, qid: str) -> dict | None:

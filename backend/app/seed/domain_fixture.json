@@ -1,16 +1,16 @@
 {
   "provider": "Microsoft 365",
-  "note": "Dane demonstracyjne: domena .example nie istnieje w internecie.",
+  "note": "Demo data: the .example domain does not exist on the internet.",
   "checked_at": "2026-10-04T09:14:00+00:00",
   "web": { "status": 200 },
   "findings": [
-    { "key": "mx", "level": "ok", "title": "Serwery poczty", "detail": "kancelarianowak-example.mail.protection.outlook.com" },
+    { "key": "mx", "level": "ok", "title": "Mail servers", "detail": "nowaklaw-example.mail.protection.outlook.com" },
     { "key": "spf", "level": "ok", "title": "SPF", "detail": "v=spf1 include:spf.protection.outlook.com -all" },
-    { "key": "dmarc", "level": "bad", "title": "DMARC", "detail": "Brak rekordu DMARC. Fałszywe maile „od tej domeny” nie zostaną odrzucone." },
-    { "key": "dkim", "level": "ok", "title": "DKIM", "detail": "Znaleziony selektor: selector1" },
-    { "key": "cert", "level": "ok", "title": "Certyfikat HTTPS", "detail": "Ważny jeszcze 61 dni." },
-    { "key": "https_redirect", "level": "ok", "title": "Przekierowanie na HTTPS", "detail": "HTTP przekierowuje na HTTPS." },
-    { "key": "headers", "level": "warn", "title": "Nagłówki bezpieczeństwa", "detail": "Brakuje: CSP, X-Frame-Options" },
-    { "key": "version", "level": "warn", "title": "Strona zdradza oprogramowanie", "detail": "WordPress 6.8" }
+    { "key": "dmarc", "level": "bad", "title": "DMARC", "detail": "No DMARC record. Fake emails \"from this domain\" will not be rejected." },
+    { "key": "dkim", "level": "ok", "title": "DKIM", "detail": "Selector found: selector1" },
+    { "key": "cert", "level": "ok", "title": "HTTPS certificate", "detail": "Valid for 61 more days." },
+    { "key": "https_redirect", "level": "ok", "title": "Redirect to HTTPS", "detail": "HTTP redirects to HTTPS." },
+    { "key": "headers", "level": "warn", "title": "Security headers", "detail": "Missing: CSP, X-Frame-Options" },
+    { "key": "version", "level": "warn", "title": "The site reveals its software", "detail": "WordPress 6.8" }
   ]
 }

@@ -11,7 +11,7 @@ function readVoice(file: File): Promise<Voice> {
       clearTimeout(timeout)
       media.removeAttribute('src')
       URL.revokeObjectURL(url)
-      reject(new Error(`Nie można odczytać nagrania ${file.name}. Wybierz MP3 lub WAV.`))
+      reject(new Error(`Cannot read the recording ${file.name}. Choose an MP3 or WAV file.`))
     }
     const timeout = window.setTimeout(fail, 10000)
     media.preload = 'metadata'
@@ -78,7 +78,7 @@ export function useDemoPlayer() {
       element.play().catch(() => {
         if (cancelled) return
         setPlaying(false)
-        setError('Przeglądarka zatrzymała lektora. Naciśnij Odtwórz, aby wznowić.')
+        setError('The browser paused the narration. Press Play to resume.')
       })
     }
     return () => { cancelled = true; element.pause() }
@@ -126,10 +126,10 @@ export function useDemoPlayer() {
       for (const file of Array.from(files)) {
         const match = file.name.match(/^0([1-7])(?:[._ -]|$)/)
         if (!match || !/\.(mp3|wav|m4a)$/i.test(file.name) || file.size > 50 * 1024 * 1024) {
-          throw new Error('Nazwij pliki 01-intro, 02-firma, aż do 07-final. Wybierz MP3, WAV lub M4A do 50 MB każdy.')
+          throw new Error('Name the files 01-intro, 02-company and so on up to 07-final. Use MP3, WAV or M4A, up to 50 MB each.')
         }
         const key = Number(match[1]) - 1
-        if (loaded[key]) throw new Error(`Wybrano dwa nagrania do sceny ${match[1]}. Wybierz jedno.`)
+        if (loaded[key]) throw new Error(`Two recordings were chosen for scene ${match[1]}. Choose one.`)
         loaded[key] = await readVoice(file)
       }
       for (const [key, voice] of Object.entries(loaded)) {
@@ -144,7 +144,7 @@ export function useDemoPlayer() {
       setTime(0)
     } catch (cause) {
       Object.values(loaded).forEach((voice) => URL.revokeObjectURL(voice.url))
-      setError(cause instanceof Error ? cause.message : 'Nie udało się wczytać lektora.')
+      setError(cause instanceof Error ? cause.message : 'Could not load the narration.')
     } finally {
       setLoadingVoice(false)
     }

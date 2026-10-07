@@ -2,17 +2,17 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Health, Org } from '../api/types'
-import { BrandMark, Wordmark } from './BrandMark'
+import { Wordmark } from './BrandMark'
 import { Icon } from './icons'
 import { useHealth } from './useHealth'
 
 export function LocalBadge({ health }: { health: Health | null }) {
-  if (!health) return <span className="pill bad"><span className="dot" />backend niedostępny</span>
+  if (!health) return <span className="pill bad"><span className="dot" />backend unavailable</span>
   const m = health.llm
   return (
-    <span className={`pill ${m.available ? 'ok' : 'warn'}`} title={m.available ? `Model ${m.model} działa na tym komputerze` : 'Ollama nie odpowiada. Kret działa na regułach i szablonach.'}>
+    <span className={`pill ${m.available ? 'ok' : 'warn'}`} title={m.available ? `Model ${m.model} runs on this computer` : 'Ollama is not responding. The mole runs on rules and templates.'}>
       <span className="dot" />
-      {m.available ? `${m.model} · lokalnie` : 'tryb bez modelu'} · 0 B na zewnątrz
+      {m.available ? `${m.model} · local` : 'no-model mode'} · 0 B sent out
     </span>
   )
 }
@@ -32,7 +32,7 @@ export default function Shell() {
   }, [])
 
   const reset = async () => {
-    if (!confirm('Wrócić do firmy demo? Twoja firma, incydenty, maile i przejścia kreta zostaną usunięte z tego komputera.')) return
+    if (!confirm('Go back to the demo company? Your company, incidents, emails and mole runs will be removed from this computer.')) return
     await api.resetDemo()
     setMenu(false)
     nav('/app')
@@ -42,32 +42,31 @@ export default function Shell() {
   return (
     <div className="shell">
       <header className="topbar">
-        <Link to="/app" className="brand" aria-label="cyberKret, pulpit">
-          <BrandMark />
+        <Link to="/app" className="brand" aria-label="cyberMole, dashboard">
           <span>
             <Wordmark />
-            <small>{org?.name || 'Twoja firma'}</small>
+            <small>{org?.name || 'Your company'}</small>
           </span>
         </Link>
-        <nav className="mainnav" aria-label="Główna nawigacja">
-          <NavLink to="/app" end>Pulpit</NavLink>
-          <NavLink to="/app/tunele">Tunele</NavLink>
-          <NavLink to="/app/poczta">Kret pocztowy</NavLink>
-          <NavLink to="/app/incydent">Incydent</NavLink>
+        <nav className="mainnav" aria-label="Main navigation">
+          <NavLink to="/app" end>Dashboard</NavLink>
+          <NavLink to="/app/tunnels">Tunnels</NavLink>
+          <NavLink to="/app/mail">Mail mole</NavLink>
+          <NavLink to="/app/incident">Incident</NavLink>
         </nav>
         <div className="topbar-right">
           <LocalBadge health={health} />
-          <button className="btn btn-bad btn-sm" onClick={() => nav('/app/incydent?nowy=1')}>
-            <Icon name="alert" size={16} /> Coś się stało
+          <button className="btn btn-bad btn-sm" onClick={() => nav('/app/incident?new=1')}>
+            <Icon name="alert" size={16} /> Something happened
           </button>
           <div className="menu">
-            <button className="btn btn-ghost btn-sm" aria-expanded={menu} onClick={() => setMenu((m) => !m)} aria-label="Więcej">⋯</button>
+            <button className="btn btn-ghost btn-sm" aria-expanded={menu} onClick={() => setMenu((m) => !m)} aria-label="More">⋯</button>
             {menu && (
               <div className="menu-pop" role="menu">
-                <Link to="/app/firma" role="menuitem" onClick={() => setMenu(false)}>Moja firma</Link>
-                <Link to="/" role="menuitem">Strona projektu</Link>
-                <Link to="/app/karta" role="menuitem" onClick={() => setMenu(false)}>Karta kreta do druku</Link>
-                <button role="menuitem" onClick={reset}>Wróć do firmy demo</button>
+                <Link to="/app/company" role="menuitem" onClick={() => setMenu(false)}>My company</Link>
+                <Link to="/" role="menuitem">Project page</Link>
+                <Link to="/app/card" role="menuitem" onClick={() => setMenu(false)}>Printable mole card</Link>
+                <button role="menuitem" onClick={reset}>Back to the demo company</button>
               </div>
             )}
           </div>

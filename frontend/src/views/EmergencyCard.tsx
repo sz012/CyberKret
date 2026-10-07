@@ -13,26 +13,26 @@ export default function EmergencyCard() {
     api.card().then(
       (value) => {
         setCard(value)
-        setPrinted(new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }))
+        setPrinted(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }))
       },
       (e: Error) => setError(e.message),
     )
   }, [])
 
   if (error) return <p className="bad">{error}</p>
-  if (!card) return <p className="muted">Ładowanie karty…</p>
+  if (!card) return <p className="muted">Loading the card…</p>
 
   return (
     <div className="ecard-page">
       <header className="page-head no-print">
         <div>
-          <h1>Karta kreta do szuflady</h1>
+          <h1>The mole card for your drawer</h1>
           <p className="muted">
-            Jedna kartka na wypadek, gdy padnie poczta, internet albo prąd. Wydrukuj ją teraz i połóż tam, gdzie każdy ją znajdzie.
+            One sheet for the day email, internet or power goes down. Print it now and keep it where everyone can find it.
           </p>
         </div>
         <button className="btn btn-lamp btn-lg" onClick={() => window.print()}>
-          <Icon name="printer" size={18} /> Drukuj kartę
+          <Icon name="printer" size={18} /> Print the card
         </button>
       </header>
 
@@ -41,15 +41,15 @@ export default function EmergencyCard() {
           <div className="row gap-sm">
             <BrandMark size={44} paper />
             <div>
-              <b>Karta awaryjna cyberKreta</b>
+              <b>cyberMole emergency card</b>
               <small>{card.org}</small>
             </div>
           </div>
-          <span className="mono small">wydrukowano {printed}</span>
+          <span className="mono small">printed {printed}</span>
         </header>
 
         <section>
-          <h2>Pierwsze kroki, zanim wiesz więcej</h2>
+          <h2>First steps, before you know more</h2>
           <div className="ecard-types">
             {card.by_type.map((t) => (
               <div key={t.id}>
@@ -69,7 +69,7 @@ export default function EmergencyCard() {
 
         <div className="ecard-grid">
           <section>
-            <h2>Kto co robi</h2>
+            <h2>Who does what</h2>
             <ul className="ecard-list">
               {card.people.map((p) => (
                 <li key={p.id}>
@@ -80,7 +80,7 @@ export default function EmergencyCard() {
             </ul>
           </section>
           <section>
-            <h2>Kanały zastępcze</h2>
+            <h2>Backup channels</h2>
             <ul className="ecard-list">
               {card.fallbacks.map((f) => (
                 <li key={f.id}>
@@ -94,7 +94,7 @@ export default function EmergencyCard() {
 
         {card.contacts.length > 0 && (
           <section>
-            <h2>Telefony do kontrahentów: tylko nimi potwierdzasz zmianę konta</h2>
+            <h2>Vendor phone numbers: the only way to confirm a bank account change</h2>
             <table className="ecard-table">
               <tbody>
                 {card.contacts.map((c) => (
@@ -110,13 +110,13 @@ export default function EmergencyCard() {
         )}
 
         <section>
-          <h2>Zasady, które obowiązują zawsze</h2>
+          <h2>Rules that always apply</h2>
           <ul className="ecard-rules">
             {card.rules.map((r) => <li key={r}>{r}</li>)}
           </ul>
         </section>
 
-        <footer className="ecard-foot">Karta działa bez prądu i internetu. Wydrukuj nową po każdej zmianie w zespole albo u kontrahentów.</footer>
+        <footer className="ecard-foot">This card works without power or internet. Print a new one after every change in the team or among your vendors.</footer>
       </article>
     </div>
   )

@@ -2,7 +2,7 @@ from app.kret.engine import run
 
 
 def test_presentation_uses_real_rules_without_changing_saved_data(client, org):
-    client.post("/api/org/new", json={"name": "Firma poza prezentacją"})
+    client.post("/api/org/new", json={"name": "Company outside the presentation"})
     saved = client.get("/api/org").json()
     runs = client.get("/api/kret/runs").json()
     incidents = client.get("/api/incidents").json()

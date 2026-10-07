@@ -1,4 +1,4 @@
-"""Kret pocztowy: deterministic checks of a message first, the local model only explains them.
+"""Mail mole: deterministic checks of a message first, the local model only explains them.
 
 Attachments are read as bytes and text. Nothing is executed or rendered.
 """
@@ -11,16 +11,18 @@ from html.parser import HTMLParser
 
 from ..llm import ollama
 
-URGENCY = [r"\bpiln\w*", r"natychmiast", r"do końca dnia", r"w ciągu 24", r"dzisiaj", r"zablokowan\w*", r"wstrzyma\w*", r"ostatni\w* termin"]
-ACCOUNT_CHANGE = [r"(now\w*|zmian\w*|aktualizacj\w*)\s+(numer\w*\s+)?(rachunk\w*|kont\w* bankow\w*)", r"numer\w* rachunk\w*"]
-IBAN = re.compile(r"\b(?:PL\s?)?\d{2}(?:\s?\d{4}){6}\b")
+URGENCY = [r"\burgent\w*", r"immediately", r"by the end of (the )?day", r"within 24", r"\btoday\b", r"\b(suspended|blocked|locked)\b", r"final (notice|reminder)",
+           r"\bpiln\w*", r"natychmiast", r"do końca dnia", r"w ciągu 24", r"dzisiaj", r"zablokowan\w*", r"wstrzyma\w*", r"ostatni\w* termin"]
+ACCOUNT_CHANGE = [r"new (bank )?account (number|details)", r"(changed|change of|updated?) (our )?(bank|bank account|account details|banking details)",
+                  r"(now\w*|zmian\w*|aktualizacj\w*)\s+(numer\w*\s+)?(rachunk\w*|kont\w* bankow\w*)", r"numer\w* rachunk\w*"]
+IBAN = re.compile(r"\b(?:[A-Z]{2}\s?)?\d{2}(?:\s?\d{4}){6}\b")
 RISKY_EXT = {"exe", "scr", "js", "vbs", "bat", "cmd", "iso", "img", "lnk", "hta", "html", "htm", "docm", "xlsm", "zip", "rar", "7z"}
 DOC_EXT = {"pdf", "doc", "docx", "xls", "xlsx", "jpg", "png", "txt"}
 
 VERDICT = {
-    "danger": {"label": "Nie otwieraj, zgłoś", "level": "bad"},
-    "caution": {"label": "Sprawdź, zanim klikniesz", "level": "warn"},
-    "safe": {"label": "Wygląda bezpiecznie", "level": "ok"},
+    "danger": {"label": "Do not open, report it", "level": "bad"},
+    "caution": {"label": "Check before you click", "level": "warn"},
+    "safe": {"label": "Looks safe", "level": "ok"},
 }
 
 
@@ -115,7 +117,7 @@ def summarize(msg: EmailMessage) -> dict:
     atts = []
     for part in msg.iter_attachments():
         payload = part.get_payload(decode=True) or b""
-        atts.append({"filename": part.get_filename() or "bez_nazwy", "content_type": part.get_content_type(), "size": len(payload)})
+        atts.append({"filename": part.get_filename() or "unnamed", "content_type": part.get_content_type(), "size": len(payload)})
     return {
         "from_name": name or addr, "from_addr": addr, "to": [a for _, a in getaddresses(msg.get_all("To", []))],
         "reply_to": parseaddr(str(msg.get("Reply-To", "")))[1] or None,
@@ -135,36 +137,36 @@ def heuristics(msg: EmailMessage, org: dict) -> list[dict]:
     sender = _domain_of(s["from_addr"])
     look = lookalike(sender, known)
     if look:
-        add("lookalike_sender", "high", "Domena udaje znanego nadawcę",
-            f"{look['name']} pisze z {look['domain']}. Ten mail przyszedł z {sender}.", sender)
+        add("lookalike_sender", "high", "The domain imitates a known sender",
+            f"{look['name']} writes from {look['domain']}. This email came from {sender}.", sender)
 
     if s["reply_to"] and _domain_of(s["reply_to"]) != sender:
-        add("reply_to_mismatch", "high", "Odpowiedź pójdzie gdzie indziej",
-            f"Odpowiedź trafi na {s['reply_to']}, a nie do nadawcy.", s["reply_to"])
+        add("reply_to_mismatch", "high", "Your reply goes somewhere else",
+            f"A reply goes to {s['reply_to']}, not to the sender.", s["reply_to"])
 
     auth = _auth_results(msg)
     if auth["dmarc"] in ("fail",) or auth["spf"] in ("fail", "softfail"):
-        add("auth_fail", "medium", "Serwer nadawcy się nie zgadza",
-            f"Kontrola poczty: SPF={auth['spf'] or '?'}, DKIM={auth['dkim'] or '?'}, DMARC={auth['dmarc'] or '?'}.")
+        add("auth_fail", "medium", "The sender's server does not match",
+            f"Email checks: SPF={auth['spf'] or '?'}, DKIM={auth['dkim'] or '?'}, DMARC={auth['dmarc'] or '?'}.")
     elif look and auth["spf"] == "pass":
-        add("auth_pass_lookalike", "info", "Techniczne kontrole przechodzą, ale to nic nie znaczy",
-            f"SPF=pass tylko potwierdza, że mail wysłał właściciel {sender}. Oszust kupił tę domenę.")
+        add("auth_pass_lookalike", "info", "Technical checks pass, but that means nothing",
+            f"SPF=pass only confirms the email was sent by the owner of {sender}. The fraudster bought that domain.")
 
     body = s["text"]
     low = body.lower()
     for pat in ACCOUNT_CHANGE:
         m = re.search(pat, low)
         if m:
-            add("account_change", "high", "Prośba o zmianę numeru konta",
-                "Oszuści najczęściej zarabiają właśnie na „nowym numerze rachunku”.", body[m.start():m.end()])
+            add("account_change", "high", "A request to change the bank account",
+                "A \"new account number\" is how fraudsters most often get paid.", body[m.start():m.end()])
             break
     iban = IBAN.search(body)
     if iban and not any(i["type"] == "account_change" for i in ind):
-        add("iban", "medium", "Numer rachunku w treści", "Mail podaje numer konta do przelewu.", iban.group(0))
+        add("iban", "medium", "Account number in the text", "The email gives an account number for a payment.", iban.group(0))
     for pat in URGENCY:
         m = re.search(pat, low)
         if m:
-            add("urgency", "medium", "Presja czasu", "Pośpiech ma sprawić, że nikt nie sprawdzi.", body[m.start():m.end()])
+            add("urgency", "medium", "Time pressure", "The rush is meant to stop anyone from checking.", body[m.start():m.end()])
             break
 
     html = s["html"] or ""
@@ -174,10 +176,10 @@ def heuristics(msg: EmailMessage, org: dict) -> list[dict]:
         for href, text in p.links:
             hd, td = _domain_of(href), _domain_of(text)
             if td and hd and td != hd:
-                add("link_mismatch", "high", "Link prowadzi gdzie indziej, niż pokazuje",
-                    f"Widać {td}, a link prowadzi do {hd}.", text)
+                add("link_mismatch", "high", "The link goes somewhere other than it shows",
+                    f"It shows {td}, but the link goes to {hd}.", text)
             elif hd and lookalike(hd, known):
-                add("lookalike_link", "high", "Link do podrobionej domeny", f"Link prowadzi do {hd}.", text or href)
+                add("lookalike_link", "high", "A link to a forged domain", f"The link goes to {hd}.", text or href)
 
     for part in msg.iter_attachments():
         name = (part.get_filename() or "").lower()
@@ -185,19 +187,19 @@ def heuristics(msg: EmailMessage, org: dict) -> list[dict]:
         exts = name.split(".")[1:]
         head = payload[:2000].decode("utf-8", errors="ignore").lower()
         if len(exts) >= 2 and exts[-2] in DOC_EXT and exts[-1] in RISKY_EXT:
-            add("double_extension", "high", "Załącznik udaje dokument",
-                f"„{part.get_filename()}” wygląda jak .{exts[-2]}, a naprawdę to .{exts[-1]}.", part.get_filename())
+            add("double_extension", "high", "The attachment pretends to be a document",
+                f"\"{part.get_filename()}\" looks like a .{exts[-2]} file, but it is really .{exts[-1]}.", part.get_filename())
         elif exts and exts[-1] in RISKY_EXT:
-            add("risky_attachment", "medium", "Ryzykowny typ załącznika", f"Pliki .{exts[-1]} często niosą złośliwe treści.", part.get_filename())
+            add("risky_attachment", "medium", "Risky attachment type", f".{exts[-1]} files often carry malicious content.", part.get_filename())
         declared = part.get_content_type()
         if declared == "application/pdf" and not payload.startswith(b"%PDF"):
-            add("type_mismatch", "high", "To nie jest PDF", "Załącznik twierdzi, że jest PDF-em, ale w środku jest coś innego.")
+            add("type_mismatch", "high", "This is not a PDF", "The attachment claims to be a PDF, but there is something else inside.")
         if "<form" in head or "<html" in head:
             lp = _Links()
             lp.feed(payload[:200_000].decode("utf-8", errors="ignore"))
             if lp.passwords:
-                add("credential_form", "high", "Załącznik prosi o hasło",
-                    "W środku jest formularz logowania. Kret otworzył go jako tekst: to podróbka strony banku.")
+                add("credential_form", "high", "The attachment asks for a password",
+                    "There is a login form inside. The mole opened it as text: it is a forged bank page.")
     return ind
 
 
@@ -211,18 +213,18 @@ def verdict_from(indicators: list[dict]) -> str:
     return "safe"
 
 
-SYSTEM_PROMPT = """Jesteś cyberKretem, asystentem bezpieczeństwa w małej polskiej firmie. Działasz lokalnie, offline.
-Dostajesz maila i listę faktów, które sprawdziły deterministyczne testy. Twoje zadanie: wytłumaczyć to pracownikowi bez wiedzy technicznej.
-Zasady:
-- Pisz po polsku, krótko, ciepło, bez żargonu. Zwracaj się do adresata po imieniu, jeśli je znasz.
-- Nie wymyślaj faktów. Opieraj się na liście faktów i treści maila.
-- Jeśli dodajesz własny sygnał, "quote" musi być dosłownym fragmentem treści maila.
-- Nigdy nie każ klikać linków ani otwierać załącznika z tego maila.
-Zwróć wyłącznie JSON:
+SYSTEM_PROMPT = """You are cyberMole, a security assistant in a small company. You run locally, offline.
+You get an email and a list of facts checked by deterministic tests. Your job: explain it to an employee with no technical knowledge.
+Rules:
+- Always write in English, even when the email is in another language. Be brief, warm and free of jargon. Address the recipient by first name if you know it.
+- Do not invent facts. Rely on the list of facts and the text of the email.
+- If you add a signal of your own, "quote" must be a verbatim fragment of the email text.
+- Never tell anyone to click links or open attachments from this email.
+Return JSON only:
 {"verdict": "danger" | "caution" | "safe",
- "summary": "dwa zdania: co to jest i dlaczego",
- "what_to_do": "jedno konkretne zdanie: co zrobić teraz",
- "extra_signals": [{"title": "...", "quote": "dosłowny fragment", "explanation": "..."}]}"""
+ "summary": "two sentences: what this is and why",
+ "what_to_do": "one concrete sentence: what to do now",
+ "extra_signals": [{"title": "...", "quote": "verbatim fragment", "explanation": "..."}]}"""
 
 MAIL_SCHEMA = {
     "type": "object",
@@ -253,7 +255,7 @@ def rules(msg: EmailMessage, org: dict) -> dict:
     summary, what = _template(verdict, ind, org)
     return {
         "verdict": verdict, **VERDICT[verdict], "summary": summary, "what_to_do": what, "indicators": ind,
-        "llm": {"model": None, "local": True, "ms": None, "error": "nie pytano modelu"},
+        "llm": {"model": None, "local": True, "ms": None, "error": "model not asked"},
         "mail": {k: v for k, v in s.items() if k != "html"},
     }
 
@@ -262,12 +264,12 @@ def explain(result: dict, msg: EmailMessage, org: dict, recipient_name: str | No
     s = summarize(msg)
     ind = [i for i in result["indicators"] if i["source"] != "model"]
     verdict = verdict_from(ind)
-    facts = "\n".join(f"- {i['title']}: {i['detail']}" for i in ind) or "- brak sygnałów ostrzegawczych"
-    user = (f"Adresat: {recipient_name or 'pracownik'}\nOd: {s['from_name']} <{s['from_addr']}>\n"
-            f"Reply-To: {s['reply_to'] or '-'}\nTemat: {s['subject']}\n"
-            f"Załączniki: {', '.join(a['filename'] for a in s['attachments']) or 'brak'}\n\n"
-            f"Treść:\n{s['text'][:4000]}\n\nFakty sprawdzone przez kreta:\n{facts}\n"
-            f"Werdykt testów: {verdict}")
+    facts = "\n".join(f"- {i['title']}: {i['detail']}" for i in ind) or "- no warning signs"
+    user = (f"Recipient: {recipient_name or 'employee'}\nFrom: {s['from_name']} <{s['from_addr']}>\n"
+            f"Reply-To: {s['reply_to'] or '-'}\nSubject: {s['subject']}\n"
+            f"Attachments: {', '.join(a['filename'] for a in s['attachments']) or 'none'}\n\n"
+            f"Text:\n{s['text'][:4000]}\n\nFacts checked by the mole:\n{facts}\n"
+            f"Test verdict: {verdict}\nAnswer in English.")
     data, meta = ollama.chat_json(SYSTEM_PROMPT, user, MAIL_SCHEMA)
     summary = what = None
     if data:
@@ -279,7 +281,7 @@ def explain(result: dict, msg: EmailMessage, org: dict, recipient_name: str | No
         for x in data.get("extra_signals") or []:
             q = str(x.get("quote") or "").strip()
             if q and q in s["text"] and not any(i.get("quote") == q for i in ind):
-                ind.append({"type": "llm", "severity": "medium", "title": str(x.get("title") or "Sygnał"),
+                ind.append({"type": "llm", "severity": "medium", "title": str(x.get("title") or "Signal"),
                             "detail": str(x.get("explanation") or ""), "quote": q, "source": "model"})
     if not summary:
         summary, what = _template(verdict, ind, org)
@@ -294,18 +296,18 @@ def analyze(msg: EmailMessage, org: dict, recipient_name: str | None = None, use
 
 def _template(verdict: str, ind: list[dict], org: dict) -> tuple[str, str]:
     if verdict == "safe":
-        return "Kret nie znalazł nic podejrzanego. Nadawca się zgadza, nie ma prośby o pieniądze ani dziwnych załączników.", "Możesz odpowiedzieć normalnie."
+        return "The mole found nothing suspicious. The sender checks out, and there is no request for money and no strange attachment.", "You can reply as usual."
     real = [i for i in ind if i["severity"] != "info"]
     titles = [i["title"].lower() for i in real if i["severity"] == "high"][:3] or [i["title"].lower() for i in real][:2]
     n = len(real)
-    s = f"Kret znalazł {n} {'sygnał' if n == 1 else 'sygnały' if n < 5 else 'sygnałów'} oszustwa, m.in.: {', '.join(titles)}."
+    s = f"The mole found {n} {'sign' if n == 1 else 'signs'} of fraud, including: {', '.join(titles)}."
     if any(i["type"] in ("account_change", "iban") for i in ind):
         look = next((i for i in ind if i["type"] == "lookalike_sender"), None)
         phone = ""
         if look:
             c = next((c for c in org.get("contacts", []) if c["domain"] in look["detail"]), None)
             phone = f" ({c['phone']})" if c and c.get("phone") else ""
-        return s + " To klasyczna próba wyłudzenia przelewu.", f"Nie płać. Zadzwoń do kontrahenta na numer z umowy{phone}, nie z tego maila."
+        return s + " This is a classic attempt to steal a payment.", f"Do not pay. Call the vendor on the number from the contract{phone}, not the one in this email."
     if verdict == "danger":
-        return s + " Ten mail próbuje Cię oszukać.", "Nie klikaj linków i nie otwieraj załącznika. Zgłoś mail kretowi."
-    return s, "Nie klikaj linku. Wejdź na stronę firmy sam, wpisując adres ręcznie."
+        return s + " This email is trying to trick you.", "Do not click links or open the attachment. Report the email to the mole."
+    return s, "Do not click the link. Go to the company's website yourself by typing the address."

@@ -30,10 +30,10 @@ export default function Dashboard() {
   const headline = !runs
     ? '…'
     : !last
-      ? 'Kret jeszcze nie sprawdzał Twojej sieci.'
+      ? 'The mole has not checked your network yet.'
       : last.tunnels.length === 0
-        ? 'Kret nie znalazł otwartych tuneli. Dobra robota.'
-        : `Kret znalazł ${last.tunnels.length} ${plural(last.tunnels.length, 'tunel', 'tunele', 'tuneli')}. Pierwszy ruch zajmie ${last.moves[0]?.effort_min ?? 0} minut.`
+        ? 'The mole found no open tunnels. Good job.'
+        : `The mole found ${last.tunnels.length} ${plural(last.tunnels.length, 'tunnel', 'tunnels')}. The first move takes ${last.moves[0]?.effort_min ?? 0} minutes.`
 
   return (
     <div className="dash">
@@ -41,68 +41,68 @@ export default function Dashboard() {
         <section className="card-strip card demo-strip">
           <Icon name="briefcase" size={26} className="lamp" />
           <div>
-            <b>To jest firma demo: {org.name}.</b>
-            <p className="muted">Wszystko działa naprawdę, ale na zmyślonych danych. Ustaw swoją firmę, a kret sprawdzi Ciebie.</p>
+            <b>This is a demo company: {org.name}.</b>
+            <p className="muted">Everything really works, but on made-up data. Set up your own company and the mole will check you.</p>
           </div>
-          <Link className="btn btn-lamp btn-sm" to="/app/firma">Ustaw moją firmę</Link>
+          <Link className="btn btn-lamp btn-sm" to="/app/company">Set up my company</Link>
         </section>
       )}
       <section className="dash-hero card">
         <Mascot size={210} pose={last && last.tunnels.length === 0 ? 'happy' : 'report'} />
         <div className="dash-hero-copy">
-          <span className="eyebrow">Dzień dobry{org?.name ? `, ${org.name}` : ''}</span>
+          <span className="eyebrow">Hello{org?.name ? `, ${org.name}` : ''}</span>
           <h1>{headline}</h1>
           <p className="muted">
-            Kret przegląda sieć, komputery, konta, pocztę, kopie i procedury. Mówi, którędy wszedłby atakujący i co zamknąć najpierw.
+            The mole goes through the network, computers, accounts, email, backups and procedures. It shows how an attacker would get in and what to close first.
           </p>
           <div className="row gap">
-            <button className="btn btn-lamp btn-lg" onClick={() => nav('/app/tunele?kop=1')}>
-              {last ? 'Wpuść kreta ponownie' : 'Wpuść kreta'} ▸
+            <button className="btn btn-lamp btn-lg" onClick={() => nav('/app/tunnels?dig=1')}>
+              {last ? 'Send the mole in again' : 'Send the mole in'} ▸
             </button>
-            {last && <span className="muted mono small">ostatnio {ago(last.created_at)}</span>}
+            {last && <span className="muted mono small">last run {ago(last.created_at)}</span>}
           </div>
         </div>
       </section>
 
       <section className="tiles">
-        <Link to="/app/tunele" className="tile card">
+        <Link to="/app/tunnels" className="tile card">
           <div className="tile-icon lamp"><Icon name="router" size={26} /></div>
-          <h3>Tunele</h3>
-          <p className="muted">Ścieżki, którymi atakujący dotarłby do danych klientów, pieniędzy albo zatrzymał pracę firmy.</p>
+          <h3>Tunnels</h3>
+          <p className="muted">Paths an attacker would take to client data or money, or to bring the business to a halt.</p>
           <div className="tile-stat">
             {last ? (
               <>
                 <b className={last.counts.open ? 'bad' : 'ok'}>{last.tunnels.length}</b>
-                <span>{last.tunnels.length ? 'otwartych tuneli' : 'tuneli, wszystko zasypane'}</span>
+                <span>{last.tunnels.length ? 'open tunnels' : 'tunnels, all filled in'}</span>
               </>
             ) : (
-              <span className="muted">jeszcze nie sprawdzono</span>
+              <span className="muted">not checked yet</span>
             )}
           </div>
         </Link>
 
-        <Link to="/app/poczta" className="tile card">
+        <Link to="/app/mail" className="tile card">
           <div className="tile-icon net"><Icon name="mail" size={26} /></div>
-          <h3>Kret pocztowy</h3>
-          <p className="muted">Czyta maile, zanim otworzy je człowiek. Podejrzane załączniki otwiera u siebie w norze, jako tekst.</p>
+          <h3>Mail mole</h3>
+          <p className="muted">Reads emails before a person opens them. It opens suspicious attachments in its own burrow, as plain text.</p>
           <div className="tile-stat">
             <b className={flagged ? 'bad' : 'ok'}>{flagged}</b>
-            <span>podejrzanych{unscanned ? `, ${unscanned} czeka na kreta` : ''}</span>
+            <span>suspicious{unscanned ? `, ${unscanned} waiting for the mole` : ''}</span>
           </div>
         </Link>
 
-        <Link to={open[0] ? `/app/incydent/${open[0].id}` : '/app/incydent?nowy=1'} className={`tile card ${open.length ? 'tile-alert' : ''}`}>
+        <Link to={open[0] ? `/app/incident/${open[0].id}` : '/app/incident?new=1'} className={`tile card ${open.length ? 'tile-alert' : ''}`}>
           <div className="tile-icon bad"><Icon name="alert" size={26} /></div>
-          <h3>Incydent</h3>
-          <p className="muted">Gdy coś się stało: kilka pytań i plan dopasowany do Twojej firmy. Działa bez internetu.</p>
+          <h3>Incident</h3>
+          <p className="muted">When something happens: a few questions and a plan that fits your company. Works without internet.</p>
           <div className="tile-stat">
             {open.length ? (
               <>
                 <b className="bad">{open.length}</b>
-                <span>trwa: {open[0].type_label.toLowerCase()}</span>
+                <span>open: {open[0].type_label.toLowerCase()}</span>
               </>
             ) : (
-              <span className="ok">spokój, brak incydentów</span>
+              <span className="ok">all quiet, no incidents</span>
             )}
           </div>
         </Link>
@@ -111,24 +111,24 @@ export default function Dashboard() {
       <section className="local-strip card">
         <Icon name="chip" size={28} className="lamp" />
         <div>
-          <b>Mózg kreta działa na tym komputerze.</b>
+          <b>The mole's brain runs on this computer.</b>
           <p className="muted">
             {health?.llm.available
-              ? `Model ${health.llm.model} przez Ollamę. Maile, wyniki skanów i odpowiedzi nie wychodzą z tego komputera.`
-              : 'Model lokalny nie odpowiada. Kret działa dalej na regułach i gotowych szablonach. Instrukcja uruchomienia modelu jest w README.'}
+              ? `Model ${health.llm.model} through Ollama. Emails, scan results and answers never leave this computer.`
+              : 'The local model is not responding. The mole keeps working on rules and ready templates. The README explains how to start the model.'}
           </p>
         </div>
         <span className="zero">0 B</span>
-        <span className="muted small">wysłanych na zewnątrz</span>
+        <span className="muted small">sent outside</span>
       </section>
 
       <section className="card-strip card">
         <Icon name="printer" size={26} className="lamp" />
         <div>
-          <b>Karta kreta do szuflady.</b>
-          <p className="muted">Wydrukuj ją, zanim coś się stanie. Gdy padnie poczta, internet albo prąd, każdy wie, co robić i do kogo dzwonić.</p>
+          <b>The mole card for your drawer.</b>
+          <p className="muted">Print it before anything happens. When email, internet or power goes down, everyone knows what to do and whom to call.</p>
         </div>
-        <Link className="btn btn-ghost btn-sm" to="/app/karta">Otwórz kartę</Link>
+        <Link className="btn btn-ghost btn-sm" to="/app/card">Open the card</Link>
       </section>
     </div>
   )

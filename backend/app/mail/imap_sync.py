@@ -65,14 +65,14 @@ def _sizes(box: imaplib.IMAP4, uids: list[bytes]) -> dict[bytes, int]:
 
 def sync(mailbox: str) -> dict:
     if not configured():
-        raise ImapError("Skrzynka nie jest podłączona. Uzupełnij IMAP_USER i IMAP_PASSWORD w pliku .env.local i uruchom backend ponownie.")
+        raise ImapError("No mailbox is connected. Set IMAP_USER and IMAP_PASSWORD in .env.local and restart the backend.")
     new = skipped = 0
     try:
         with imaplib.IMAP4_SSL(config.IMAP_HOST, config.IMAP_PORT, timeout=20) as box:
             box.login(config.IMAP_USER, config.IMAP_PASSWORD)
             status, _ = box.select(f'"{config.IMAP_FOLDER}"', readonly=True)
             if status != "OK":
-                raise ImapError(f"Nie ma folderu {config.IMAP_FOLDER}. Sprawdź IMAP_FOLDER w pliku .env.local.")
+                raise ImapError(f"There is no folder {config.IMAP_FOLDER}. Check IMAP_FOLDER in .env.local.")
             validity = (box.response("UIDVALIDITY")[1] or [b"0"])[0].decode()
             status, data = box.uid("search", None, "SINCE", _since(config.IMAP_DAYS))
             uids = data[0].split()[-config.IMAP_LIMIT:] if status == "OK" and data and data[0] else []
@@ -92,8 +92,8 @@ def sync(mailbox: str) -> dict:
     except imaplib.IMAP4.error as e:
         text = str(e).lower()
         if "authenticationfailed" in text or "invalid credentials" in text or "login" in text:
-            raise ImapError("Serwer poczty odrzucił logowanie. Sprawdź adres i hasło aplikacji w pliku .env.local.") from None
-        raise ImapError("Serwer poczty odrzucił polecenie. Spróbuj ponownie za chwilę.") from None
+            raise ImapError("The mail server rejected the login. Check the address and the app password in .env.local.") from None
+        raise ImapError("The mail server rejected the command. Try again in a moment.") from None
     except (OSError, ssl.SSLError, socket.timeout):
-        raise ImapError(f"Nie udało się połączyć z {config.IMAP_HOST}. Sprawdź internet i ustawienie IMAP_HOST.") from None
+        raise ImapError(f"Could not connect to {config.IMAP_HOST}. Check the internet connection and IMAP_HOST.") from None
     return {"new": new, "skipped": skipped, "checked": len(uids)}

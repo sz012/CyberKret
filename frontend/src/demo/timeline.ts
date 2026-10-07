@@ -1,11 +1,11 @@
 export const SCENES = [
-  { id: 'intro', label: 'Noc w biurze', seconds: 18 },
-  { id: 'company', label: 'Twoja firma', seconds: 11 },
-  { id: 'tunnels', label: 'Droga ataku', seconds: 17 },
-  { id: 'fix', label: 'Pierwszy ruch', seconds: 9 },
-  { id: 'mail', label: 'Podejrzany mail', seconds: 17 },
-  { id: 'incident', label: 'Plan działania', seconds: 13 },
-  { id: 'end', label: 'Twój kret', seconds: 11 },
+  { id: 'intro', label: 'Night at the office', seconds: 18 },
+  { id: 'company', label: 'Your company', seconds: 11 },
+  { id: 'tunnels', label: 'Attack path', seconds: 17 },
+  { id: 'fix', label: 'First move', seconds: 9 },
+  { id: 'mail', label: 'Suspicious email', seconds: 17 },
+  { id: 'incident', label: 'Action plan', seconds: 13 },
+  { id: 'end', label: 'Your mole', seconds: 11 },
 ] as const
 
 export function makeTimeline(audioDurations: Partial<Record<number, number>> = {}) {

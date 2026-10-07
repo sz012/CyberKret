@@ -8,11 +8,11 @@ import { useHealth } from '../components/useHealth'
 import { plural, time } from '../util'
 
 const SCAN_STEPS = [
-  'Sprawdzam nadawcę i porównuję z kontrahentami',
-  'Czytam nagłówki SPF, DKIM, DMARC',
-  'Patrzę, dokąd naprawdę prowadzą linki',
-  'Otwieram załączniki u siebie w norze, jako tekst',
-  'Model lokalny czyta treść i tłumaczy',
+  'Checking the sender against your vendors',
+  'Reading the SPF, DKIM and DMARC headers',
+  'Looking where the links really go',
+  'Opening attachments in my burrow, as plain text',
+  'The local model reads the text and explains',
 ]
 
 function highlight(text: string, quotes: string[]) {
@@ -90,7 +90,7 @@ export default function Mail() {
     const m = await api.mail(id)
     setMsg(m)
     const a = m.analysis ?? (await rulesScan(id))
-    if (modelOn && !a.llm.model && a.llm.error !== 'brak lokalnego modelu') explain(id)
+    if (modelOn && !a.llm.model && a.llm.error !== 'no local model') explain(id)
   }
 
   const booted = useRef(false)
@@ -109,7 +109,7 @@ export default function Mail() {
       const { id } = await api.deliverNext()
       const r = await refresh()
       const m = r.find((x) => x.id === id)
-      say(true, `Nowy mail: ${m?.from_name ?? ''}, „${m?.subject ?? ''}”. Kret już czyta.`)
+      say(true, `New email: ${m?.from_name ?? ''}, "${m?.subject ?? ''}". The mole is already reading it.`)
       await open(id)
     } catch {
       setNoMore(true)
@@ -122,7 +122,7 @@ export default function Mail() {
       const res = await api.syncMail()
       const r = await refresh()
       for (const x of r.filter((x) => !x.scan)) await rulesScan(x.id)
-      say(true, res.new ? `Pobrano ${res.new} ${plural(res.new, 'nowy mail', 'nowe maile', 'nowych maili')} z ostatnich ${box?.imap.days ?? 14} dni.` : 'Brak nowych maili.')
+      say(true, res.new ? `Fetched ${res.new} ${plural(res.new, 'new email', 'new emails')} from the last ${box?.imap.days ?? 14} days.` : 'No new emails.')
     } catch (x) {
       say(false, (x as Error).message)
     } finally {
@@ -139,7 +139,7 @@ export default function Mail() {
   const report = async () => {
     if (!msg) return
     const inc = await api.createIncident('fake_invoice', msg.id)
-    nav(`/app/incydent/${inc.id}`)
+    nav(`/app/incident/${inc.id}`)
   }
 
   const a = msg?.analysis ?? null
@@ -149,26 +149,26 @@ export default function Mail() {
     <div className="mail-page">
       <header className="page-head">
         <div>
-          <span className="eyebrow">Funkcja 2 · Kret pocztowy</span>
-          <h1>Kret czyta pocztę, zanim otworzy ją człowiek.</h1>
-          <p className="muted">Reguły dają werdykt od razu. Model na tym komputerze tłumaczy go po ludzku. Załączniki kret otwiera u siebie, jako tekst, nigdy na komputerze pracownika.</p>
+          <span className="eyebrow">Feature 2 · Mail mole</span>
+          <h1>The mole reads email before a person opens it.</h1>
+          <p className="muted">Rules give the verdict right away. The model on this computer explains it in plain words. The mole opens attachments in its own burrow, as text, never on an employee's computer.</p>
         </div>
         <div className="row gap-sm wrap">
           <label className="btn btn-ghost btn-sm">
-            <Icon name="upload" size={16} /> Wczytaj .eml
+            <Icon name="upload" size={16} /> Load .eml
             <input type="file" accept=".eml,message/rfc822" hidden onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
           </label>
           {box?.imap.configured && (
-            <button className="btn btn-lamp" onClick={sync} disabled={syncing}>{syncing ? 'Pobieram…' : 'Pobierz nowe maile'}</button>
+            <button className="btn btn-lamp" onClick={sync} disabled={syncing}>{syncing ? 'Fetching…' : 'Fetch new emails'}</button>
           )}
           {box?.demo && !box.imap.configured && (
-            <button className="btn btn-lamp" onClick={deliver} disabled={noMore}>{noMore ? 'Brak nowych maili' : 'Przyślij nowy mail (demo)'}</button>
+            <button className="btn btn-lamp" onClick={deliver} disabled={noMore}>{noMore ? 'No new emails' : 'Send a new email (demo)'}</button>
           )}
         </div>
       </header>
 
       {box && !box.imap.configured && !box.demo && (
-        <p className="muted small">Skrzynka nie jest podłączona. Wpisz IMAP_USER i IMAP_PASSWORD do pliku .env.local i uruchom backend ponownie. Instrukcja dla Gmaila jest w README.</p>
+        <p className="muted small">No mailbox is connected. Put IMAP_USER and IMAP_PASSWORD in .env.local and restart the backend. The README explains how to do it for Gmail.</p>
       )}
 
       {toast && <div className={`toast ${toast.ok ? '' : 'toast-bad'}`} role="status"><Icon name={toast.ok ? 'mail' : 'alert'} size={18} /> {toast.text}</div>}
@@ -176,12 +176,12 @@ export default function Mail() {
       <div className="mailbox card">
         <div className="mb-list">
           <div className="mb-owner">
-            <b>Skrzynka odbiorcza</b>
+            <b>Inbox</b>
             <span className="muted small">
-              {box?.imap.configured ? `${box.imap.user} · tylko odczyt` : box?.owner ? `${box.owner}${box.owner_role ? ` · ${box.owner_role.toLowerCase()}` : ''}` : 'maile wgrane ręcznie'}
+              {box?.imap.configured ? `${box.imap.user} · read-only` : box?.owner ? `${box.owner}${box.owner_role ? ` · ${box.owner_role.toLowerCase()}` : ''}` : 'emails loaded by hand'}
             </span>
           </div>
-          {rows.length === 0 && <p className="muted small card-pad">Pusto. {box?.imap.configured ? 'Kliknij „Pobierz nowe maile”.' : 'Wczytaj plik .eml albo podłącz skrzynkę.'}</p>}
+          {rows.length === 0 && <p className="muted small card-pad">Empty. {box?.imap.configured ? 'Click "Fetch new emails".' : 'Load an .eml file or connect a mailbox.'}</p>}
           <ul>
             {rows.map((r) => (
               <li key={r.id}>
@@ -195,7 +195,7 @@ export default function Mail() {
                     {r.scan ? (
                       <span className={`pill ${r.scan.level}`}><span className="dot" />{r.scan.label}</span>
                     ) : (
-                      <span className="pill lamp"><span className="dot" />kret czyta…</span>
+                      <span className="pill lamp"><span className="dot" />mole is reading…</span>
                     )}
                     {r.attachments.length > 0 && <Icon name="paperclip" size={14} className="muted" />}
                   </div>
@@ -206,14 +206,14 @@ export default function Mail() {
         </div>
 
         <div className="mb-read">
-          {!msg && rows.length > 0 && <p className="muted card-pad">Wybierz wiadomość.</p>}
+          {!msg && rows.length > 0 && <p className="muted card-pad">Pick a message.</p>}
           {msg && (
             <>
               <div className="mb-meta">
                 <h2>{msg.subject}</h2>
-                <div><span className="muted">Od:</span> {msg.from_name} &lt;<span className={a?.indicators.some((i) => i.type === 'lookalike_sender') ? 'flag' : ''}>{msg.from_addr}</span>&gt;</div>
-                {msg.reply_to && <div><span className="muted">Odpowiedź do:</span> <span className={a?.indicators.some((i) => i.type === 'reply_to_mismatch') ? 'flag' : ''}>{msg.reply_to}</span></div>}
-                <div><span className="muted">Do:</span> {msg.to.join(', ')}</div>
+                <div><span className="muted">From:</span> {msg.from_name} &lt;<span className={a?.indicators.some((i) => i.type === 'lookalike_sender') ? 'flag' : ''}>{msg.from_addr}</span>&gt;</div>
+                {msg.reply_to && <div><span className="muted">Reply-To:</span> <span className={a?.indicators.some((i) => i.type === 'reply_to_mismatch') ? 'flag' : ''}>{msg.reply_to}</span></div>}
+                <div><span className="muted">To:</span> {msg.to.join(', ')}</div>
               </div>
 
               {isExplaining && (
@@ -239,7 +239,7 @@ export default function Mail() {
                     return (
                       <span key={at.filename} className={`att ${bad ? 'bad' : ''}`}>
                         <Icon name="paperclip" size={15} /> {at.filename} <span className="muted">({Math.ceil(at.size / 1024)} KB)</span>
-                        {bad && <span className="att-note">kret otworzył w norze: to strona z formularzem hasła</span>}
+                        {bad && <span className="att-note">the mole opened it in its burrow: it is a page with a password form</span>}
                       </span>
                     )
                   })}
@@ -256,11 +256,11 @@ export default function Mail() {
 }
 
 function llmNote(a: Analysis, explaining: boolean): string {
-  if (a.llm.model) return `wyjaśnienie: ${a.llm.model}, lokalnie, ${((a.llm.ms ?? 0) / 1000).toFixed(1)} s`
-  if (explaining) return 'werdykt z reguł · model lokalny pisze wyjaśnienie'
-  if (a.llm.error === 'brak lokalnego modelu') return 'tryb bez modelu: reguły i szablony'
-  if (a.llm.error === 'nie pytano modelu') return 'werdykt z reguł'
-  return 'model nie odpowiedział, wyjaśnienie z szablonu'
+  if (a.llm.model) return `explanation: ${a.llm.model}, local, ${((a.llm.ms ?? 0) / 1000).toFixed(1)} s`
+  if (explaining) return 'verdict from rules · the local model is writing an explanation'
+  if (a.llm.error === 'no local model') return 'no-model mode: rules and templates'
+  if (a.llm.error === 'model not asked') return 'verdict from rules'
+  return 'the model did not answer, explanation from a template'
 }
 
 function Verdict({ a, explaining, onReport }: { a: Analysis; explaining: boolean; onReport: () => void }) {
@@ -272,9 +272,9 @@ function Verdict({ a, explaining, onReport }: { a: Analysis; explaining: boolean
         <Mascot size={92} pose={a.level === 'ok' ? 'happy' : 'alarm'} />
         <div>
           <span className={`pill ${a.level}`}><span className="dot" />{a.label}</span>
-          <h3>{a.level === 'bad' ? `Stop. Kret znalazł ${signals.length} ${plural(signals.length, 'sygnał', 'sygnały', 'sygnałów')} oszustwa.` : a.level === 'warn' ? 'Uwaga, coś tu nie gra.' : 'Wygląda w porządku.'}</h3>
+          <h3>{a.level === 'bad' ? `Stop. The mole found ${signals.length} ${plural(signals.length, 'sign', 'signs')} of fraud.` : a.level === 'warn' ? 'Careful, something is off here.' : 'Looks fine.'}</h3>
           <p>{a.summary}</p>
-          {a.what_to_do && <p className="todo"><b>Co zrobić:</b> {a.what_to_do}</p>}
+          {a.what_to_do && <p className="todo"><b>What to do:</b> {a.what_to_do}</p>}
         </div>
       </div>
       {signals.length > 0 && (
@@ -282,15 +282,15 @@ function Verdict({ a, explaining, onReport }: { a: Analysis; explaining: boolean
           {signals.map((s, i) => (
             <li key={i}>
               <b>{s.title}.</b> <span className="muted">{s.detail}</span>
-              <span className={`src ${s.source === 'model' ? 'model' : 'kret'}`}>{s.source === 'model' ? 'zauważył model' : 'sprawdził kret'}</span>
+              <span className={`src ${s.source === 'model' ? 'model' : 'kret'}`}>{s.source === 'model' ? 'spotted by the model' : 'checked by the mole'}</span>
             </li>
           ))}
         </ol>
       )}
       {info.map((s, i) => <p key={i} className="muted small info-note">ⓘ {s.title}: {s.detail}</p>)}
       <div className="verdict-foot">
-        <span className="muted small mono">{llmNote(a, explaining)} · nic nie wysłano na zewnątrz</span>
-        {a.level !== 'ok' && <button className="btn btn-bad btn-sm" onClick={onReport}><Icon name="alert" size={15} /> Zgłoś incydent</button>}
+        <span className="muted small mono">{llmNote(a, explaining)} · nothing sent outside</span>
+        {a.level !== 'ok' && <button className="btn btn-bad btn-sm" onClick={onReport}><Icon name="alert" size={15} /> Report an incident</button>}
       </div>
     </div>
   )
@@ -310,23 +310,23 @@ function AskKret() {
   }
   return (
     <section className="ask card">
-      <div className="card-head"><h3>Zapytaj kreta</h3><span>wklej SMS, link albo treść maila</span></div>
+      <div className="card-head"><h3>Ask the mole</h3><span>paste a text message, a link or an email</span></div>
       <div className="card-pad ask-grid">
         <div className="stack">
           <textarea className="input" rows={5} value={text} onChange={(e) => setText(e.target.value)}
-            placeholder="Np. „Twoja paczka czeka na dopłatę 1,99 zł: http://…”" />
-          <button className="btn btn-lamp btn-sm" disabled={busy || text.trim().length < 3} onClick={go}>{busy ? 'Kret czyta…' : 'Czy to oszustwo?'}</button>
+            placeholder="E.g. “Your parcel is waiting for a 1.99 fee payment: http://…”" />
+          <button className="btn btn-lamp btn-sm" disabled={busy || text.trim().length < 3} onClick={go}>{busy ? 'The mole is reading…' : 'Is this a scam?'}</button>
         </div>
         <div>
           {res ? (
             <div className={`ask-res v-${res.level}`}>
               <span className={`pill ${res.level}`}><span className="dot" />{res.label}</span>
               <p>{res.summary}</p>
-              {res.what_to_do && <p><b>Co zrobić:</b> {res.what_to_do}</p>}
+              {res.what_to_do && <p><b>What to do:</b> {res.what_to_do}</p>}
               <p className="muted small mono">{llmNote(res, false)}</p>
             </div>
           ) : (
-            <p className="muted small">{busy ? 'Reguły już sprawdziły tekst, model lokalny pisze wyjaśnienie…' : 'Tekst zostaje na tym komputerze. Z modelem lokalnym odpowiedź zajmuje kilka do kilkunastu sekund.'}</p>
+            <p className="muted small">{busy ? 'The rules have checked the text, the local model is writing an explanation…' : 'The text stays on this computer. With the local model an answer takes a few seconds.'}</p>
           )}
         </div>
       </div>

@@ -4,7 +4,7 @@ import { Icon } from './icons'
 export default function PhaseStrip({ phases, closed }: { phases: Phase[]; closed: boolean }) {
   const current = closed ? -1 : phases.findIndex((p) => p.total > 0 && p.done < p.total)
   return (
-    <ol className="phases" aria-label="Etapy incydentu">
+    <ol className="phases" aria-label="Incident stages">
       {phases.map((p, i) => {
         const complete = p.total > 0 && p.done >= p.total
         return (

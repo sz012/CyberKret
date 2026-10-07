@@ -1,0 +1,348 @@
+{
+  "demo": false,
+  "name": "",
+  "domain": "",
+  "phone": "",
+  "description": "",
+  "mailbox_owner": null,
+  "people": [],
+  "chambers": [
+    {
+      "id": "siec",
+      "label": "Network & router",
+      "icon": "router",
+      "x": 120,
+      "y": 250,
+      "blurb": "Router, Wi-Fi and port forwarding",
+      "dig": "I ride the cable to the router and look at what the internet can see"
+    },
+    {
+      "id": "komputery",
+      "label": "Computers",
+      "icon": "laptop",
+      "x": 235,
+      "y": 375,
+      "blurb": "The company's computers and laptops",
+      "dig": "I visit the computers and check the admin accounts"
+    },
+    {
+      "id": "konta",
+      "label": "Accounts & passwords",
+      "icon": "key",
+      "x": 380,
+      "y": 455,
+      "blurb": "The team's email and cloud accounts",
+      "dig": "I check how people sign in to the accounts"
+    },
+    {
+      "id": "poczta",
+      "label": "Email & domain",
+      "icon": "mail",
+      "x": 620,
+      "y": 455,
+      "blurb": "The company's domain and its DNS records",
+      "dig": "I read the domain's SPF and DMARC records"
+    },
+    {
+      "id": "procedury",
+      "label": "Payments",
+      "icon": "coins",
+      "x": 765,
+      "y": 375,
+      "blurb": "How the company handles bank account changes",
+      "dig": "I check how you change account numbers"
+    },
+    {
+      "id": "kopie",
+      "label": "Backups",
+      "icon": "disk",
+      "x": 880,
+      "y": 250,
+      "blurb": "Data backups",
+      "dig": "I go down to the backups"
+    },
+    {
+      "id": "www",
+      "label": "Website",
+      "icon": "globe",
+      "x": 500,
+      "y": 300,
+      "blurb": "The company's website",
+      "dig": "I check the website and its certificate"
+    }
+  ],
+  "targets": [
+    {
+      "id": "client_data_read",
+      "label": "Client data",
+      "harm": "A leak of clients' personal data and secrets",
+      "weight": 3,
+      "x": 270,
+      "y": 575
+    },
+    {
+      "id": "money_stolen",
+      "label": "Money",
+      "harm": "A payment to a fraudster's account",
+      "weight": 2,
+      "x": 500,
+      "y": 575
+    },
+    {
+      "id": "operations_stopped",
+      "label": "Business operations",
+      "harm": "Encrypted computers and backups, the business comes to a halt",
+      "weight": 3,
+      "x": 730,
+      "y": 575
+    }
+  ],
+  "safeguards": [
+    {
+      "id": "router_no_rdp",
+      "chamber": "siec",
+      "label": "Remote desktop hidden from the internet",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "remote desktop (RDP, port 3389) open to the internet",
+      "ok_text": "remote desktop is not visible from the internet",
+      "evidence": "",
+      "fix": "Remove the port 3389 forwarding on the router. Use a VPN to work from home.",
+      "effort_min": 15,
+      "cost": "free"
+    },
+    {
+      "id": "unique_admin_passwords",
+      "chamber": "komputery",
+      "label": "Every computer has a different admin password",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "the same admin password on several computers",
+      "ok_text": "every computer has its own admin password",
+      "evidence": "",
+      "fix": "Set different admin passwords (Windows LAPS does it automatically). Work day to day on accounts without admin rights.",
+      "effort_min": 60,
+      "cost": "free"
+    },
+    {
+      "id": "pcs_updated",
+      "chamber": "komputery",
+      "label": "System and programs up to date",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "computers without updates",
+      "ok_text": "computers update automatically",
+      "evidence": "",
+      "fix": "Turn on automatic updates for the system and programs.",
+      "effort_min": 20,
+      "cost": "free"
+    },
+    {
+      "id": "disk_encryption",
+      "chamber": "komputery",
+      "label": "Drives encrypted",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "laptop drives are not encrypted",
+      "ok_text": "drives encrypted (BitLocker, FileVault)",
+      "evidence": "",
+      "fix": "Turn on BitLocker on Windows or FileVault on a Mac.",
+      "effort_min": 30,
+      "cost": "free"
+    },
+    {
+      "id": "m365_mfa",
+      "chamber": "konta",
+      "label": "Two-step login (MFA) on email accounts",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "email accounts sign in with a password alone",
+      "ok_text": "every account has two-step login",
+      "evidence": "",
+      "fix": "Turn on MFA (for example an Authenticator app) on every email account. Start with the people who pay invoices.",
+      "effort_min": 45,
+      "cost": "free"
+    },
+    {
+      "id": "domain_spf",
+      "chamber": "poczta",
+      "label": "SPF record",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "no SPF record",
+      "ok_text": "SPF record in place",
+      "evidence": "",
+      "fix": "Add an SPF record at your domain provider.",
+      "effort_min": 20,
+      "cost": "free"
+    },
+    {
+      "id": "domain_dmarc",
+      "chamber": "poczta",
+      "label": "DMARC record (protection against spoofing)",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "domain without DMARC, anyone can send email in the company's name",
+      "ok_text": "DMARC with a reject policy",
+      "evidence": "",
+      "fix": "Add a _dmarc TXT record with p=quarantine, after 2 weeks p=reject.",
+      "effort_min": 30,
+      "cost": "free"
+    },
+    {
+      "id": "payment_callback_rule",
+      "chamber": "procedury",
+      "label": "Account number changes are confirmed by phone",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "an email is enough to change an account number",
+      "ok_text": "account number changes are always confirmed by phone",
+      "evidence": "",
+      "fix": "Set a rule: account number changes are confirmed by phone on the number from the contract. Print it and pin it by the desk of the person who makes payments.",
+      "effort_min": 10,
+      "cost": "free"
+    },
+    {
+      "id": "backup_offline",
+      "chamber": "kopie",
+      "label": "A backup kept off the network",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "backups are always connected and would be encrypted with everything else",
+      "ok_text": "one backup is kept offline",
+      "evidence": "",
+      "fix": "Once a week back up to a USB drive that you disconnect and put away afterwards.",
+      "effort_min": 30,
+      "cost": "about 300 PLN for a drive"
+    },
+    {
+      "id": "backup_tested",
+      "chamber": "kopie",
+      "label": "Backup restore tested",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "nobody has checked whether files can be restored from the backup",
+      "ok_text": "restore tested this quarter",
+      "evidence": "",
+      "fix": "Restore one folder from the backup and check that the files open.",
+      "effort_min": 30,
+      "cost": "free"
+    },
+    {
+      "id": "website_updated",
+      "chamber": "www",
+      "label": "Website and plugins up to date",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "outdated website software, for example WordPress",
+      "ok_text": "website software up to date",
+      "evidence": "",
+      "fix": "Turn on automatic updates at your host.",
+      "effort_min": 15,
+      "cost": "free"
+    },
+    {
+      "id": "website_https",
+      "chamber": "www",
+      "label": "HTTPS and a valid certificate",
+      "state": "unknown",
+      "source": "unverified",
+      "problem": "website without HTTPS or with an expiring certificate",
+      "ok_text": "certificate valid, redirect to HTTPS",
+      "evidence": "",
+      "fix": "Turn on HTTPS at your host.",
+      "effort_min": 15,
+      "cost": "free"
+    }
+  ],
+  "contacts": [],
+  "fallbacks": [
+    {
+      "id": "phone",
+      "label": "Company phone",
+      "note": "works without email or internet"
+    },
+    {
+      "id": "sms",
+      "label": "Text messages to clients",
+      "note": "from the company phone"
+    },
+    {
+      "id": "offline_copy",
+      "label": "Offline copy of the data",
+      "note": "a drive disconnected from the network"
+    },
+    {
+      "id": "spare_laptop",
+      "label": "Spare laptop",
+      "note": "for work when the main computer is untrusted"
+    },
+    {
+      "id": "printed_card",
+      "label": "The mole card in the drawer",
+      "note": "printed first steps and phone numbers"
+    }
+  ],
+  "continuity": [
+    {
+      "id": "key",
+      "label": "The most important matter in the next 24 hours",
+      "critical": true,
+      "fallback": "Documents from the offline copy, work on the spare computer.",
+      "confirmations": [
+        [
+          "key_docs",
+          "The documents needed are available without email"
+        ],
+        [
+          "key_person",
+          "We know who takes over the matter if needed"
+        ]
+      ]
+    },
+    {
+      "id": "payments",
+      "label": "Payments and invoices",
+      "critical": true,
+      "fallback": "Payments only after confirmation by phone.",
+      "confirmations": [
+        [
+          "pay_hold",
+          "Payments to new account numbers on hold"
+        ],
+        [
+          "pay_bank",
+          "The bank knows about the fraud attempt"
+        ]
+      ]
+    },
+    {
+      "id": "clients",
+      "label": "Contact with clients",
+      "critical": false,
+      "fallback": "Phone and text messages from the company number.",
+      "confirmations": [
+        [
+          "cl_sms",
+          "Clients got a warning"
+        ],
+        [
+          "cl_web",
+          "Notice on the website"
+        ]
+      ]
+    },
+    {
+      "id": "email",
+      "label": "Email",
+      "critical": false,
+      "fallback": "Untrusted until further notice. Important matters by phone.",
+      "confirmations": [
+        [
+          "mail_clean",
+          "The IT person confirmed the mailbox is clean"
+        ]
+      ]
+    }
+  ]
+}

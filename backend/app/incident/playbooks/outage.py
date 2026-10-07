@@ -1,35 +1,35 @@
-"""Internet or mail is down: keep the firm working and rule out an attack."""
+"""Internet or mail is down: keep the company working and rule out an attack."""
 from .common import NO, UNKNOWN, YES, YES_NO, answer, boss_name, hypothesis, lvl, phone_line, why
 
 ID = "outage"
-LABEL = "Nie działa internet lub poczta"
+LABEL = "Internet or email is down"
 
 NET, MAIL, BOTH = "internet", "mail", "both"
 ALL, ONE = "all", "one"
 
 QUESTIONS = [
-    {"id": "what", "text": "Co nie działa?",
-     "options": [(NET, "Internet"), (MAIL, "Tylko poczta"), (BOTH, "Internet i poczta")]},
-    {"id": "scope", "text": "Czy problem dotyczy wszystkich komputerów?",
-     "options": [(ALL, "Tak, wszystkich"), (ONE, "Tylko jednego"), (UNKNOWN, "Nie wiem jeszcze")]},
-    {"id": "provider", "text": "Czy operator albo dostawca poczty potwierdza awarię?", "options": YES_NO},
-    {"id": "signs", "text": "Czy są inne niepokojące objawy: zmienione hasła, okup, dziwne komunikaty?", "options": YES_NO},
+    {"id": "what", "text": "What is not working?",
+     "options": [(NET, "Internet"), (MAIL, "Only email"), (BOTH, "Internet and email")]},
+    {"id": "scope", "text": "Does the problem affect every computer?",
+     "options": [(ALL, "Yes, all of them"), (ONE, "Only one"), (UNKNOWN, "Not sure yet")]},
+    {"id": "provider", "text": "Does the internet or email provider confirm an outage?", "options": YES_NO},
+    {"id": "signs", "text": "Are there other worrying signs: changed passwords, a ransom note, strange messages?", "options": YES_NO},
 ]
 
 FACTS = {
-    ("what", NET): ("confirmed", "Nie działa internet."),
-    ("what", MAIL): ("confirmed", "Nie działa poczta, internet działa."),
-    ("what", BOTH): ("confirmed", "Nie działa internet ani poczta."),
-    ("what", UNKNOWN): ("unverified", "Nie ustalono jeszcze, co dokładnie nie działa."),
-    ("scope", ALL): ("confirmed", "Problem dotyczy wszystkich komputerów."),
-    ("scope", ONE): ("confirmed", "Problem dotyczy jednego komputera."),
-    ("scope", UNKNOWN): ("unverified", "Nie wiadomo, ilu komputerów dotyczy problem."),
-    ("provider", YES): ("confirmed", "Dostawca potwierdza awarię po swojej stronie."),
-    ("provider", NO): ("confirmed", "Dostawca nie widzi awarii."),
-    ("provider", UNKNOWN): ("unverified", "Nikt jeszcze nie pytał dostawcy o awarię."),
-    ("signs", YES): ("confirmed", "Są objawy, które mogą oznaczać atak."),
-    ("signs", NO): ("confirmed", "Brak innych niepokojących objawów."),
-    ("signs", UNKNOWN): ("unverified", "Nie sprawdzono, czy są inne objawy ataku."),
+    ("what", NET): ("confirmed", "The internet is down."),
+    ("what", MAIL): ("confirmed", "Email is down, the internet works."),
+    ("what", BOTH): ("confirmed", "Neither the internet nor email works."),
+    ("what", UNKNOWN): ("unverified", "We have not yet established what exactly is down."),
+    ("scope", ALL): ("confirmed", "The problem affects every computer."),
+    ("scope", ONE): ("confirmed", "The problem affects one computer."),
+    ("scope", UNKNOWN): ("unverified", "We do not know how many computers are affected."),
+    ("provider", YES): ("confirmed", "The provider confirms an outage on their side."),
+    ("provider", NO): ("confirmed", "The provider sees no outage."),
+    ("provider", UNKNOWN): ("unverified", "Nobody has asked the provider about an outage yet."),
+    ("signs", YES): ("confirmed", "There are signs that may mean an attack."),
+    ("signs", NO): ("confirmed", "No other worrying signs."),
+    ("signs", UNKNOWN): ("unverified", "Nobody has checked for other signs of an attack."),
 }
 
 
@@ -46,17 +46,17 @@ def hypotheses(answers: dict, facts: list[dict], org: dict) -> dict:
     attack = "likely" if signs == YES else "unlikely" if signs == NO else "possible"
     return {
         "outside": hypothesis(
-            "Awaria u operatora lub dostawcy", outside,
-            "Problem jest poza biurem. Trzeba przeczekać i pracować kanałami zastępczymi.",
-            why([(provider == YES, "dostawca potwierdza awarię")]), None),
+            "Outage at the operator or provider", outside,
+            "The problem is outside the office. Wait it out and work through backup channels.",
+            why([(provider == YES, "the provider confirms an outage")]), None),
         "local": hypothesis(
-            "Problem w biurze", local,
-            "Router, kabel, ustawienia komputera albo skończony abonament. Zwykle da się to naprawić na miejscu.",
-            why([(scope == ONE, "problem dotyczy jednego komputera"), (provider == NO, "dostawca nie widzi awarii")]), None),
+            "Problem in the office", local,
+            "The router, a cable, computer settings or an expired subscription. Usually this can be fixed on site.",
+            why([(scope == ONE, "the problem affects one computer"), (provider == NO, "the provider sees no outage")]), None),
         "attack": hypothesis(
-            "Atak, nie awaria", attack,
-            "Zmienione hasła albo żądanie okupu oznaczają, że to incydent bezpieczeństwa. Otwórz właściwy poradnik.",
-            why([(signs == YES, "są inne niepokojące objawy")]), None),
+            "An attack, not an outage", attack,
+            "Changed passwords or a ransom note mean this is a security incident. Open the right playbook.",
+            why([(signs == YES, "there are other worrying signs")]), None),
     }
 
 
@@ -69,49 +69,49 @@ def mail(c: dict) -> bool:
 
 
 ACTIONS = [
-    {"id": "check_scope", "phase": "assess", "title": "Sprawdź, gdzie dokładnie nie działa",
-     "detail": "Inny komputer, telefon w Wi-Fi biura i telefon na danych komórkowych. Jeśli działa tylko na danych komórkowych, problem jest w biurze albo u operatora.",
+    {"id": "check_scope", "phase": "assess", "title": "Check where exactly it does not work",
+     "detail": "Another computer, a phone on the office Wi-Fi and a phone on mobile data. If it only works on mobile data, the problem is in the office or at the operator.",
      "role": "office", "priority": "now", "safe_any_cause": True, "when": lambda c: True},
-    {"id": "phone_mode", "phase": "continue", "title": "Pilne sprawy telefonicznie",
-     "detail": "Klienci i kontrahenci dostają krótką informację o awarii. Gotowy tekst poniżej.",
+    {"id": "phone_mode", "phase": "continue", "title": "Urgent matters by phone",
+     "detail": "Clients and vendors get a short note about the outage. A ready text is below.",
      "role": "office", "priority": "now", "safe_any_cause": True, "when": lambda c: True},
-    {"id": "restart_router", "phase": "stop", "title": "Uruchom ponownie router i sprawdź kable",
-     "detail": "Wyłącz router na 30 sekund. Sprawdź, czy kable siedzą w gniazdach, a lampki świecą jak zwykle.",
+    {"id": "restart_router", "phase": "stop", "title": "Restart the router and check the cables",
+     "detail": "Turn the router off for 30 seconds. Check that the cables sit in their sockets and the lights look as usual.",
      "role": "it", "priority": "15min", "safe_any_cause": False, "when": lambda c: net(c) and lvl(c, "local") != "unlikely"},
-    {"id": "call_provider", "phase": "assess", "title": "Zadzwoń do operatora internetu",
-     "detail": "Numer jest na umowie albo fakturze. Zapytaj o awarię w okolicy i o termin naprawy.",
+    {"id": "call_provider", "phase": "assess", "title": "Call the internet operator",
+     "detail": "The number is on the contract or an invoice. Ask about an outage in your area and when it will be fixed.",
      "role": "office", "priority": "15min", "safe_any_cause": False, "when": lambda c: net(c) and answer(c, "provider") == UNKNOWN},
-    {"id": "mail_status", "phase": "assess", "title": "Sprawdź stronę statusu dostawcy poczty",
-     "detail": "Google Workspace Status Dashboard albo stan usług Microsoft 365. Jeśli internet nie działa, sprawdź z telefonu.",
+    {"id": "mail_status", "phase": "assess", "title": "Check the email provider's status page",
+     "detail": "Google Workspace Status Dashboard or the Microsoft 365 service status. If the internet is down, check from a phone.",
      "role": "it", "priority": "15min", "safe_any_cause": False, "when": lambda c: mail(c) and answer(c, "provider") == UNKNOWN},
-    {"id": "hotspot", "phase": "continue", "title": "Uruchom internet awaryjny z telefonu",
-     "detail": "Udostępnij internet z telefonu jednemu komputerowi do najważniejszych spraw, na przykład bankowości i terminów.",
+    {"id": "hotspot", "phase": "continue", "title": "Start a backup connection from a phone",
+     "detail": "Share the phone's internet with one computer for the most important things, such as banking and deadlines.",
      "role": "office", "priority": "15min", "safe_any_cause": False, "when": lambda c: net(c) and lvl(c, "attack") != "likely"},
-    {"id": "no_private_mail", "phase": "continue", "title": "Nie wysyłajcie danych klientów z prywatnych skrzynek",
-     "detail": "To wygodne, ale wyprowadza dane poza firmę. Lepiej telefon, spotkanie albo przeczekanie awarii.",
+    {"id": "no_private_mail", "phase": "continue", "title": "Do not send client data from private mailboxes",
+     "detail": "It is convenient, but it takes data outside the company. Better a phone call, a meeting or waiting the outage out.",
      "role": "all", "priority": "15min", "safe_any_cause": False, "when": lambda c: mail(c)},
-    {"id": "fix_one", "phase": "stop", "title": "Napraw ustawienia jednego komputera",
-     "detail": "Sprawdź Wi-Fi, kabel, datę i godzinę systemu oraz ostatnio instalowane programy. Uruchom komputer ponownie.",
+    {"id": "fix_one", "phase": "stop", "title": "Fix the settings of the one computer",
+     "detail": "Check Wi-Fi, the cable, the system date and time and recently installed programs. Restart the computer.",
      "role": "it", "priority": "1h", "safe_any_cause": False, "when": lambda c: answer(c, "scope") == ONE},
-    {"id": "attack_check", "phase": "assess", "title": "Sprawdź, czy to nie atak",
-     "detail": "Zmienione hasła, okup albo dziwne komunikaty? Otwórz incydent „Zaszyfrowane pliki” albo „Ktoś zalogował się na nasze konto”.",
+    {"id": "attack_check", "phase": "assess", "title": "Check that it is not an attack",
+     "detail": "Changed passwords, a ransom note or strange messages? Open the \"Encrypted files\" or \"Someone logged into our account\" incident.",
      "role": "boss", "priority": "now", "safe_any_cause": False, "when": lambda c: lvl(c, "attack") != "unlikely"},
-    {"id": "log_outage", "phase": "learn", "title": "Zapisz przebieg awarii",
-     "detail": "Kiedy się zaczęła, co pomogło, ile trwała. Przyda się przy reklamacji u operatora i przy planie na następny raz.",
+    {"id": "log_outage", "phase": "learn", "title": "Write down how the outage went",
+     "detail": "When it started, what helped, how long it lasted. Useful for a complaint to the operator and for a plan next time.",
      "role": "office", "priority": "verify", "safe_any_cause": False, "when": lambda c: True},
 ]
 
 
 def messages(org: dict, facts: list[dict], answers: dict) -> list[dict]:
-    name = org.get("name") or "Nasza firma"
-    what = {NET: "internetu", MAIL: "poczty"}.get(answers.get("what", BOTH), "internetu i poczty")
+    name = org.get("name") or "Our company"
+    what = {NET: "internet", MAIL: "email"}.get(answers.get("what", BOTH), "internet and email")
     boss = boss_name(org)
     return [
-        {"id": "sms_clients", "channel": "SMS do klientów",
-         "text": f"{name}: mamy awarię {what}. Maile mogą do nas nie docierać. W pilnych sprawach {phone_line(org)} Dziękujemy za cierpliwość."},
-        {"id": "team", "channel": "Wiadomość do zespołu (SMS)",
-         "text": f"Awaria {what}. Pilne sprawy telefonicznie, nie wysyłamy danych klientów z prywatnych skrzynek. "
-                 f"Informacje o naprawie przekażę telefonicznie.{f' Koordynuje {boss}.' if boss else ''}"},
+        {"id": "sms_clients", "channel": "Text message to clients",
+         "text": f"{name}: our {what} is down. Emails may not reach us. For urgent matters {phone_line(org)} Thank you for your patience."},
+        {"id": "team", "channel": "Message to the team (text)",
+         "text": f"Our {what} is down. Urgent matters by phone, we do not send client data from private mailboxes. "
+                 f"Updates on the fix will come by phone.{f' {boss} is coordinating.' if boss else ''}"},
     ]
 
 
@@ -127,4 +127,4 @@ def impact(answers: dict) -> dict:
     what = answers.get("what", BOTH)
     untrusted = {NET: ["siec"], MAIL: ["poczta"]}.get(what, ["siec", "poczta"])
     return {"untrusted": untrusted, "at_risk": ["operations_stopped"],
-            "note": "Internet lub poczta: niedostępne. Pracujemy kanałami zastępczymi i nie przenosimy danych klientów na prywatne konta."}
+            "note": "Internet or email: unavailable. We work through backup channels and do not move client data to private accounts."}
